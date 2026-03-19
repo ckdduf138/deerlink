@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Room {
+  id        String   @id @default(cuid())
+  title     String
+  createdAt DateTime @default(now())
+
+  questions Question[]
+  participants Participant[]
+}
+
+model Question {
+  id       String @id @default(cuid())
+  roomId   String
+  type     String // "balance" | "multiple" | "subjective"
+  title    String
+  optionA  String? // balance game option A
+  optionB  String? // balance game option B
+  options  String? // JSON array for multiple choice options
+  order    Int
+
+  room    Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  answers Answer[]
+
+  @@index([roomId])
+}
+
+model Participant {
+  id        String   @id @default(cuid())
+  roomId    String
+  nickname  String
+  createdAt DateTime @default(now())
+
+  room    Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  answers Answer[]
+
+  @@index([roomId])
+}
+
+model Answer {
+  id            String @id @default(cuid())
+  questionId    String
+  participantId String
+  value         String // "A" | "B" for balance, option index for multiple, free text for subjective
+
+  question    Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  participant Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  @@unique([questionId, participantId])
+  @@index([questionId])
+  @@index([participantId])
+}
