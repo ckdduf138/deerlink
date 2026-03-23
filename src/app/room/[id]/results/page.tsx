@@ -44,8 +44,18 @@ interface Question {
 interface Room {
   id: string;
   title: string;
+  expiresAt: string;
   questions: Question[];
   participants: Participant[];
+}
+
+function formatRemaining(expiresAt: string): string {
+  const diff = new Date(expiresAt).getTime() - Date.now();
+  if (diff <= 0) return "만료";
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  if (hours > 0) return `${hours}h`;
+  return `${minutes}m`;
 }
 
 /* ─── Balance Result ─────────────────────── */
@@ -397,7 +407,7 @@ export default function ResultsPage({
   return (
     <div className="min-h-screen bg-[#fafaf8] text-stone-900">
       {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 md:px-8 py-4 border-b border-amber-100 bg-white/90 backdrop-blur-md">
+      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center px-4 md:px-8 py-4 border-b border-amber-100 bg-white/90 backdrop-blur-md">
         <Link
           href={`/room/${id}`}
           className="flex items-center gap-2 text-sm text-stone-600 hover:text-stone-900 transition-colors"
@@ -405,35 +415,6 @@ export default function ResultsPage({
           <ArrowLeft className="w-4 h-4" />
           <span className="hidden sm:inline">돌아가기</span>
         </Link>
-
-        <div className="flex items-center gap-3">
-          <button
-            onClick={copyInviteLink}
-            className={cn(
-              "flex items-center gap-1.5 text-xs transition-colors",
-              copied ? "text-amber-600" : "text-stone-600 hover:text-stone-900"
-            )}
-          >
-            {copied ? (
-              <>
-                <Check className="w-3.5 h-3.5" />
-                복사됨
-              </>
-            ) : (
-              <>
-                <Copy className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">링크 복사</span>
-              </>
-            )}
-          </button>
-          <button
-            onClick={shareInviteLink}
-            className="flex items-center gap-1.5 text-xs text-stone-600 hover:text-stone-900 transition-colors"
-          >
-            <Share2 className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">공유하기</span>
-          </button>
-        </div>
       </nav>
 
       <div className="max-w-2xl mx-auto px-4 pt-20 pb-16">
@@ -450,9 +431,13 @@ export default function ResultsPage({
           <h1 className="text-2xl font-bold text-stone-900 mb-2 leading-snug">
             {room.title}
           </h1>
-          <div className="flex items-center gap-1.5 text-xs text-stone-600 color-stone-600">
-            <Users className="w-3 h-3" />
-            {room.participants.length}명 참여
+          <div className="flex items-center gap-3 text-xs text-stone-600">
+            <span className="flex items-center gap-1">
+              <Users className="w-3 h-3" />
+              {room.participants.length}명 참여
+            </span>
+            <span className="w-px h-3 bg-stone-300" />
+            <span className="font-mono">{formatRemaining(room.expiresAt)}</span>
           </div>
         </motion.div>
 
@@ -563,6 +548,48 @@ export default function ResultsPage({
             </div>
           </motion.div>
         )}
+
+        {/* Share + CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.4, delay: 0.3 }}
+          className="mt-6 rounded-2xl border border-amber-100 bg-white px-5 py-5"
+        >
+          <div className="flex gap-2 mb-5">
+            <button
+              onClick={copyInviteLink}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border text-xs transition-colors",
+                copied
+                  ? "border-amber-200 bg-amber-50 text-amber-700"
+                  : "border-amber-100 text-stone-700 hover:text-stone-900 hover:border-amber-200"
+              )}
+            >
+              {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+              {copied ? "복사됨" : "링크 복사"}
+            </button>
+            <button
+              onClick={shareInviteLink}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-amber-100 text-xs text-stone-700 hover:text-stone-900 hover:border-amber-200 transition-colors"
+            >
+              <Share2 className="w-3.5 h-3.5" />
+              공유하기
+            </button>
+          </div>
+
+          <div className="h-px bg-stone-100 mb-5" />
+
+          <div className="text-center">
+            <Link
+              href="/create"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-sm font-medium transition-all duration-200 shadow-lg shadow-amber-900/20 hover:-translate-y-0.5"
+            >
+              방 만들기
+            </Link>
+          </div>
+        </motion.div>
       </div>
     </div>
   );

@@ -41,6 +41,17 @@ interface Room {
   participants: { id: string; nickname: string }[];
 }
 
+/* ─── Utils ─────────────────────────────── */
+
+function formatRemaining(expiresAt: string): string {
+  const diff = new Date(expiresAt).getTime() - Date.now();
+  if (diff <= 0) return "만료";
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  if (hours > 0) return `${hours}h`;
+  return `${minutes}m`;
+}
+
 /* ─── Lobby ──────────────────────────────── */
 
 function Lobby({
@@ -92,6 +103,8 @@ function Lobby({
             <Users className="w-3 h-3" />
             {room.participants.length}명 참여 중
           </span>
+          <span className="w-px h-3 bg-stone-300" />
+          <span className="font-mono">{formatRemaining(room.expiresAt)}</span>
         </div>
       </div>
 
@@ -180,7 +193,7 @@ function Lobby({
         </div>
       )}
 
-      {/* Nickname + CTA */}
+{/* Nickname + CTA */}
       <div className="space-y-3">
         <div>
           <label className="block text-[10px] uppercase tracking-widest text-stone-500 mb-3">
