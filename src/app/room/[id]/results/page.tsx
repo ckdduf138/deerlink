@@ -11,6 +11,7 @@ import {
   Users,
   Copy,
   Check,
+  Share2,
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -343,6 +344,15 @@ export default function ResultsPage({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const shareInviteLink = async () => {
+    const url = window.location.href.replace("/results", "");
+    if (navigator.share) {
+      await navigator.share({ title: room?.title, url });
+    } else {
+      copyInviteLink();
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#fafaf8] flex items-center justify-center">
@@ -396,25 +406,34 @@ export default function ResultsPage({
           <span className="hidden sm:inline">돌아가기</span>
         </Link>
 
-        <button
-          onClick={copyInviteLink}
-          className={cn(
-            "flex items-center gap-1.5 text-xs transition-colors",
-            copied ? "text-amber-600" : "text-stone-600 hover:text-stone-900"
-          )}
-        >
-          {copied ? (
-            <>
-              <Check className="w-3.5 h-3.5" />
-              링크 복사됨
-            </>
-          ) : (
-            <>
-              <Copy className="w-3.5 h-3.5" />
-              초대 링크 복사
-            </>
-          )}
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={copyInviteLink}
+            className={cn(
+              "flex items-center gap-1.5 text-xs transition-colors",
+              copied ? "text-amber-600" : "text-stone-600 hover:text-stone-900"
+            )}
+          >
+            {copied ? (
+              <>
+                <Check className="w-3.5 h-3.5" />
+                복사됨
+              </>
+            ) : (
+              <>
+                <Copy className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">링크 복사</span>
+              </>
+            )}
+          </button>
+          <button
+            onClick={shareInviteLink}
+            className="flex items-center gap-1.5 text-xs text-stone-600 hover:text-stone-900 transition-colors"
+          >
+            <Share2 className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">공유하기</span>
+          </button>
+        </div>
       </nav>
 
       <div className="max-w-2xl mx-auto px-4 pt-20 pb-16">
