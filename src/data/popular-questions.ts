@@ -12,15 +12,15 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
   // 밸런스 8개
   {
     type: "balance",
-    title: "평생 돈은 없지만 하고 싶은 일 vs 하기 싫은 일이지만 연봉 3억",
-    optionA: "하고 싶은 일",
-    optionB: "연봉 3억",
+    title: "1억 받고 절친과 영원히 절연 vs 1억 포기하고 평생 절친",
+    optionA: "1억 받고 절연",
+    optionB: "1억 포기하고 절친",
   },
   {
     type: "balance",
-    title: "애인이 가난하지만 나를 미치게 사랑 vs 부자지만 나한테 무관심",
-    optionA: "가난하지만 사랑",
-    optionB: "부자지만 무관심",
+    title: "내가 미치게 좋아하는 사람과 연애 vs 나를 미치게 좋아하는 사람과 연애",
+    optionA: "내가 좋아하는 사람",
+    optionB: "나를 좋아하는 사람",
   },
   {
     type: "balance",
@@ -30,27 +30,27 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
   },
   {
     type: "balance",
-    title: "지금 이 순간 기억 전부 삭제 vs 앞으로 아무것도 기억 못함",
-    optionA: "과거 기억 삭제",
-    optionB: "미래 기억 불가",
+    title: "선톡 절대 안 하는 애인 vs 하루종일 카톡 폭격하는 애인",
+    optionA: "선톡 안 하는 애인",
+    optionB: "카톡 폭격 애인",
+  },
+  {
+    type: "balance",
+    title: "월급 200만원 좋아하는 일 vs 월급 1,000만원 하기 싫은 일",
+    optionA: "200만원 좋아하는 일",
+    optionB: "1,000만원 싫은 일",
+  },
+  {
+    type: "balance",
+    title: "탕수육은 부먹 vs 찍먹",
+    optionA: "부먹",
+    optionB: "찍먹",
   },
   {
     type: "balance",
     title: "친구 10명한테 욕먹는 소문 퍼짐 vs SNS에서 1만 명한테 공개 망신",
     optionA: "친구들한테 욕",
     optionB: "1만 명 공개 망신",
-  },
-  {
-    type: "balance",
-    title: "강아지 vs 고양이",
-    optionA: "강아지",
-    optionB: "고양이",
-  },
-  {
-    type: "balance",
-    title: "밤샘 vs 푹 쉬기",
-    optionA: "밤샘",
-    optionB: "푹 쉬기",
   },
   {
     type: "balance",
@@ -62,44 +62,48 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
   // 객관식 7개
   {
     type: "multiple",
-    title: "지금 당장 10억이 생기면 제일 먼저 하고 싶은 것은?",
-    options: ["서울 아파트 구매", "세계 여행", "사업 시작", "부모님께 드림"],
+    title: "카톡 왔을 때 나는?",
+    options: ["즉시 답장", "읽고 나중에 답장", "읽씹할 때 있음", "알림 꺼놓음"],
   },
   {
     type: "multiple",
-    title: "연인과 싸웠을 때 나의 반응은?",
-    options: ["바로 화해 시도", "냉각기 필요", "혼자 삭히고 넘어감", "상황에 따라 다름"],
+    title: "약속 시간 나는?",
+    options: ["30분 전 도착", "딱 맞게 도착", "5~10분 지각", "항상 30분+ 지각"],
   },
   {
     type: "multiple",
-    title: "나의 음주 스타일은?",
-    options: ["아예 안 마심", "가끔 1-2잔", "분위기 따라 적당히", "한 번 시작하면 끝장"],
+    title: "갈등 생기면 나는?",
+    options: ["바로 직접 말함", "삭히다가 폭발함", "그냥 넘어감", "슬쩍 멀어짐"],
   },
   {
     type: "multiple",
-    title: "새벽 2시에 갑자기 놀 수 있으면 뭐 할 것 같아?",
-    options: ["유튜브/넷플릭스", "야식 배달", "오래된 친구한테 연락", "일찍 잠들기"],
+    title: "우리 그룹에서 내 포지션은?",
+    options: ["분위기 메이커", "조용한 관찰자", "분위기 파악러", "중재자"],
   },
   {
     type: "multiple",
-    title: "첫 만남에서 호감 생기는 포인트는?",
-    options: ["눈 마주침", "목소리/말투", "유머 감각", "경청하는 태도"],
+    title: "10억 생기면 가장 먼저?",
+    options: ["집 구매", "세계 일주", "투자·사업", "부모님께 드림"],
   },
   {
     type: "multiple",
-    title: "우리 그룹에서 나는 어떤 포지션?",
-    options: ["분위기 메이커", "분위기 파악러", "조용한 관찰자", "중재자"],
+    title: "스트레스 받을 때 나는?",
+    options: ["혼자 조용히", "친구 만나서 풀기", "먹방", "잠으로 해결"],
   },
   {
     type: "multiple",
-    title: "요즘 스트레스 수준은?",
-    options: ["여유롭다", "보통", "힘들다", "죽겠다"],
+    title: "공포영화 보면 나는?",
+    options: ["눈 딱 감음", "소리 지름", "옆사람 붙잡음", "멀쩡하게 봄"],
   },
 
   // 주관식 5개
   {
     type: "subjective",
-    title: "살면서 가장 후회하는 선택은?",
+    title: "이 그룹에서 제일 먼저 결혼할 것 같은 사람은? (이유도)",
+  },
+  {
+    type: "subjective",
+    title: "지금 당장 어디든 갈 수 있다면 어디 가고 싶어?",
   },
   {
     type: "subjective",
@@ -107,11 +111,7 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
   },
   {
     type: "subjective",
-    title: "지금 이 순간 솔직히 가장 걱정되는 것은?",
-  },
-  {
-    type: "subjective",
-    title: "나를 한 문장으로 소개한다면?",
+    title: "요즘 꽂혀있는 것 하나만 말해봐",
   },
   {
     type: "subjective",
