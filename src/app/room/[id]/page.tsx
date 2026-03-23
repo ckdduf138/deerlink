@@ -17,6 +17,7 @@ import {
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { AntlerLogo } from "@/components/landing/AntlerLogo";
 
 /* ─── Types ─────────────────────────────── */
 
@@ -64,18 +65,18 @@ function Lobby({
     <div className="max-w-md mx-auto px-4 pt-20 pb-10">
       {/* Room info */}
       <div className="mb-8">
-        <div className="text-[10px] uppercase tracking-widest text-zinc-600 mb-3">
-          LinkMatch
+        <div className="text-[10px] uppercase tracking-widest text-stone-500 mb-3">
+          Deerlink
         </div>
-        <h1 className="text-2xl font-bold text-white mb-2 leading-snug">
+        <h1 className="text-2xl font-bold text-stone-900 mb-2 leading-snug">
           {room.title}
         </h1>
-        <div className="flex items-center gap-3 text-xs text-zinc-600">
+        <div className="flex items-center gap-3 text-xs text-stone-600 color-stone-600">
           <span className="flex items-center gap-1">
             <ListChecks className="w-3 h-3" />
             {room.questions.length}개 질문
           </span>
-          <span className="w-px h-3 bg-zinc-800" />
+          <span className="w-px h-3 bg-stone-300" />
           <span className="flex items-center gap-1">
             <Users className="w-3 h-3" />
             {room.participants.length}명 참여 중
@@ -84,16 +85,16 @@ function Lobby({
       </div>
 
       {/* Copy link */}
-      <div className="mb-6 rounded-2xl border border-white/7 bg-[#111114] overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-3 border-b border-white/5">
-          <span className="text-[10px] uppercase tracking-widest text-zinc-600">
+      <div className="mb-6 rounded-2xl border border-amber-100 bg-white overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-stone-200">
+          <span className="text-[10px] uppercase tracking-widest text-stone-500">
             초대 링크
           </span>
           <button
             onClick={copyLink}
             className={cn(
               "flex items-center gap-1.5 text-xs transition-colors",
-              copied ? "text-violet-400" : "text-zinc-500 hover:text-white"
+              copied ? "text-amber-600" : "text-stone-600 hover:text-stone-900"
             )}
           >
             {copied ? (
@@ -110,21 +111,21 @@ function Lobby({
           </button>
         </div>
         <div className="px-5 py-3">
-          <p className="text-xs text-zinc-600 truncate">{url}</p>
+          <p className="text-xs text-stone-500 truncate">{url}</p>
         </div>
       </div>
 
       {/* Participants */}
       {room.participants.length > 0 && (
         <div className="mb-6">
-          <div className="text-[10px] uppercase tracking-widest text-zinc-600 mb-2">
+          <div className="text-[10px] uppercase tracking-widest text-stone-500 mb-2">
             이미 참여한 사람
           </div>
           <div className="flex flex-wrap gap-1.5">
             {room.participants.map((p) => (
               <span
                 key={p.id}
-                className="px-2.5 py-1 rounded-full text-xs border border-white/7 bg-white/3 text-zinc-400"
+                className="px-2.5 py-1 rounded-full text-xs border border-amber-100 bg-amber-50 text-stone-700"
               >
                 {p.nickname}
               </span>
@@ -133,10 +134,20 @@ function Lobby({
         </div>
       )}
 
+      {/* Empty state - no participants */}
+      {room.participants.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-8 mb-6">
+          <AntlerLogo className="w-8 h-10 text-stone-300 mb-4" />
+          <p className="text-center text-xs text-stone-500">
+            친구들을 초대해보세요! 링크를 공유하면 모두가 함께할 수 있어요.
+          </p>
+        </div>
+      )}
+
       {/* Nickname + CTA */}
       <div className="space-y-3">
         <div>
-          <label className="block text-[10px] uppercase tracking-widest text-zinc-600 mb-3">
+          <label className="block text-[10px] uppercase tracking-widest text-stone-500 mb-3">
             닉네임
           </label>
           <input
@@ -147,7 +158,7 @@ function Lobby({
             placeholder="나를 뭐라고 부를까요?"
             maxLength={20}
             autoFocus
-            className="w-full py-3.5 px-4 rounded-xl border border-white/8 bg-white/3 text-sm text-white placeholder:text-zinc-700 outline-none focus:border-violet-500/40 transition-colors"
+            className="w-full py-3.5 px-4 rounded-xl border border-amber-100 bg-amber-50 text-sm text-stone-900 placeholder:text-stone-400 outline-none focus:border-amber-300 transition-colors"
           />
         </div>
         <button
@@ -156,8 +167,8 @@ function Lobby({
           className={cn(
             "w-full py-4 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200",
             nickname.trim()
-              ? "bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/30"
-              : "bg-white/5 text-zinc-600"
+              ? "bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-900/30"
+              : "bg-stone-100 text-stone-400"
           )}
         >
           참여하기
@@ -170,7 +181,7 @@ function Lobby({
         <div className="text-center mt-8">
           <Link
             href={`/room/${room.id}/results`}
-            className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors flex items-center justify-center gap-1.5"
+            className="text-xs text-stone-600 hover:text-stone-700 transition-colors flex items-center justify-center gap-1.5"
           >
             <BarChart3 className="w-3 h-3" />
             결과 보기 ({room.participants.length}명 참여)
@@ -249,14 +260,14 @@ function AnswerMode({
       {/* Progress */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-zinc-600 font-mono tabular-nums">
+          <span className="text-xs text-stone-600 font-mono tabular-nums">
             {currentQ + 1} / {room.questions.length}
           </span>
-          <span className="text-xs text-zinc-600">{nickname}</span>
+          <span className="text-xs text-stone-600">{nickname}</span>
         </div>
-        <div className="h-0.5 bg-white/5 rounded-full overflow-hidden">
+        <div className="h-0.5 bg-stone-200 rounded-full overflow-hidden">
           <motion.div
-            className="h-full bg-violet-500 rounded-full"
+            className="h-full bg-amber-500 rounded-full"
             initial={false}
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.3 }}
@@ -274,10 +285,10 @@ function AnswerMode({
               className={cn(
                 "rounded-full transition-all duration-200",
                 i === currentQ
-                  ? "w-4 h-1.5 bg-violet-500"
+                  ? "w-4 h-1.5 bg-amber-500"
                   : answers[q.id]
-                  ? "w-1.5 h-1.5 bg-violet-500/40"
-                  : "w-1.5 h-1.5 bg-white/10"
+                  ? "w-1.5 h-1.5 bg-amber-500/40"
+                  : "w-1.5 h-1.5 bg-stone-300"
               )}
               aria-label={`질문 ${i + 1}로 이동`}
             />
@@ -298,12 +309,12 @@ function AnswerMode({
           {/* Question */}
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-3">
-              <IconComponent className="w-3.5 h-3.5 text-zinc-600" />
-              <span className="text-[10px] uppercase tracking-widest text-zinc-600">
+              <IconComponent className="w-3.5 h-3.5 text-stone-500" />
+              <span className="text-[10px] uppercase tracking-widest text-stone-500">
                 {TYPE_LABEL[question?.type ?? "balance"]}
               </span>
             </div>
-            <h2 className="text-xl font-bold text-white leading-snug">
+            <h2 className="text-xl font-bold text-stone-900 leading-snug">
               {question?.title}
             </h2>
           </div>
@@ -323,11 +334,11 @@ function AnswerMode({
                     className={cn(
                       "py-7 px-4 rounded-2xl border text-center transition-all duration-200 text-sm font-medium",
                       isSelected
-                        ? "border-violet-500/40 bg-violet-500/10 text-violet-200 shadow-lg shadow-violet-900/20"
-                        : "border-white/8 bg-white/3 text-zinc-400 hover:border-white/15 hover:bg-white/5 hover:text-white"
+                        ? "border-amber-500/40 bg-amber-50 text-amber-900 shadow-lg shadow-amber-900/20"
+                        : "border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:bg-stone-50 hover:text-stone-900"
                     )}
                   >
-                    <span className="block text-[10px] font-mono text-zinc-600 mb-2">
+                    <span className="block text-[10px] font-mono text-stone-500 mb-2">
                       {opt.value}
                     </span>
                     <span className="leading-snug">{opt.label}</span>
@@ -335,9 +346,9 @@ function AnswerMode({
                       <motion.div
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
-                        className="mt-3 mx-auto w-5 h-5 rounded-full bg-violet-500/20 flex items-center justify-center"
+                        className="mt-3 mx-auto w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center"
                       >
-                        <Check className="w-3 h-3 text-violet-300" />
+                        <Check className="w-3 h-3 text-amber-600" />
                       </motion.div>
                     )}
                   </button>
@@ -358,14 +369,14 @@ function AnswerMode({
                     className={cn(
                       "w-full py-3.5 px-4 rounded-xl border text-left transition-all duration-200 text-sm flex items-center gap-3",
                       isSelected
-                        ? "border-violet-500/40 bg-violet-500/8 text-violet-200"
-                        : "border-white/8 bg-white/3 text-zinc-400 hover:border-white/15 hover:bg-white/5 hover:text-white"
+                        ? "border-amber-500/40 bg-amber-50 text-amber-900"
+                        : "border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:bg-stone-50 hover:text-stone-900"
                     )}
                   >
                     <div
                       className={cn(
                         "w-4 h-4 rounded-full border flex items-center justify-center flex-shrink-0 transition-colors",
-                        isSelected ? "border-violet-500 bg-violet-500" : "border-zinc-700"
+                        isSelected ? "border-amber-500 bg-amber-500" : "border-stone-300"
                       )}
                     >
                       {isSelected && <Check className="w-2.5 h-2.5 text-white" />}
@@ -384,7 +395,7 @@ function AnswerMode({
               onChange={(e) => selectAnswer(e.target.value)}
               placeholder="자유롭게 답변하세요"
               rows={5}
-              className="w-full py-3.5 px-4 rounded-xl border border-white/8 bg-white/3 text-sm text-white placeholder:text-zinc-700 outline-none focus:border-violet-500/30 transition-colors resize-none leading-relaxed"
+              className="w-full py-3.5 px-4 rounded-xl border border-amber-100 bg-amber-50 text-sm text-stone-900 placeholder:text-stone-400 outline-none focus:border-amber-300 transition-colors resize-none leading-relaxed"
             />
           )}
         </motion.div>
@@ -395,7 +406,7 @@ function AnswerMode({
         <button
           onClick={goPrev}
           disabled={currentQ === 0}
-          className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm text-zinc-500 hover:text-white disabled:opacity-20 transition-colors"
+          className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm text-stone-600 hover:text-stone-900 disabled:opacity-20 transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           이전
@@ -408,8 +419,8 @@ function AnswerMode({
             className={cn(
               "flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
               answered
-                ? "bg-violet-600 hover:bg-violet-500 text-white"
-                : "bg-white/5 text-zinc-600"
+                ? "bg-amber-600 hover:bg-amber-500 text-white"
+                : "bg-stone-100 text-stone-400"
             )}
           >
             다음
@@ -422,8 +433,8 @@ function AnswerMode({
             className={cn(
               "flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
               allAnswered && !submitting
-                ? "bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/30"
-                : "bg-white/5 text-zinc-600"
+                ? "bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-900/30"
+                : "bg-stone-100 text-stone-400"
             )}
           >
             {submitting ? (
@@ -491,19 +502,19 @@ export default function RoomPage({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#09090b] flex items-center justify-center">
-        <Loader2 className="w-5 h-5 text-zinc-600 animate-spin" />
+      <div className="min-h-screen bg-[#fafaf8] flex items-center justify-center">
+        <Loader2 className="w-5 h-5 text-stone-400 animate-spin" />
       </div>
     );
   }
 
   if (!room) {
     return (
-      <div className="min-h-screen bg-[#09090b] flex flex-col items-center justify-center gap-4">
-        <p className="text-zinc-500 text-sm">방을 찾을 수 없습니다</p>
+      <div className="min-h-screen bg-[#fafaf8] flex flex-col items-center justify-center gap-4">
+        <p className="text-stone-600 text-sm">방을 찾을 수 없습니다</p>
         <Link
           href="/"
-          className="text-xs text-zinc-600 hover:text-zinc-400 flex items-center gap-1.5 transition-colors"
+          className="text-xs text-stone-600 hover:text-stone-700 flex items-center gap-1.5 transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           홈으로
@@ -513,20 +524,20 @@ export default function RoomPage({
   }
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-white">
+    <div className="min-h-screen bg-[#fafaf8] text-stone-900">
       {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 md:px-8 py-4 border-b border-white/5 bg-[#09090b]/90 backdrop-blur-md">
+      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 md:px-8 py-4 border-b border-amber-100 bg-white/90 backdrop-blur-md">
         <Link
           href="/"
-          className="flex items-center gap-2 text-sm text-zinc-500 hover:text-white transition-colors"
+          className="flex items-center gap-2 text-sm text-stone-600 hover:text-stone-900 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span className="hidden sm:inline">LinkMatch</span>
+          <span className="hidden sm:inline">Deerlink</span>
         </Link>
         {mode === "answer" && (
           <button
             onClick={() => setMode("lobby")}
-            className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
+            className="text-xs text-stone-600 hover:text-stone-700 transition-colors"
           >
             돌아가기
           </button>

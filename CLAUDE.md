@@ -1,4 +1,4 @@
-# LinkMatch — CLAUDE.md
+# Deerlink — CLAUDE.md
 
 이 파일은 Claude Code가 일관된 코드를 생성하기 위한 프로젝트 가이드입니다.
 
@@ -6,7 +6,7 @@
 
 ## 프로젝트 개요
 
-**LinkMatch** — 링크 하나로 그룹 의견을 비교하는 플랫폼.
+**Deerlink** — 링크 하나로 그룹 의견을 비교하는 플랫폼. 사슴 뿔처럼 여러 가지가 하나의 뿌리에서 만나는 컨셉.
 방 생성자가 질문을 만들고 링크를 공유하면, 참여자 전원이 답변 후 결과를 비교한다.
 핵심 원칙: **Answer Lock** — 모두가 답변 완료 전까지 결과 비교 불가 (API 레벨 강제).
 
@@ -65,21 +65,21 @@ src/
 ### 색상 팔레트
 
 ```
-배경:       #09090b   (near-black)
-카드 배경:  #111114
-border:     rgba(255,255,255,0.07)
-텍스트 1:   #fafafa   (제목)
-텍스트 2:   #a1a1aa   (zinc-400, 본문)
-텍스트 3:   #71717a   (zinc-500, 보조)
-텍스트 4:   #52525b   (zinc-600, 캡션/라벨)
-Accent:     #8b5cf6   (violet-500)
-Accent dim: #7c3aed   (violet-600)
+배경:       #0d0a07   (따뜻한 다크 브라운)
+카드 배경:  #17120c   (따뜻한 브라운)
+border:     rgba(240,200,130,0.09)  (amber tint)
+텍스트 1:   #fdf4e8   (크림 화이트)
+텍스트 2:   #a8a29e   (stone-400, 본문)
+텍스트 3:   #78716c   (stone-500, 보조)
+텍스트 4:   #57534e   (stone-600, 캡션/라벨)
+Accent:     #e8a038   (amber-500, 사슴 털 색)
+Accent dim: #d4891e   (amber-600)
 ```
 
 **색상 원칙**
-- accent 색상은 **violet 단색**만 사용. indigo/pink/amber 동시 사용 금지.
-- 의미 있는 대조 색상: sky(파랑) — violet과 대비 목적으로만.
-- 그라디언트 남용 금지. 필요 시 `from-violet-600 to-violet-400` 정도.
+- accent 색상은 **amber 단색**만 사용. 따뜻한 느낌 유지.
+- 의미 있는 대조 색상: teal(청록) — amber와 대비 목적으로만 (balance game B 옵션).
+- 그라디언트 남용 금지. 필요 시 `from-amber-600 to-amber-400` 정도.
 
 ### 타이포그래피
 
@@ -91,30 +91,30 @@ Accent dim: #7c3aed   (violet-600)
 히어로:  text-5xl ~ text-[82px]  font-bold  tracking-tight  leading-[1.05]
 섹션:    text-3xl ~ text-4xl     font-bold  tracking-tight
 카드:    text-sm ~ text-base     font-semibold
-본문:    text-sm                 text-zinc-500  leading-relaxed
-캡션:    text-[10px] ~ text-xs  text-zinc-600  uppercase tracking-widest
+본문:    text-sm                 text-stone-500  leading-relaxed
+캡션:    text-[10px] ~ text-xs  text-stone-600  uppercase tracking-widest
 ```
 
 ### 컴포넌트 스타일 패턴
 
 ```tsx
 // 카드 — 기본
-className="rounded-2xl border border-white/7 bg-[#111114] p-6"
+className="rounded-2xl border border-white/8 bg-[#17120c] p-6"
 
 // 카드 — 강조 (selected/active)
-className="border-violet-500/25 bg-violet-500/8"
+className="border-amber-500/25 bg-amber-500/8"
 
 // 버튼 — 주요 CTA
-className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium transition-all duration-200 shadow-lg shadow-violet-900/40 hover:-translate-y-0.5"
+className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-sm font-medium transition-all duration-200 shadow-lg shadow-amber-900/40 hover:-translate-y-0.5"
 
 // 버튼 — 보조
-className="text-sm text-zinc-400 hover:text-white transition-colors duration-200"
+className="text-sm text-stone-400 hover:text-white transition-colors duration-200"
 
 // Input
-className="bg-white/5 border-white/10 text-white placeholder:text-zinc-600 rounded-xl"
+className="bg-white/3 border border-white/8 text-white placeholder:text-stone-600 rounded-xl"
 
 // 태그/뱃지
-className="px-3 py-1 rounded-full text-xs border border-white/8 bg-white/3 text-zinc-400"
+className="px-3 py-1 rounded-full text-xs border border-white/8 bg-white/3 text-stone-400"
 
 // 섹션 구분선
 className="h-px bg-white/5"
@@ -272,10 +272,10 @@ if (answeredCount < totalQuestions) {
 
 ## 금지 사항
 
-- 이모지 사용 금지 (코드, UI 모두)
+- 이모지 사용 금지 (코드 내, DeerPlaceholder에서만 사용)
 - 3D 라이브러리 (`@react-three/fiber` 등) 랜딩 페이지에 사용 금지
 - 아이콘-인-박스 UI 패턴 금지
-- indigo/pink/amber 3색 동시 사용 금지
+- violet/sky 색상 사용 금지 (대신 amber/teal 사용)
 - `any` 타입 금지
 - `ease: "easeInOut"` 등 string ease는 `as const` 없이 사용 가능
 - 불필요한 `useEffect` 남용 금지 — 서버에서 처리 가능한 건 서버에서

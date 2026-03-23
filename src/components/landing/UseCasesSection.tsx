@@ -14,8 +14,10 @@ const tags = [
 ];
 
 export function UseCasesSection() {
+  const tagColors = ["bg-amber-50", "bg-pink-50", "bg-lime-50", "bg-sky-50"];
+
   return (
-    <section className="py-16 md:py-24 px-6 border-t border-white/5">
+    <section className="py-16 md:py-24 px-6 border-t border-stone-200">
       <div className="max-w-5xl mx-auto flex flex-col md:flex-row md:items-center gap-8">
         <motion.div
           initial={{ opacity: 0, x: -12 }}
@@ -24,10 +26,10 @@ export function UseCasesSection() {
           transition={{ duration: 0.5 }}
           className="md:w-52 flex-shrink-0"
         >
-          <div className="text-xs text-zinc-600 uppercase tracking-widest mb-2">
+          <div className="text-xs text-stone-500 uppercase tracking-widest mb-2">
             활용 사례
           </div>
-          <p className="text-sm text-zinc-400 leading-relaxed">
+          <p className="text-sm text-stone-600 leading-relaxed">
             어떤 모임이든 링크 하나면 충분합니다
           </p>
         </motion.div>
@@ -46,7 +48,7 @@ export function UseCasesSection() {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.3, delay: i * 0.04 + 0.1 }}
-              className="px-3.5 py-1.5 rounded-full text-xs text-zinc-400 border border-white/8 bg-white/3"
+              className={`px-3.5 py-1.5 rounded-full text-xs text-stone-600 border border-amber-100 ${tagColors[i % 4]}`}
             >
               {tag}
             </motion.span>

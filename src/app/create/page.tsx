@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { AntlerLogo } from "@/components/landing/AntlerLogo";
 
 /* ─── Types ─────────────────────────────────────── */
 
@@ -35,17 +36,17 @@ const TYPE_CONFIG = {
   balance: {
     icon: Scale,
     label: "밸런스",
-    color: "text-violet-400",
+    color: "text-amber-400",
   },
   multiple: {
     icon: ListChecks,
     label: "객관식",
-    color: "text-sky-400",
+    color: "text-teal-400",
   },
   subjective: {
     icon: PenLine,
     label: "주관식",
-    color: "text-zinc-400",
+    color: "text-stone-400",
   },
 } as const;
 
@@ -93,24 +94,24 @@ function QuestionCard({ question, index, onChange, onRemove }: QuestionCardProps
       value={question}
       dragListener={false}
       dragControls={dragControls}
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       exit={{ opacity: 0, scale: 0.97 }}
       transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-      className="rounded-2xl border border-white/7 bg-[#111114] overflow-hidden"
+      className="rounded-2xl border border-amber-100 bg-white overflow-hidden"
     >
       {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5">
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-stone-200">
         {/* Drag handle */}
         <button
           onPointerDown={(e) => dragControls.start(e)}
-          className="touch-none cursor-grab active:cursor-grabbing p-0.5 text-zinc-800 hover:text-zinc-600 transition-colors"
+          className="touch-none cursor-grab active:cursor-grabbing p-0.5 text-stone-400 hover:text-stone-600 transition-colors"
           aria-label="드래그하여 순서 변경"
         >
           <GripVertical className="w-3.5 h-3.5" />
         </button>
 
-        <span className="text-[10px] font-mono text-zinc-700 tabular-nums">
+        <span className="text-[10px] font-mono text-stone-500 tabular-nums">
           {String(index + 1).padStart(2, "0")}
         </span>
 
@@ -123,7 +124,7 @@ function QuestionCard({ question, index, onChange, onRemove }: QuestionCardProps
 
         <button
           onClick={() => onRemove(question.id)}
-          className="w-7 h-7 flex items-center justify-center text-zinc-800 hover:text-red-400 transition-colors"
+          className="w-7 h-7 flex items-center justify-center text-stone-400 hover:text-red-500 transition-colors"
           aria-label="질문 삭제"
         >
           <Trash2 className="w-3.5 h-3.5" />
@@ -134,17 +135,12 @@ function QuestionCard({ question, index, onChange, onRemove }: QuestionCardProps
       <div className="px-4 pt-3.5 pb-3">
         <input
           type="text"
+          data-question-input
           value={question.title}
           onChange={(e) => onChange(question.id, { title: e.target.value })}
-          placeholder={
-            question.type === "balance"
-              ? "치킨 vs 피자, 뭐 먹을래?"
-              : question.type === "multiple"
-              ? "요즘 주로 어디서 시간 보내?"
-              : "요즘 가장 큰 고민이 뭐야?"
-          }
+          placeholder="질문을 입력하세요"
           maxLength={80}
-          className="w-full bg-transparent text-sm font-medium text-white placeholder:text-zinc-700 outline-none leading-relaxed"
+          className="w-full bg-transparent text-sm font-medium text-stone-900 placeholder:text-stone-400 outline-none leading-relaxed"
         />
       </div>
 
@@ -155,17 +151,17 @@ function QuestionCard({ question, index, onChange, onRemove }: QuestionCardProps
             type="text"
             value={question.optionA ?? ""}
             onChange={(e) => onChange(question.id, { optionA: e.target.value })}
-            placeholder="치킨"
+            placeholder="옵션 1"
             maxLength={30}
-            className="py-2.5 px-3 rounded-xl border border-white/8 bg-white/3 text-xs text-white placeholder:text-zinc-700 outline-none focus:border-violet-500/40 transition-colors"
+            className="py-2.5 px-3 rounded-xl border border-amber-100 bg-amber-50 text-xs text-stone-900 placeholder:text-stone-400 outline-none focus:border-amber-300 transition-colors"
           />
           <input
             type="text"
             value={question.optionB ?? ""}
             onChange={(e) => onChange(question.id, { optionB: e.target.value })}
-            placeholder="피자"
+            placeholder="옵션 2"
             maxLength={30}
-            className="py-2.5 px-3 rounded-xl border border-white/8 bg-white/3 text-xs text-white placeholder:text-zinc-700 outline-none focus:border-violet-500/40 transition-colors"
+            className="py-2.5 px-3 rounded-xl border border-amber-100 bg-amber-50 text-xs text-stone-900 placeholder:text-stone-400 outline-none focus:border-amber-300 transition-colors"
           />
         </div>
       )}
@@ -175,19 +171,19 @@ function QuestionCard({ question, index, onChange, onRemove }: QuestionCardProps
         <div className="px-4 pb-4 space-y-1.5">
           {question.options?.map((opt, i) => (
             <div key={i} className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-zinc-700 flex-shrink-0" />
+              <div className="w-1.5 h-1.5 rounded-full bg-stone-300 flex-shrink-0" />
               <input
                 type="text"
                 value={opt}
                 onChange={(e) => updateOption(i, e.target.value)}
                 placeholder={`선택지 ${i + 1}`}
                 maxLength={30}
-                className="flex-1 py-2 px-3 rounded-xl border border-white/8 bg-white/3 text-xs text-white placeholder:text-zinc-700 outline-none focus:border-sky-500/30 transition-colors"
+                className="flex-1 py-2 px-3 rounded-xl border border-stone-200 bg-stone-100 text-xs text-stone-900 placeholder:text-stone-400 outline-none focus:border-stone-300 transition-colors"
               />
               {(question.options?.length ?? 0) > 2 && (
                 <button
                   onClick={() => removeOption(i)}
-                  className="text-zinc-800 hover:text-red-400 transition-colors flex-shrink-0 p-1"
+                  className="text-stone-400 hover:text-red-500 transition-colors flex-shrink-0 p-1"
                 >
                   <Trash2 className="w-3 h-3" />
                 </button>
@@ -197,7 +193,7 @@ function QuestionCard({ question, index, onChange, onRemove }: QuestionCardProps
           {(question.options?.length ?? 0) < 5 && (
             <button
               onClick={addOption}
-              className="text-[11px] text-zinc-700 hover:text-zinc-400 transition-colors pl-3.5 py-1"
+              className="text-[11px] text-stone-500 hover:text-stone-700 transition-colors pl-3.5 py-1"
             >
               + 선택지 추가
             </button>
@@ -208,7 +204,7 @@ function QuestionCard({ question, index, onChange, onRemove }: QuestionCardProps
       {/* Subjective */}
       {question.type === "subjective" && (
         <div className="px-4 pb-3">
-          <p className="text-xs text-zinc-700">자유롭게 텍스트로 답변</p>
+          <p className="text-xs text-stone-500">자유롭게 텍스트로 답변</p>
         </div>
       )}
     </Reorder.Item>
@@ -246,6 +242,13 @@ export default function CreateRoomPage() {
       ...(type === "multiple" ? { options: ["", ""] } : {}),
     };
     setQuestions((prev) => [...prev, q]);
+    // Focus on the new question's title input after it renders
+    setTimeout(() => {
+      const lastInput = document.querySelector(
+        "[data-question-input]:last-of-type"
+      ) as HTMLInputElement;
+      lastInput?.focus();
+    }, 0);
   };
 
   const updateQuestion = (id: string, updates: Partial<Question>) => {
@@ -289,16 +292,17 @@ export default function CreateRoomPage() {
   const atMax = questions.length >= MAX_QUESTIONS;
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-white">
+    <div className="min-h-screen bg-[#fafaf8] text-stone-900">
       {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 md:px-8 py-4 border-b border-white/5 bg-[#09090b]/90 backdrop-blur-md">
+      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 md:px-8 py-4 border-b border-amber-100 bg-white/90 backdrop-blur-md">
         <Link
           href="/"
-          className="flex items-center gap-2 text-sm text-zinc-500 hover:text-white transition-colors"
+          className="flex items-center gap-2 text-sm text-stone-600 hover:text-stone-900 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span className="hidden sm:inline text-sm font-semibold text-white tracking-tight">
-            LinkMatch
+          <span className="hidden sm:inline flex items-center gap-1.5 text-sm font-semibold text-stone-900 tracking-tight">
+            <AntlerLogo className="w-3 h-[15px] text-amber-400" />
+            Deerlink
           </span>
         </Link>
 
@@ -309,8 +313,8 @@ export default function CreateRoomPage() {
           className={cn(
             "hidden md:flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200",
             isValid && !loading
-              ? "bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/30 hover:-translate-y-0.5"
-              : "bg-white/5 text-zinc-600 cursor-not-allowed"
+              ? "bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-900/30 hover:-translate-y-0.5"
+              : "bg-stone-100 text-stone-400 cursor-not-allowed"
           )}
         >
           {loading ? (
@@ -328,27 +332,27 @@ export default function CreateRoomPage() {
       <div className="max-w-xl mx-auto px-4 pt-24 pb-40 md:pb-20">
         {/* Header */}
         <div className="mb-8">
-          <p className="text-xs text-zinc-600 mb-1">질문 만들고 링크 공유하면 끝</p>
+          <p className="text-xs text-stone-600 mb-1">질문 만들고 링크 공유하면 끝</p>
           <input
             ref={titleInputRef}
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="오늘 점심 뭐 먹을까?"
+            placeholder="제목을 입력하세요"
             maxLength={50}
-            className="w-full text-2xl font-bold bg-transparent text-white placeholder:text-zinc-800 outline-none border-b border-white/8 focus:border-violet-500/30 pb-3 transition-colors"
+            className="w-full text-2xl font-bold bg-transparent text-stone-900 placeholder:text-stone-400 outline-none border-b border-amber-100 focus:border-amber-300 pb-3 transition-colors"
           />
         </div>
 
         {/* Question list */}
         <div className="space-y-3">
-          <Reorder.Group
-            axis="y"
-            values={questions}
-            onReorder={setQuestions}
-            className="space-y-3"
-          >
-            <AnimatePresence>
+          <AnimatePresence>
+            <Reorder.Group
+              axis="y"
+              values={questions}
+              onReorder={setQuestions}
+              className="space-y-3"
+            >
               {questions.map((q, i) => (
                 <QuestionCard
                   key={q.id}
@@ -358,12 +362,12 @@ export default function CreateRoomPage() {
                   onRemove={removeQuestion}
                 />
               ))}
-            </AnimatePresence>
-          </Reorder.Group>
+            </Reorder.Group>
+          </AnimatePresence>
 
-          {/* Add question buttons */}
+          {/* Add question buttons — only show after title is entered */}
           <AnimatePresence>
-            {!atMax && (
+            {!atMax && title.trim().length > 0 && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -377,7 +381,7 @@ export default function CreateRoomPage() {
                       key={type}
                       onClick={() => addQuestion(type)}
                       whileTap={{ scale: 0.97 }}
-                      className="flex items-center justify-center gap-1.5 py-3 rounded-xl border border-dashed border-white/8 hover:border-violet-500/25 text-zinc-600 hover:text-violet-400 text-xs transition-all duration-150"
+                      className="flex items-center justify-center gap-1.5 py-3 rounded-xl border border-dashed border-stone-200 hover:border-amber-300 text-stone-600 hover:text-amber-600 text-xs transition-all duration-150"
                     >
                       <Icon className="w-3.5 h-3.5" />
                       {label}
@@ -388,14 +392,22 @@ export default function CreateRoomPage() {
             )}
           </AnimatePresence>
 
-          {questions.length === 0 && (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center text-xs text-zinc-800 pt-2"
+          {title.trim().length > 0 && questions.length === 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex flex-col items-center justify-center py-12 gap-4"
             >
-              질문 하나면 충분해요
-            </motion.p>
+              <motion.div
+                animate={{ opacity: [0.4, 0.7, 0.4] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <AntlerLogo className="w-10 h-12 text-stone-300" />
+              </motion.div>
+              <p className="text-center text-xs text-stone-400">
+                질문 하나면 충분해요
+              </p>
+            </motion.div>
           )}
 
 
@@ -405,15 +417,15 @@ export default function CreateRoomPage() {
 
       {/* Mobile sticky bar */}
       <div className="fixed bottom-0 inset-x-0 md:hidden z-40">
-        <div className="bg-gradient-to-t from-[#09090b] via-[#09090b]/95 to-transparent pt-8 pb-8 px-4">
+        <div className="bg-gradient-to-t from-[#fafaf8] via-[#fafaf8]/95 to-transparent pt-8 pb-8 px-4">
           <button
             onClick={handleSubmit}
             disabled={!isValid || loading}
             className={cn(
               "w-full py-4 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2",
               isValid && !loading
-                ? "bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/40"
-                : "bg-white/5 text-zinc-600"
+                ? "bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-900/40"
+                : "bg-stone-100 text-stone-400"
             )}
           >
             {loading ? (
@@ -426,7 +438,7 @@ export default function CreateRoomPage() {
             )}
           </button>
           {questions.length > 0 && !isValid && (
-            <p className="text-center text-[11px] text-zinc-700 mt-2">
+            <p className="text-center text-[11px] text-stone-500 mt-2">
               선택지까지 입력해주세요
             </p>
           )}

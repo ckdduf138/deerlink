@@ -7,7 +7,7 @@ import { CtaSection } from "@/components/landing/CtaSection";
 
 export default function Home() {
   return (
-    <main className="bg-[#09090b] min-h-screen">
+    <main className="bg-[#fafaf8] min-h-screen">
       <LandingNav />
       <HeroSection />
       <StepsSection />

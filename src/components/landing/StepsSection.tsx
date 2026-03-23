@@ -22,7 +22,7 @@ const steps = [
 
 export function StepsSection() {
   return (
-    <section id="steps" className="py-28 md:py-36 px-6">
+    <section id="steps" className="py-28 md:py-36 px-6 bg-[#fafaf8]">
       <div className="max-w-5xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -31,15 +31,15 @@ export function StepsSection() {
           transition={{ duration: 0.55 }}
           className="mb-16"
         >
-          <div className="text-xs text-zinc-600 uppercase tracking-widest mb-4">
+          <div className="text-xs text-stone-500 uppercase tracking-widest mb-4">
             사용 방법
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
+          <h2 className="text-3xl md:text-4xl font-bold text-stone-900 tracking-tight">
             3단계로 끝납니다
           </h2>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-white/6 rounded-2xl overflow-hidden border border-white/6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-amber-100/50 rounded-2xl overflow-hidden border border-stone-200">
           {steps.map((step, i) => (
             <motion.div
               key={step.number}
@@ -47,15 +47,15 @@ export function StepsSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.45, delay: i * 0.08 }}
-              className="bg-[#09090b] p-8 md:p-10"
+              className="bg-[#fafaf8] p-8 md:p-10 relative"
             >
-              <span className="block text-xs font-mono text-zinc-700 mb-6 tabular-nums">
+              <span className="block text-xs font-mono text-amber-600 mb-6 tabular-nums">
                 {step.number}
               </span>
-              <h3 className="text-base font-semibold text-white mb-2">
+              <h3 className="text-base font-semibold text-stone-900 mb-2">
                 {step.title}
               </h3>
-              <p className="text-sm text-zinc-500 leading-relaxed">
+              <p className="text-sm text-stone-500 leading-relaxed">
                 {step.description}
               </p>
             </motion.div>
