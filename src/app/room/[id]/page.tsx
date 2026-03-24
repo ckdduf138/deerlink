@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { AntlerLogo } from "@/components/landing/AntlerLogo";
 import { RoomClient } from "./room-client";
 
@@ -20,6 +21,13 @@ export default async function RoomPage({
   });
 
   if (!room) notFound();
+
+  // 이미 참여한 사람은 결과 페이지로
+  const cookieStore = await cookies();
+  const participantId = cookieStore.get(`participant_${id}`)?.value;
+  if (participantId && room.participants.some((p) => p.id === participantId)) {
+    redirect(`/room/${id}/results`);
+  }
 
   if (new Date(room.expiresAt) < new Date()) {
     return (
