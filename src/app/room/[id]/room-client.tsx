@@ -13,7 +13,6 @@ import {
   ListChecks,
   PenLine,
   Users,
-  BarChart3,
 } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -225,17 +224,6 @@ function Lobby({
         </button>
       </div>
 
-      {room.participants.length > 0 && (
-        <div className="text-center mt-8">
-          <Link
-            href={`/room/${room.id}/results`}
-            className="text-xs text-stone-600 hover:text-stone-700 transition-colors flex items-center justify-center gap-1.5"
-          >
-            <BarChart3 className="w-3 h-3" />
-            결과 보기 ({room.participants.length}명 참여)
-          </Link>
-        </div>
-      )}
     </div>
   );
 }
@@ -509,7 +497,7 @@ export function RoomClient({ room }: { room: Room }) {
 
   const handleComplete = async (answers: Record<string, string>) => {
     try {
-      await fetch(`/api/rooms/${room.id}/answers`, {
+      const res = await fetch(`/api/rooms/${room.id}/answers`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -520,6 +508,8 @@ export function RoomClient({ room }: { room: Room }) {
           })),
         }),
       });
+      const participant = await res.json();
+      document.cookie = `participant_${room.id}=${participant.id}; path=/; max-age=86400; SameSite=Lax`;
       router.push(`/room/${room.id}/results`);
     } catch {
       // stay on page on error

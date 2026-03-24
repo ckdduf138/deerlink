@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { AntlerLogo } from "@/components/landing/AntlerLogo";
 import { ResultsClient } from "./results-client";
 
@@ -23,6 +24,33 @@ export default async function ResultsPage({
   });
 
   if (!room) notFound();
+
+  // 참여자만 결과 열람 가능
+  const cookieStore = await cookies();
+  const participantId = cookieStore.get(`participant_${id}`)?.value;
+  const isParticipant = room.participants.some((p) => p.id === participantId);
+
+  if (!isParticipant) {
+    return (
+      <div className="min-h-screen bg-[#fafaf8] flex flex-col items-center justify-center gap-6 px-4">
+        <AntlerLogo className="w-10 h-12 text-stone-300" />
+        <div className="text-center">
+          <h1 className="text-xl font-bold text-stone-800 mb-2">
+            참여 후 결과를 볼 수 있어요
+          </h1>
+          <p className="text-sm text-stone-500">
+            질문에 답변하면 모두의 결과를 확인할 수 있어요
+          </p>
+        </div>
+        <Link
+          href={`/room/${id}`}
+          className="px-5 py-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-sm font-medium transition-colors"
+        >
+          답변하러 가기
+        </Link>
+      </div>
+    );
+  }
 
   if (new Date(room.expiresAt) < new Date()) {
     return (
