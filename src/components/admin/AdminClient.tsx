@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, ChevronUp, Trash2, LogOut, Users, MessageSquare, Clock } from "lucide-react";
+import { ChevronDown, ChevronUp, Trash2, LogOut, Users, MessageSquare, Clock, Copy, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Answer = { id: string; questionId: string; value: string };
@@ -61,23 +61,23 @@ function RoomDetail({ room }: { room: Room }) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {questions.map((q) => (
-        <div key={q.id} className="rounded-xl border border-stone-100 bg-stone-50 p-4">
-          <div className="flex items-start gap-2 mb-3">
+        <div key={q.id} className="rounded-xl border border-stone-100 bg-stone-50 p-3">
+          <div className="flex items-start gap-2 mb-2.5">
             <span className="text-[10px] text-stone-400 uppercase tracking-widest mt-0.5 flex-shrink-0">
               {q.type === "balance" ? "밸런스" : q.type === "multiple" ? "객관식" : "주관식"}
             </span>
-            <p className="text-sm font-medium text-stone-800 leading-snug">{q.title}</p>
+            <p className="text-xs font-medium text-stone-800 leading-snug">{q.title}</p>
           </div>
           <div className="space-y-1.5">
             {participants.map((p) => {
               const ans = p.answers.find((a) => a.questionId === q.id);
               return (
                 <div key={p.id} className="flex items-center justify-between gap-2">
-                  <span className="text-xs text-stone-500 truncate max-w-[120px]">{p.nickname}</span>
+                  <span className="text-xs text-stone-500 truncate max-w-[100px] flex-shrink-0">{p.nickname}</span>
                   {ans ? (
-                    <span className="text-xs px-2 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-amber-700 font-medium truncate max-w-[200px]">
+                    <span className="text-xs px-2 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-amber-700 font-medium truncate">
                       {getAnswerLabel(q, ans.value)}
                     </span>
                   ) : (
@@ -97,6 +97,7 @@ function RoomRow({ room, onDelete }: { room: Room; onDelete: (id: string) => voi
   const [expanded, setExpanded] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirm, setConfirm] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const expired = isExpired(room.expiresAt);
 
@@ -111,15 +112,22 @@ function RoomRow({ room, onDelete }: { room: Room; onDelete: (id: string) => voi
     onDelete(room.id);
   };
 
+  const handleCopy = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    await navigator.clipboard.writeText(`${window.location.origin}/room/${room.id}`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div className={cn("rounded-2xl border bg-white overflow-hidden", expired ? "border-stone-100" : "border-stone-200")}>
-      {/* Header row */}
       <div
-        className="flex items-center gap-3 px-5 py-4 cursor-pointer hover:bg-stone-50 transition-colors"
+        className="px-4 py-3.5 cursor-pointer hover:bg-stone-50 transition-colors"
         onClick={() => setExpanded((v) => !v)}
       >
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-0.5">
+        {/* 제목 + 만료뱃지 + 토글 */}
+        <div className="flex items-start justify-between gap-2 mb-1.5">
+          <div className="flex items-center gap-2 min-w-0">
             <p className={cn("text-sm font-semibold truncate", expired ? "text-stone-400" : "text-stone-900")}>
               {room.title}
             </p>
@@ -127,50 +135,59 @@ function RoomRow({ room, onDelete }: { room: Room; onDelete: (id: string) => voi
               <span className="text-[10px] px-1.5 py-0.5 rounded bg-stone-100 text-stone-400 flex-shrink-0">만료</span>
             )}
           </div>
-          <p className="text-xs text-stone-400">{formatDate(room.createdAt)}</p>
-        </div>
-
-        <div className="flex items-center gap-4 flex-shrink-0 text-xs text-stone-500">
-          <div className="flex items-center gap-1">
-            <MessageSquare className="w-3.5 h-3.5" />
-            {room.questions.length}
-          </div>
-          <div className="flex items-center gap-1">
-            <Users className="w-3.5 h-3.5" />
-            {room.participants.length}
-          </div>
-          <div className="flex items-center gap-1">
-            <Clock className="w-3.5 h-3.5" />
-            {formatDate(room.expiresAt)}
-          </div>
-        </div>
-
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleDelete();
-          }}
-          disabled={deleting}
-          className={cn(
-            "flex-shrink-0 text-xs px-2.5 py-1.5 rounded-lg transition-colors",
-            confirm
-              ? "bg-red-500 text-white"
-              : "text-stone-400 hover:text-red-500 hover:bg-red-50"
+          {expanded ? (
+            <ChevronUp className="w-4 h-4 text-stone-400 flex-shrink-0 mt-0.5" />
+          ) : (
+            <ChevronDown className="w-4 h-4 text-stone-400 flex-shrink-0 mt-0.5" />
           )}
-        >
-          {deleting ? "..." : confirm ? "확인" : <Trash2 className="w-3.5 h-3.5" />}
-        </button>
+        </div>
 
-        {expanded ? (
-          <ChevronUp className="w-4 h-4 text-stone-400 flex-shrink-0" />
-        ) : (
-          <ChevronDown className="w-4 h-4 text-stone-400 flex-shrink-0" />
-        )}
+        {/* 통계 + 액션 버튼 */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-3 text-xs text-stone-400 flex-wrap">
+            <span>{formatDate(room.createdAt)}</span>
+            <div className="flex items-center gap-1">
+              <MessageSquare className="w-3 h-3" />
+              {room.questions.length}
+            </div>
+            <div className="flex items-center gap-1">
+              <Users className="w-3 h-3" />
+              {room.participants.length}
+            </div>
+            {!expired && (
+              <div className="flex items-center gap-1 text-stone-300">
+                <Clock className="w-3 h-3" />
+                {formatDate(room.expiresAt)}까지
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={handleCopy}
+              className="p-1.5 rounded-lg text-stone-400 hover:text-amber-600 hover:bg-amber-50 transition-colors"
+              title="방 링크 복사"
+            >
+              {copied ? <Check className="w-3.5 h-3.5 text-amber-600" /> : <Copy className="w-3.5 h-3.5" />}
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); handleDelete(); }}
+              disabled={deleting}
+              className={cn(
+                "text-xs px-2.5 py-1.5 rounded-lg transition-colors",
+                confirm
+                  ? "bg-red-500 text-white"
+                  : "text-stone-400 hover:text-red-500 hover:bg-red-50"
+              )}
+            >
+              {deleting ? "..." : confirm ? "확인" : <Trash2 className="w-3.5 h-3.5" />}
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Expanded detail */}
       {expanded && (
-        <div className="px-5 pb-5 pt-1 border-t border-stone-100">
+        <div className="px-4 pb-4 pt-1 border-t border-stone-100">
           <RoomDetail room={room} />
         </div>
       )}
@@ -202,11 +219,10 @@ export function AdminClient({ initialRooms }: { initialRooms: Room[] }) {
 
   return (
     <div className="min-h-screen bg-[#fafaf8]">
-      <div className="max-w-3xl mx-auto px-4 py-10">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+      <div className="max-w-2xl mx-auto px-4 py-8">
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-xl font-bold text-stone-900">관리자</h1>
+            <h1 className="text-lg font-bold text-stone-900">관리자</h1>
             <p className="text-xs text-stone-400 mt-0.5">
               방 {rooms.length}개 · 활성 {activeRooms}개 · 참여자 {totalParticipants}명
             </p>
@@ -220,8 +236,7 @@ export function AdminClient({ initialRooms }: { initialRooms: Room[] }) {
           </button>
         </div>
 
-        {/* Sort tabs */}
-        <div className="flex gap-2 mb-4">
+        <div className="flex gap-2 mb-3">
           {(["recent", "participants"] as SortKey[]).map((key) => (
             <button
               key={key}
@@ -238,7 +253,6 @@ export function AdminClient({ initialRooms }: { initialRooms: Room[] }) {
           ))}
         </div>
 
-        {/* Room list */}
         <div className="space-y-2">
           {sorted.length === 0 ? (
             <p className="text-sm text-stone-400 text-center py-16">방이 없어요</p>

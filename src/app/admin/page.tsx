@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { AdminClient } from "@/components/admin/AdminClient";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminPage() {
   const rooms = await prisma.room.findMany({
     include: {
