@@ -346,11 +346,11 @@ export function ResultsClient({ room }: { room: Room }) {
       {/* Nav */}
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center px-4 md:px-8 py-4 border-b border-amber-100 bg-white/90 backdrop-blur-md">
         <Link
-          href={`/room/${room.id}`}
+          href="/"
           className="flex items-center gap-2 text-sm text-stone-600 hover:text-stone-900 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span className="hidden sm:inline">돌아가기</span>
+          <span className="hidden sm:inline">Deerlink</span>
         </Link>
       </nav>
 
