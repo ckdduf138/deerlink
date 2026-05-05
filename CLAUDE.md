@@ -286,8 +286,8 @@ if (answeredCount < totalQuestions) {
 ## 개발 명령어
 
 ```bash
-pnpm dev          # 개발 서버 (Turbopack)
-pnpm build        # 프로덕션 빌드
-pnpm lint         # ESLint
+yarn dev          # 개발 서버 (Turbopack)
+yarn build        # 프로덕션 빌드
+yarn lint         # ESLint
 npx prisma studio # DB 관리 UI
 ```

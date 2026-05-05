@@ -239,15 +239,18 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="mb-20"
+          className="mb-20 flex flex-col items-center gap-3"
         >
           <Link
             href="/create"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-sm font-medium transition-all duration-200 shadow-lg shadow-amber-900/40 hover:shadow-amber-800/50 hover:-translate-y-0.5"
+            className="group inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-sm font-medium transition-all duration-200 shadow-lg shadow-amber-900/40 hover:shadow-amber-800/50 hover:-translate-y-0.5"
           >
-            방 만들기
-            <ArrowRight className="w-3.5 h-3.5" />
+            무료로 방 만들기
+            <ArrowRight className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
           </Link>
+          <p className="text-[11px] text-stone-500 tracking-wide">
+            회원가입 없이 · 30초면 완성
+          </p>
         </motion.div>
 
         {/* Product mockup */}

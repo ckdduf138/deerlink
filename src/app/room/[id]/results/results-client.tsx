@@ -11,10 +11,12 @@ import {
   Copy,
   Check,
   Share2,
+  Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { AntlerLogo } from "@/components/landing/AntlerLogo";
+import { DeerHoofMark } from "@/components/DeerHoofMark";
 
 /* ─── Types ─────────────────────────────── */
 
@@ -330,6 +332,15 @@ const TYPE_ICON = {
 export function ResultsClient({ room }: { room: Room }) {
   const [copied, setCopied] = useState(false);
 
+  const unanimousCount = room.questions.filter((q) => {
+    if (q.type === "subjective") return false;
+    const values = room.participants
+      .flatMap((p) => p.answers.filter((a) => a.questionId === q.id))
+      .map((a) => a.value);
+    if (values.length < 2) return false;
+    return new Set(values).size === 1;
+  }).length;
+
   const copyInviteLink = async () => {
     const url = window.location.href.replace("/results", "");
     await navigator.clipboard.writeText(url);
@@ -367,35 +378,58 @@ export function ResultsClient({ room }: { room: Room }) {
           transition={{ duration: 0.4 }}
           className="mb-10"
         >
-          <div className="text-[10px] uppercase tracking-widest text-stone-500 mb-3">
-            결과 비교
+          <div className="flex items-center gap-2 mb-3">
+            <AntlerLogo
+              animated
+              className="w-3 h-[15px] text-amber-500"
+            />
+            <div className="text-[10px] uppercase tracking-widest text-stone-500">
+              결과 비교
+            </div>
           </div>
           <h1 className="text-2xl font-bold text-stone-900 mb-2 leading-snug">
             {room.title}
           </h1>
-          <div className="flex items-center gap-3 text-xs text-stone-600">
+          <div className="flex items-center gap-3 text-xs text-stone-600 flex-wrap">
             <span className="flex items-center gap-1">
               <Users className="w-3 h-3" />
               {room.participants.length}명 참여
             </span>
             <span className="w-px h-3 bg-stone-300" />
             <span className="font-mono">{formatRemaining(room.expiresAt)}</span>
+            {unanimousCount > 0 && (
+              <>
+                <span className="w-px h-3 bg-stone-300" />
+                <span className="flex items-center gap-1 text-amber-700">
+                  <Sparkles className="w-3 h-3" />
+                  <span className="font-medium">
+                    같은 답 {unanimousCount}개
+                  </span>
+                </span>
+              </>
+            )}
           </div>
         </motion.div>
 
         {/* Empty state */}
         {room.participants.length === 0 && (
-          <div className="py-20 text-center">
-            <div className="flex justify-center mb-6">
-              <AntlerLogo className="w-10 h-12 text-stone-300" />
+          <div className="relative py-20 text-center">
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+              <DeerHoofMark className="absolute top-10 left-[18%] w-3 h-4 text-stone-300/50 -rotate-12" />
+              <DeerHoofMark className="absolute top-24 right-[20%] w-3 h-4 text-stone-300/50 rotate-[8deg]" />
+              <DeerHoofMark className="absolute bottom-16 left-[26%] w-2.5 h-3 text-stone-300/40 rotate-3" />
+              <DeerHoofMark className="absolute bottom-24 right-[28%] w-2.5 h-3 text-stone-300/40 -rotate-6" />
             </div>
-            <p className="text-stone-600 text-sm">아직 참여자가 없습니다</p>
-            <p className="text-stone-500 text-xs mt-1">
+            <div className="relative flex justify-center mb-6">
+              <AntlerLogo animated className="w-10 h-12 text-stone-300" />
+            </div>
+            <p className="relative text-stone-600 text-sm">아직 참여자가 없어요</p>
+            <p className="relative text-stone-500 text-xs mt-1">
               링크를 공유해서 친구들을 초대하세요
             </p>
             <button
               onClick={copyInviteLink}
-              className="mt-6 flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-amber-100 bg-amber-50 text-xs text-stone-700 hover:text-stone-900 transition-colors mx-auto"
+              className="relative mt-6 flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-amber-100 bg-amber-50 text-xs text-stone-700 hover:text-stone-900 hover:border-amber-200 transition-colors mx-auto"
             >
               <Copy className="w-3.5 h-3.5" />
               초대 링크 복사
@@ -480,12 +514,14 @@ export function ResultsClient({ room }: { room: Room }) {
             </div>
             <div className="flex flex-wrap gap-1.5">
               {room.participants.map((p) => (
-                <span
+                <motion.span
                   key={p.id}
-                  className="px-2.5 py-1 rounded-full text-xs border border-amber-100 bg-amber-50 text-stone-700"
+                  whileHover={{ y: -2 }}
+                  transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                  className="px-2.5 py-1 rounded-full text-xs border border-amber-100 bg-amber-50 text-stone-700 cursor-default"
                 >
                   {p.nickname}
-                </span>
+                </motion.span>
               ))}
             </div>
           </motion.div>

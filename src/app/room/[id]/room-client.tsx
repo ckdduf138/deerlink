@@ -19,6 +19,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
 import { cn } from "@/lib/utils";
 import { AntlerLogo } from "@/components/landing/AntlerLogo";
+import { DeerHoofMark } from "@/components/DeerHoofMark";
 
 /* ─── Types ─────────────────────────────── */
 
@@ -109,25 +110,31 @@ function Lobby({
 
       {/* Share card */}
       <div className="mb-6 rounded-2xl border border-amber-100 bg-white overflow-hidden">
-        <div className="px-5 py-3 border-b border-stone-100">
-          <span className="text-[10px] uppercase tracking-widest text-stone-500">
-            초대 링크
-          </span>
+        <div className="px-5 py-3 border-b border-stone-100 text-center">
+          <p className="text-xs text-stone-600">
+            QR을 보여주거나 링크를 보내세요
+          </p>
         </div>
         {/* QR code */}
         <div className="flex justify-center py-5 border-b border-stone-100">
-          <QRCodeSVG
-            value={url}
-            size={128}
-            fgColor="#1c1917"
-            bgColor="transparent"
-            imageSettings={{
-              src: "/icon.png",
-              width: 24,
-              height: 24,
-              excavate: true,
-            }}
-          />
+          <motion.div
+            whileHover={{ scale: 1.04 }}
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="cursor-pointer"
+          >
+            <QRCodeSVG
+              value={url}
+              size={128}
+              fgColor="#1c1917"
+              bgColor="transparent"
+              imageSettings={{
+                src: "/icon.png",
+                width: 24,
+                height: 24,
+                excavate: true,
+              }}
+            />
+          </motion.div>
         </div>
         {/* URL */}
         <div className="px-5 py-3 border-b border-stone-100">
@@ -172,21 +179,27 @@ function Lobby({
           </div>
           <div className="flex flex-wrap gap-1.5">
             {room.participants.map((p) => (
-              <span
+              <motion.span
                 key={p.id}
-                className="px-2.5 py-1 rounded-full text-xs border border-amber-100 bg-amber-50 text-stone-700"
+                whileHover={{ y: -2 }}
+                transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                className="px-2.5 py-1 rounded-full text-xs border border-amber-100 bg-amber-50 text-stone-700 cursor-default"
               >
                 {p.nickname}
-              </span>
+              </motion.span>
             ))}
           </div>
         </div>
       )}
 
       {room.participants.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-8 mb-6">
-          <AntlerLogo className="w-8 h-10 text-stone-300 mb-4" />
-          <p className="text-center text-xs text-stone-500">
+        <div className="relative flex flex-col items-center justify-center py-8 mb-6">
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            <DeerHoofMark className="absolute top-1 left-[22%] w-2 h-2.5 text-stone-300/50 -rotate-12" />
+            <DeerHoofMark className="absolute bottom-3 right-[24%] w-2 h-2.5 text-stone-300/50 rotate-6" />
+          </div>
+          <AntlerLogo animated className="relative w-8 h-10 text-stone-300 mb-4" />
+          <p className="relative text-center text-xs text-stone-500">
             친구들을 초대해보세요! 링크를 공유하면 모두가 함께할 수 있어요.
           </p>
         </div>
@@ -337,9 +350,9 @@ function AnswerMode({
               className={cn(
                 "rounded-full transition-all duration-200",
                 i === currentQ
-                  ? "w-4 h-1.5 bg-amber-500"
+                  ? "w-5 h-1.5 bg-amber-500"
                   : answers[q.id]
-                  ? "w-1.5 h-1.5 bg-amber-500/40"
+                  ? "w-2 h-2 bg-amber-400"
                   : "w-1.5 h-1.5 bg-stone-300"
               )}
               aria-label={`질문 ${i + 1}로 이동`}
@@ -382,8 +395,13 @@ function AnswerMode({
                     <motion.button
                       key={opt.value}
                       onClick={() => selectAnswer(opt.value)}
-                      animate={{ scale: isSelected ? 1.03 : 1 }}
-                      whileTap={{ scale: 0.97 }}
+                      animate={{ scale: isSelected ? 1.03 : 1, rotate: 0 }}
+                      whileHover={
+                        isSelected
+                          ? {}
+                          : { scale: 1.02, rotate: opt.value === "A" ? -1.2 : 1.2 }
+                      }
+                      whileTap={{ scale: 0.97, rotate: 0 }}
                       transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
                       className={cn(
                         "py-7 px-4 rounded-2xl border text-center text-sm font-medium",

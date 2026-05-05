@@ -17,6 +17,7 @@ import {
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { AntlerLogo } from "@/components/landing/AntlerLogo";
+import { DeerHoofMark } from "@/components/DeerHoofMark";
 import { PopularQuestionsSheet } from "@/components/PopularQuestionsSheet";
 import type { PopularQuestion } from "@/data/popular-questions";
 
@@ -54,6 +55,15 @@ const TYPE_CONFIG = {
 } as const;
 
 const MAX_QUESTIONS = 20;
+
+const TITLE_EXAMPLES = [
+  "우리 팀 워크샵 의견 모으기",
+  "칼퇴 vs 야근, 친구들 생각은?",
+  "다음 회식 메뉴 정하기",
+  "친구들 가치관 비교해보기",
+  "이번 휴가 어디로 갈까?",
+  "MT 단체게임 — 누가 가장 비슷할까",
+];
 
 function generateId() {
   return Math.random().toString(36).slice(2, 9);
@@ -222,12 +232,21 @@ export default function CreateRoomPage() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(false);
   const [showSheet, setShowSheet] = useState(false);
+  const [exampleIndex, setExampleIndex] = useState(0);
   const titleInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     titleInputRef.current?.focus();
   }, []);
+
+  useEffect(() => {
+    if (title.length > 0) return;
+    const interval = setInterval(() => {
+      setExampleIndex((prev) => (prev + 1) % TITLE_EXAMPLES.length);
+    }, 2800);
+    return () => clearInterval(interval);
+  }, [title]);
 
   useEffect(() => {
     if (questions.length > 0) {
@@ -359,6 +378,21 @@ export default function CreateRoomPage() {
             maxLength={50}
             className="w-full text-2xl font-bold bg-transparent text-stone-900 placeholder:text-stone-400 outline-none border-b border-amber-100 focus:border-amber-300 pb-3 transition-colors"
           />
+          <AnimatePresence mode="wait">
+            {title.length === 0 && (
+              <motion.p
+                key={exampleIndex}
+                initial={{ opacity: 0, y: -3 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 3 }}
+                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                className="text-[11px] text-stone-500 mt-2.5 tracking-wide"
+              >
+                <span className="text-stone-400">예시 · </span>
+                {TITLE_EXAMPLES[exampleIndex]}
+              </motion.p>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Question list */}
@@ -429,15 +463,40 @@ export default function CreateRoomPage() {
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex flex-col items-center justify-center py-12 gap-4"
+              className="relative flex flex-col items-center justify-center py-12 gap-4"
             >
-              <motion.div
-                animate={{ opacity: [0.4, 0.7, 0.4] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-              >
-                <AntlerLogo className="w-10 h-12 text-stone-300" />
-              </motion.div>
-              <p className="text-center text-xs text-stone-400">
+              <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.4 }}
+                >
+                  <DeerHoofMark className="absolute top-2 left-[18%] w-2.5 h-3 text-stone-300/60 -rotate-12" />
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.55 }}
+                >
+                  <DeerHoofMark className="absolute top-9 right-[20%] w-2.5 h-3 text-stone-300/60 rotate-[8deg]" />
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.7 }}
+                >
+                  <DeerHoofMark className="absolute bottom-2 left-[28%] w-2 h-2.5 text-stone-300/50 rotate-3" />
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.85 }}
+                >
+                  <DeerHoofMark className="absolute bottom-6 right-[26%] w-2 h-2.5 text-stone-300/50 -rotate-6" />
+                </motion.div>
+              </div>
+              <AntlerLogo animated className="relative w-10 h-12 text-stone-300" />
+              <p className="relative text-center text-xs text-stone-400">
                 질문 하나면 충분해요
               </p>
             </motion.div>
