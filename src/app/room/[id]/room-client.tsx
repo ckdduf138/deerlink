@@ -122,7 +122,7 @@ function Lobby({
             fgColor="#1c1917"
             bgColor="transparent"
             imageSettings={{
-              src: "/icon.svg",
+              src: "/icon.png",
               width: 24,
               height: 24,
               excavate: true,

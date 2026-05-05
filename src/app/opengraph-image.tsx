@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "Deerlink — 링크 하나로 모두의 생각을 비교해요";
+export const alt = "Deerlink — 밸런스게임 만들기, 링크 하나로 의견 비교";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -26,7 +26,7 @@ export default function Image() {
           viewBox="0 0 24 28"
           fill="none"
           stroke="#e8a038"
-          strokeWidth="1.6"
+          strokeWidth="2.8"
           strokeLinecap="round"
           strokeLinejoin="round"
         >

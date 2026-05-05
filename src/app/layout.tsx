@@ -25,6 +25,19 @@ export const metadata: Metadata = {
   },
   description:
     "링크 하나로 밸런스게임, 투표, 설문을 만들고 친구들과 생각을 비교해요. 술자리 게임, MT 단체 게임, 이심전심 게임, 고민 나누기까지. 회원가입 없이 무료로 시작하세요.",
+  alternates: {
+    canonical: baseUrl,
+  },
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+    shortcut: ["/icon-192.png"],
+  },
   keywords: [
     "밸런스게임",
     "밸런스게임 만들기",
@@ -73,7 +86,14 @@ export const metadata: Metadata = {
     type: "website",
     locale: "ko_KR",
     url: baseUrl,
-    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Deerlink — 밸런스게임 만들기, 링크 하나로 의견 비교" }],
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "Deerlink — 밸런스게임 만들기, 링크 하나로 의견 비교",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
