@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -215,7 +215,7 @@ function Lobby({
           className={cn(
             "w-full py-4 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200",
             nickname.trim()
-              ? "bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-900/30"
+              ? "bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-900/30 hover:-translate-y-0.5"
               : "bg-stone-100 text-stone-400"
           )}
         >
@@ -255,6 +255,7 @@ function AnswerMode({
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [direction, setDirection] = useState(1);
   const [submitting, setSubmitting] = useState(false);
+  const autoAdvanceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const question = room.questions[currentQ];
   const parsedOptions: string[] = question?.options
@@ -267,9 +268,21 @@ function AnswerMode({
 
   const selectAnswer = (value: string) => {
     setAnswers((prev) => ({ ...prev, [question.id]: value }));
+    if (question.type !== "subjective" && currentQ < room.questions.length - 1) {
+      if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
+      autoAdvanceRef.current = setTimeout(() => {
+        setDirection(1);
+        setCurrentQ((q) => q + 1);
+        autoAdvanceRef.current = null;
+      }, 650);
+    }
   };
 
   const goNext = () => {
+    if (autoAdvanceRef.current) {
+      clearTimeout(autoAdvanceRef.current);
+      autoAdvanceRef.current = null;
+    }
     if (currentQ < room.questions.length - 1) {
       setDirection(1);
       setCurrentQ((q) => q + 1);
@@ -277,6 +290,10 @@ function AnswerMode({
   };
 
   const goPrev = () => {
+    if (autoAdvanceRef.current) {
+      clearTimeout(autoAdvanceRef.current);
+      autoAdvanceRef.current = null;
+    }
     if (currentQ > 0) {
       setDirection(-1);
       setCurrentQ((q) => q - 1);
@@ -354,39 +371,55 @@ function AnswerMode({
           </div>
 
           {question?.type === "balance" && (
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { label: question.optionA!, value: "A" },
-                { label: question.optionB!, value: "B" },
-              ].map((opt) => {
-                const isSelected = currentAnswer === opt.value;
-                return (
-                  <button
-                    key={opt.value}
-                    onClick={() => selectAnswer(opt.value)}
-                    className={cn(
-                      "py-7 px-4 rounded-2xl border text-center transition-all duration-200 text-sm font-medium",
-                      isSelected
-                        ? "border-amber-500/40 bg-amber-50 text-amber-900 shadow-lg shadow-amber-900/20"
-                        : "border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:bg-stone-50 hover:text-stone-900"
-                    )}
-                  >
-                    <span className="block text-[10px] font-mono text-stone-500 mb-2">
-                      {opt.value}
-                    </span>
-                    <span className="leading-snug">{opt.label}</span>
-                    {isSelected && (
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        className="mt-3 mx-auto w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center"
-                      >
-                        <Check className="w-3 h-3 text-amber-600" />
-                      </motion.div>
-                    )}
-                  </button>
-                );
-              })}
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { label: question.optionA!, value: "A" },
+                  { label: question.optionB!, value: "B" },
+                ].map((opt) => {
+                  const isSelected = currentAnswer === opt.value;
+                  return (
+                    <motion.button
+                      key={opt.value}
+                      onClick={() => selectAnswer(opt.value)}
+                      animate={{ scale: isSelected ? 1.03 : 1 }}
+                      whileTap={{ scale: 0.97 }}
+                      transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                      className={cn(
+                        "py-7 px-4 rounded-2xl border text-center text-sm font-medium",
+                        "transition-colors duration-200",
+                        isSelected
+                          ? "border-amber-500/60 bg-amber-50 text-amber-900 shadow-lg shadow-amber-900/20"
+                          : "border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:bg-stone-50 hover:text-stone-900"
+                      )}
+                    >
+                      <span className="block text-[10px] font-mono text-stone-500 mb-2">
+                        {opt.value}
+                      </span>
+                      <span className="leading-snug">{opt.label}</span>
+                      {isSelected && (
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          className="mt-3 mx-auto w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center"
+                        >
+                          <Check className="w-3 h-3 text-amber-600" />
+                        </motion.div>
+                      )}
+                    </motion.button>
+                  );
+                })}
+              </div>
+              {currentAnswer && currentQ < room.questions.length - 1 && (
+                <motion.div
+                  key={`balance-progress-${question.id}-${currentAnswer}`}
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: 1 }}
+                  transition={{ duration: 0.65, ease: "linear" }}
+                  style={{ transformOrigin: "left" }}
+                  className="h-0.5 bg-amber-300 rounded-full"
+                />
+              )}
             </div>
           )}
 
@@ -395,13 +428,16 @@ function AnswerMode({
               {parsedOptions.map((opt, i) => {
                 const isSelected = currentAnswer === String(i);
                 return (
-                  <button
+                  <motion.button
                     key={i}
                     onClick={() => selectAnswer(String(i))}
+                    whileTap={{ scale: 0.99 }}
+                    transition={{ duration: 0.1 }}
                     className={cn(
-                      "w-full py-3.5 px-4 rounded-xl border text-left transition-all duration-200 text-sm flex items-center gap-3",
+                      "w-full py-3.5 px-4 rounded-xl border text-left text-sm flex items-center gap-3",
+                      "transition-colors duration-150",
                       isSelected
-                        ? "border-amber-500/40 bg-amber-50 text-amber-900"
+                        ? "border-amber-500/60 bg-amber-50 text-amber-900"
                         : "border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:bg-stone-50 hover:text-stone-900"
                     )}
                   >
@@ -414,9 +450,19 @@ function AnswerMode({
                       {isSelected && <Check className="w-2.5 h-2.5 text-white" />}
                     </div>
                     {opt}
-                  </button>
+                  </motion.button>
                 );
               })}
+              {currentAnswer && currentQ < room.questions.length - 1 && (
+                <motion.div
+                  key={`multiple-progress-${question.id}-${currentAnswer}`}
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: 1 }}
+                  transition={{ duration: 0.65, ease: "linear" }}
+                  style={{ transformOrigin: "left" }}
+                  className="mt-1 h-0.5 bg-amber-300 rounded-full"
+                />
+              )}
             </div>
           )}
 
@@ -529,9 +575,9 @@ export function RoomClient({ room }: { room: Room }) {
         {mode === "answer" && (
           <button
             onClick={() => setMode("lobby")}
-            className="text-xs text-stone-600 hover:text-stone-700 transition-colors"
+            className="text-xs text-stone-500 hover:text-stone-800 transition-colors duration-150"
           >
-            돌아가기
+            초대 링크 보기
           </button>
         )}
       </nav>

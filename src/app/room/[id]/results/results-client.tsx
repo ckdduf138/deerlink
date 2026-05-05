@@ -99,7 +99,7 @@ function BalanceResult({
       {/* Split bar */}
       {total > 0 && (
         <div className="mb-4">
-          <div className="flex h-2 rounded-full overflow-hidden bg-stone-200 gap-0.5">
+          <div className="flex h-3 rounded-full overflow-hidden bg-stone-100 gap-0.5">
             {pctA > 0 && (
               <motion.div
                 initial={{ width: 0 }}
@@ -119,12 +119,12 @@ function BalanceResult({
               />
             )}
           </div>
-          <div className="flex justify-between mt-1.5">
-            <span className="text-[10px] text-stone-600">
-              {countA}명 · {pctA}%
+          <div className="flex justify-between mt-2">
+            <span className="text-xs text-stone-600 font-mono tabular-nums">
+              {countA}명 · <span className="font-semibold text-amber-600">{pctA}%</span>
             </span>
-            <span className="text-[10px] text-stone-600">
-              {pctB}% · {countB}명
+            <span className="text-xs text-stone-600 font-mono tabular-nums">
+              <span className="font-semibold text-teal-600">{pctB}%</span> · {countB}명
             </span>
           </div>
         </div>
@@ -173,14 +173,19 @@ function BalanceResult({
 
       {/* Majority note */}
       {total >= 2 && (countA !== countB) && (
-        <p className="mt-3 text-[11px] text-stone-600">
-          {countA > countB
-            ? `${countA}명이 "${question.optionA}"을 선택했어요`
-            : `${countB}명이 "${question.optionB}"을 선택했어요`}
+        <p className="mt-3 text-xs text-stone-500">
+          <span className="font-medium text-stone-700">
+            {countA > countB ? countA : countB}명
+          </span>
+          {" "}이{" "}
+          <span className="font-medium text-stone-700">
+            &ldquo;{countA > countB ? question.optionA : question.optionB}&rdquo;
+          </span>
+          를 선택했어요
         </p>
       )}
       {total >= 2 && countA === countB && (
-        <p className="mt-3 text-[11px] text-stone-600">정확히 반반이에요</p>
+        <p className="mt-3 text-xs text-stone-500">정확히 <span className="font-medium text-stone-700">반반</span>이에요</p>
       )}
     </div>
   );
@@ -228,7 +233,7 @@ function MultipleResult({
                 {count}명 · {pct}%
               </span>
             </div>
-            <div className="h-1.5 bg-stone-200 rounded-full overflow-hidden mb-1.5">
+            <div className="h-2 bg-stone-100 rounded-full overflow-hidden mb-2">
               <motion.div
                 initial={{ width: 0 }}
                 whileInView={{ width: `${pct}%` }}
@@ -236,7 +241,7 @@ function MultipleResult({
                 transition={{ delay: index * 0.05 + i * 0.08 + 0.2, duration: 0.5, ease: "easeOut" }}
                 className={cn(
                   "h-full rounded-full",
-                  isTop ? "bg-amber-500" : "bg-white/20"
+                  isTop ? "bg-amber-500" : "bg-stone-300"
                 )}
               />
             </div>
@@ -425,7 +430,7 @@ export function ResultsClient({ room }: { room: Room }) {
 
                   {/* Question + result */}
                   <div className="px-5 py-5">
-                    <h3 className="text-sm font-semibold text-stone-900 mb-5 leading-snug">
+                    <h3 className="text-base font-semibold text-stone-900 mb-5 leading-snug">
                       {q.title}
                     </h3>
 
@@ -518,12 +523,13 @@ export function ResultsClient({ room }: { room: Room }) {
 
           <div className="h-px bg-stone-100 mb-5" />
 
-          <div className="text-center">
+          <div className="text-center space-y-2">
+            <p className="text-xs text-stone-500">또 다른 주제로 비교해볼까요?</p>
             <Link
               href="/create"
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-sm font-medium transition-all duration-200 shadow-lg shadow-amber-900/20 hover:-translate-y-0.5"
             >
-              방 만들기
+              새 방 만들기
             </Link>
           </div>
         </motion.div>
