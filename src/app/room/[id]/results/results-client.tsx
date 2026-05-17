@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
@@ -12,11 +12,15 @@ import {
   Check,
   Share2,
   Sparkles,
+  Download,
+  Image as ImageIcon,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { AntlerLogo } from "@/components/landing/AntlerLogo";
 import { DeerHoofMark } from "@/components/DeerHoofMark";
+import { ShareCard } from "./share-card";
 
 /* ─── Types ─────────────────────────────── */
 
@@ -331,6 +335,8 @@ const TYPE_ICON = {
 
 export function ResultsClient({ room }: { room: Room }) {
   const [copied, setCopied] = useState(false);
+  const [imageBusy, setImageBusy] = useState(false);
+  const shareCardRef = useRef<HTMLDivElement>(null);
 
   const unanimousCount = room.questions.filter((q) => {
     if (q.type === "subjective") return false;
@@ -350,10 +356,50 @@ export function ResultsClient({ room }: { room: Room }) {
 
   const shareInviteLink = async () => {
     const url = window.location.href.replace("/results", "");
+    const text = `${room.title} — Deerlink에서 같이 답해봐요`;
     if (navigator.share) {
-      await navigator.share({ title: room.title, url });
+      await navigator.share({ title: room.title, text, url });
     } else {
       copyInviteLink();
+    }
+  };
+
+  const generateImage = async (): Promise<File | null> => {
+    if (!shareCardRef.current) return null;
+    const { toPng } = await import("html-to-image");
+    const dataUrl = await toPng(shareCardRef.current, {
+      pixelRatio: 2,
+      cacheBust: true,
+    });
+    const blob = await (await fetch(dataUrl)).blob();
+    return new File([blob], `deerlink-${room.id}.png`, { type: "image/png" });
+  };
+
+  const shareResultImage = async () => {
+    if (imageBusy) return;
+    setImageBusy(true);
+    try {
+      const file = await generateImage();
+      if (!file) return;
+      const url = window.location.href.replace("/results", "");
+      const text = `${room.title} — 우리 답 비교해봤어요`;
+      if (
+        navigator.canShare &&
+        navigator.canShare({ files: [file] }) &&
+        navigator.share
+      ) {
+        await navigator.share({ files: [file], title: room.title, text, url });
+      } else {
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(file);
+        link.download = file.name;
+        link.click();
+        URL.revokeObjectURL(link.href);
+      }
+    } catch {
+      // 사용자가 시스템 공유 시트를 닫은 경우 무시
+    } finally {
+      setImageBusy(false);
     }
   };
 
@@ -527,14 +573,60 @@ export function ResultsClient({ room }: { room: Room }) {
           </motion.div>
         )}
 
-        {/* Share + CTA */}
+        {/* Result image share — primary viral hook */}
+        {room.participants.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4, delay: 0.25 }}
+            className="mt-6 rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-amber-100/40 px-5 py-5"
+          >
+            <div className="flex items-start gap-3 mb-4">
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-stone-900 mb-1">
+                  친구한테 결과 보여주기
+                </p>
+                <p className="text-xs text-stone-600 leading-relaxed">
+                  이미지로 저장해서 카톡·인스타에 공유하세요
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={shareResultImage}
+              disabled={imageBusy}
+              className={cn(
+                "w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium transition-all duration-200",
+                imageBusy
+                  ? "bg-amber-300 text-white cursor-wait"
+                  : "bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-900/25 hover:-translate-y-0.5"
+              )}
+            >
+              {imageBusy ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  이미지 만드는 중…
+                </>
+              ) : (
+                <>
+                  <ImageIcon className="w-4 h-4" />
+                  결과 이미지 공유
+                  <Download className="w-3.5 h-3.5 opacity-70" />
+                </>
+              )}
+            </button>
+          </motion.div>
+        )}
+
+        {/* Invite + new room */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.4, delay: 0.3 }}
-          className="mt-6 rounded-2xl border border-amber-100 bg-white px-5 py-5"
+          className="mt-3 rounded-2xl border border-amber-100 bg-white px-5 py-5"
         >
+          <p className="text-xs text-stone-500 mb-3">친구를 더 초대할까요?</p>
           <div className="flex gap-2 mb-5">
             <button
               onClick={copyInviteLink}
@@ -546,14 +638,14 @@ export function ResultsClient({ room }: { room: Room }) {
               )}
             >
               {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-              {copied ? "복사됨" : "링크 복사"}
+              {copied ? "복사됨" : "방 링크 복사"}
             </button>
             <button
               onClick={shareInviteLink}
               className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-amber-100 text-xs text-stone-700 hover:text-stone-900 hover:border-amber-200 transition-colors"
             >
               <Share2 className="w-3.5 h-3.5" />
-              공유하기
+              방 공유하기
             </button>
           </div>
 
@@ -563,12 +655,25 @@ export function ResultsClient({ room }: { room: Room }) {
             <p className="text-xs text-stone-500">또 다른 주제로 비교해볼까요?</p>
             <Link
               href="/create"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-sm font-medium transition-all duration-200 shadow-lg shadow-amber-900/20 hover:-translate-y-0.5"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white text-sm font-medium transition-all duration-200 hover:-translate-y-0.5"
             >
               새 방 만들기
             </Link>
           </div>
         </motion.div>
+      </div>
+
+      {/* Hidden share card — rendered off-screen for html-to-image capture */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "fixed",
+          left: -10000,
+          top: 0,
+          pointerEvents: "none",
+        }}
+      >
+        <ShareCard ref={shareCardRef} room={room} />
       </div>
     </div>
   );
