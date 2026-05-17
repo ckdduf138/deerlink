@@ -17,12 +17,20 @@ export function LandingNav() {
         Deerlink
       </span>
 
-      <Link
-        href="/create"
-        className="text-sm text-stone-600 hover:text-stone-900 transition-colors duration-200"
-      >
-        방 만들기 &rarr;
-      </Link>
+      <div className="flex items-center gap-5">
+        <Link
+          href="/popular"
+          className="text-sm text-stone-600 hover:text-stone-900 transition-colors duration-200"
+        >
+          인기 질문
+        </Link>
+        <Link
+          href="/create"
+          className="text-sm text-stone-600 hover:text-stone-900 transition-colors duration-200"
+        >
+          방 만들기 &rarr;
+        </Link>
+      </div>
     </motion.nav>
   );
 }
