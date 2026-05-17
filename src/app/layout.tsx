@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Gowun_Dodum } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
 const gowunDodum = Gowun_Dodum({
@@ -20,11 +22,11 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: "밸런스게임 만들기 | 무료 온라인 투표·의견 비교 - Deerlink",
+    default: "밸런스게임 만들기 - 단톡방 투표 30초 완성 | Deerlink",
     template: "%s | Deerlink",
   },
   description:
-    "링크 하나로 밸런스게임, 투표, 설문을 만들고 친구들과 생각을 비교해요. 술자리 게임, MT 단체 게임, 이심전심 게임, 고민 나누기까지. 회원가입 없이 무료로 시작하세요.",
+    "링크 하나로 밸런스게임·투표·설문. 모두가 답해야 결과 공개되는 단톡방 투표 도구. 회원가입 없이 30초 만에 친구들과 공유하세요.",
   alternates: {
     canonical: baseUrl,
   },
@@ -46,6 +48,10 @@ export const metadata: Metadata = {
     "밸런스게임 질문 모음",
     "밸런스게임 링크",
     "온라인 밸런스게임",
+    "단톡방 밸런스게임",
+    "단톡방 투표",
+    "단톡방 투표 만들기",
+    "카톡 투표",
     "커플 밸런스게임",
     "웃긴 밸런스게임",
     "온라인 투표 만들기",
@@ -79,9 +85,9 @@ export const metadata: Metadata = {
     "디어링크",
   ],
   openGraph: {
-    title: "밸런스게임 만들기 - 우리 생각 얼마나 다를까? | Deerlink",
+    title: "우리 답이 얼마나 다를까? 밸런스게임 만들기 | Deerlink",
     description:
-      "밸런스게임, 투표, 설문을 링크 하나로. 모두가 답할 때까지 서로의 선택은 비밀, 그 뒤엔 한꺼번에 공개.",
+      "링크 하나 공유하면 끝. 모두가 답해야 결과 공개되는 단톡방 밸런스게임·투표. 회원가입 없이 무료.",
     siteName: "Deerlink",
     type: "website",
     locale: "ko_KR",
@@ -97,9 +103,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "밸런스게임 만들기 - 우리 생각 얼마나 다를까? | Deerlink",
+    title: "우리 답이 얼마나 다를까? 밸런스게임 만들기 | Deerlink",
     description:
-      "밸런스게임, 투표, 설문을 링크 하나로. 모두가 답할 때까지 서로의 선택은 비밀.",
+      "링크 하나 공유하면 끝. 모두가 답해야 결과 공개되는 단톡방 밸런스게임·투표.",
     images: ["/opengraph-image"],
   },
   robots: {
@@ -227,7 +233,11 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
         />
       </head>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        {children}
+        <Analytics />
+        <SpeedInsights />
+      </body>
     </html>
   );
 }
