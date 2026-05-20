@@ -87,7 +87,7 @@ function Lobby({
     <div className="max-w-md mx-auto px-4 pt-20 pb-10">
       {/* Room info */}
       <div className="mb-8">
-        <div className="text-[10px] uppercase tracking-widest text-stone-500 mb-3">
+        <div className="text-[10px] uppercase tracking-widest text-stone-600 mb-3">
           Deerlink
         </div>
         <h1 className="text-2xl font-bold text-stone-900 mb-2 leading-snug">
@@ -138,7 +138,7 @@ function Lobby({
         </div>
         {/* URL */}
         <div className="px-5 py-3 border-b border-stone-100">
-          <p className="text-xs text-stone-500 truncate">{url}</p>
+          <p className="text-xs text-stone-600 truncate">{url}</p>
         </div>
         {/* Buttons */}
         <div className="flex">
@@ -174,7 +174,7 @@ function Lobby({
       {/* Participants */}
       {room.participants.length > 0 && (
         <div className="mb-6">
-          <div className="text-[10px] uppercase tracking-widest text-stone-500 mb-2">
+          <div className="text-[10px] uppercase tracking-widest text-stone-600 mb-2">
             이미 참여한 사람
           </div>
           <div className="flex flex-wrap gap-1.5">
@@ -199,7 +199,7 @@ function Lobby({
             <DeerHoofMark className="absolute bottom-3 right-[24%] w-2 h-2.5 text-stone-300/50 rotate-6" />
           </div>
           <AntlerLogo animated className="relative w-8 h-10 text-stone-300 mb-4" />
-          <p className="relative text-center text-xs text-stone-500">
+          <p className="relative text-center text-xs text-stone-600">
             친구들을 초대해보세요! 링크를 공유하면 모두가 함께할 수 있어요.
           </p>
         </div>
@@ -208,7 +208,7 @@ function Lobby({
       {/* Nickname + CTA */}
       <div className="space-y-3">
         <div>
-          <label className="block text-[10px] uppercase tracking-widest text-stone-500 mb-3">
+          <label className="block text-[10px] uppercase tracking-widest text-stone-600 mb-3">
             닉네임
           </label>
           <input
@@ -373,8 +373,8 @@ function AnswerMode({
         >
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-3">
-              <IconComponent className="w-3.5 h-3.5 text-stone-500" />
-              <span className="text-[10px] uppercase tracking-widest text-stone-500">
+              <IconComponent className="w-3.5 h-3.5 text-stone-600" />
+              <span className="text-[10px] uppercase tracking-widest text-stone-600">
                 {TYPE_LABEL[question?.type ?? "balance"]}
               </span>
             </div>
@@ -411,7 +411,7 @@ function AnswerMode({
                           : "border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:bg-stone-50 hover:text-stone-900"
                       )}
                     >
-                      <span className="block text-[10px] font-mono text-stone-500 mb-2">
+                      <span className="block text-[10px] font-mono text-stone-600 mb-2">
                         {opt.value}
                       </span>
                       <span className="leading-snug">{opt.label}</span>
@@ -593,7 +593,7 @@ export function RoomClient({ room }: { room: Room }) {
         {mode === "answer" && (
           <button
             onClick={() => setMode("lobby")}
-            className="text-xs text-stone-500 hover:text-stone-800 transition-colors duration-150"
+            className="text-xs text-stone-600 hover:text-stone-800 transition-colors duration-150"
           >
             초대 링크 보기
           </button>

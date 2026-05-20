@@ -76,7 +76,7 @@ export default function PopularPage() {
 
       <main className="max-w-3xl mx-auto px-6 pt-32 pb-24">
         <header className="mb-16">
-          <div className="text-xs text-stone-500 uppercase tracking-widest mb-4">
+          <div className="text-xs text-stone-600 uppercase tracking-widest mb-4">
             인기 질문 모음
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-stone-900 tracking-tight leading-[1.1] mb-6">
@@ -178,7 +178,7 @@ export default function PopularPage() {
                 key={q.title}
                 className="rounded-2xl border border-stone-200 bg-white p-5"
               >
-                <div className="text-xs font-mono text-stone-500 mb-2 tabular-nums">
+                <div className="text-xs font-mono text-stone-600 mb-2 tabular-nums">
                   {String(i + 1).padStart(2, "0")}
                 </div>
                 <h3 className="text-base font-semibold text-stone-900 leading-snug">
@@ -208,7 +208,7 @@ export default function PopularPage() {
         </section>
 
         <footer className="mt-16 pt-8 border-t border-stone-200 text-center">
-          <p className="text-xs text-stone-500">
+          <p className="text-xs text-stone-600">
             &copy; 2026 Deerlink &middot; 링크 하나로 그룹 의견 비교
           </p>
         </footer>
@@ -235,12 +235,12 @@ function Section({
   const colorMap = {
     amber: "text-amber-500",
     teal: "text-teal-500",
-    stone: "text-stone-400",
+    stone: "text-stone-600",
   };
   return (
     <section className="mt-16">
       <div className="mb-8">
-        <div className="flex items-center gap-2 text-xs text-stone-500 uppercase tracking-widest mb-3">
+        <div className="flex items-center gap-2 text-xs text-stone-600 uppercase tracking-widest mb-3">
           <Icon className={`w-3.5 h-3.5 ${colorMap[color]}`} />
           {eyebrow}
         </div>

@@ -50,7 +50,7 @@ const TYPE_CONFIG = {
   subjective: {
     icon: PenLine,
     label: "주관식",
-    color: "text-stone-400",
+    color: "text-stone-600",
   },
 } as const;
 
@@ -118,13 +118,13 @@ function QuestionCard({ question, index, onChange, onRemove }: QuestionCardProps
         {/* Drag handle */}
         <button
           onPointerDown={(e) => dragControls.start(e)}
-          className="touch-none cursor-grab active:cursor-grabbing p-0.5 text-stone-400 hover:text-stone-600 transition-colors"
+          className="touch-none cursor-grab active:cursor-grabbing p-0.5 text-stone-600 hover:text-stone-800 transition-colors"
           aria-label="드래그하여 순서 변경"
         >
           <GripVertical className="w-3.5 h-3.5" />
         </button>
 
-        <span className="text-[10px] font-mono text-stone-500 tabular-nums">
+        <span className="text-[10px] font-mono text-stone-600 tabular-nums">
           {String(index + 1).padStart(2, "0")}
         </span>
 
@@ -137,7 +137,7 @@ function QuestionCard({ question, index, onChange, onRemove }: QuestionCardProps
 
         <button
           onClick={() => onRemove(question.id)}
-          className="w-7 h-7 flex items-center justify-center text-stone-400 hover:text-red-500 transition-colors"
+          className="w-7 h-7 flex items-center justify-center text-stone-600 hover:text-red-500 transition-colors"
           aria-label="질문 삭제"
         >
           <Trash2 className="w-3.5 h-3.5" />
@@ -196,7 +196,7 @@ function QuestionCard({ question, index, onChange, onRemove }: QuestionCardProps
               {(question.options?.length ?? 0) > 2 && (
                 <button
                   onClick={() => removeOption(i)}
-                  className="text-stone-400 hover:text-red-500 transition-colors flex-shrink-0 p-1"
+                  className="text-stone-600 hover:text-red-500 transition-colors flex-shrink-0 p-1"
                 >
                   <Trash2 className="w-3 h-3" />
                 </button>
@@ -206,7 +206,7 @@ function QuestionCard({ question, index, onChange, onRemove }: QuestionCardProps
           {(question.options?.length ?? 0) < 5 && (
             <button
               onClick={addOption}
-              className="text-[11px] text-stone-500 hover:text-stone-700 transition-colors pl-3.5 py-1"
+              className="text-[11px] text-stone-600 hover:text-stone-800 transition-colors pl-3.5 py-1"
             >
               + 선택지 추가
             </button>
@@ -217,7 +217,7 @@ function QuestionCard({ question, index, onChange, onRemove }: QuestionCardProps
       {/* Subjective */}
       {question.type === "subjective" && (
         <div className="px-4 pb-3">
-          <p className="text-xs text-stone-500">자유롭게 텍스트로 답변</p>
+          <p className="text-xs text-stone-600">자유롭게 텍스트로 답변</p>
         </div>
       )}
     </Reorder.Item>
@@ -386,9 +386,9 @@ export default function CreateRoomPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 3 }}
                 transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                className="text-[11px] text-stone-500 mt-2.5 tracking-wide"
+                className="text-[11px] text-stone-600 mt-2.5 tracking-wide"
               >
-                <span className="text-stone-400">예시 · </span>
+                <span className="text-stone-600">예시 · </span>
                 {TITLE_EXAMPLES[exampleIndex]}
               </motion.p>
             )}
@@ -496,7 +496,7 @@ export default function CreateRoomPage() {
                 </motion.div>
               </div>
               <AntlerLogo animated className="relative w-10 h-12 text-stone-300" />
-              <p className="relative text-center text-xs text-stone-400">
+              <p className="relative text-center text-xs text-stone-600">
                 질문 하나면 충분해요
               </p>
             </motion.div>

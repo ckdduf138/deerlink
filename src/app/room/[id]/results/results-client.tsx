@@ -179,7 +179,7 @@ function BalanceResult({
 
       {/* Majority note */}
       {total >= 2 && (countA !== countB) && (
-        <p className="mt-3 text-xs text-stone-500">
+        <p className="mt-3 text-xs text-stone-600">
           <span className="font-medium text-stone-700">
             {countA > countB ? countA : countB}명
           </span>
@@ -191,7 +191,7 @@ function BalanceResult({
         </p>
       )}
       {total >= 2 && countA === countB && (
-        <p className="mt-3 text-xs text-stone-500">정확히 <span className="font-medium text-stone-700">반반</span>이에요</p>
+        <p className="mt-3 text-xs text-stone-600">정확히 <span className="font-medium text-stone-700">반반</span>이에요</p>
       )}
     </div>
   );
@@ -429,7 +429,7 @@ export function ResultsClient({ room }: { room: Room }) {
               animated
               className="w-3 h-[15px] text-amber-500"
             />
-            <div className="text-[10px] uppercase tracking-widest text-stone-500">
+            <div className="text-[10px] uppercase tracking-widest text-stone-600">
               결과 비교
             </div>
           </div>
@@ -470,7 +470,7 @@ export function ResultsClient({ room }: { room: Room }) {
               <AntlerLogo animated className="w-10 h-12 text-stone-300" />
             </div>
             <p className="relative text-stone-600 text-sm">아직 참여자가 없어요</p>
-            <p className="relative text-stone-500 text-xs mt-1">
+            <p className="relative text-stone-600 text-xs mt-1">
               링크를 공유해서 친구들을 초대하세요
             </p>
             <button
@@ -499,11 +499,11 @@ export function ResultsClient({ room }: { room: Room }) {
                 >
                   {/* Card header */}
                   <div className="flex items-center gap-2 px-5 py-3.5 border-b border-stone-200">
-                    <span className="text-[10px] font-mono text-stone-500 tabular-nums w-5">
+                    <span className="text-[10px] font-mono text-stone-600 tabular-nums w-5">
                       {String(idx + 1).padStart(2, "0")}
                     </span>
-                    <Icon className="w-3 h-3 text-stone-500" />
-                    <span className="text-[10px] uppercase tracking-widest text-stone-500">
+                    <Icon className="w-3 h-3 text-stone-600" />
+                    <span className="text-[10px] uppercase tracking-widest text-stone-600">
                       {TYPE_LABEL[q.type]}
                     </span>
                   </div>
@@ -551,7 +551,7 @@ export function ResultsClient({ room }: { room: Room }) {
             className="mt-6 rounded-2xl border border-amber-100 bg-white px-5 py-4"
           >
             <div className="flex items-center justify-between mb-3">
-              <div className="text-[10px] uppercase tracking-widest text-stone-500">
+              <div className="text-[10px] uppercase tracking-widest text-stone-600">
                 참여자
               </div>
               <span className="text-xs text-stone-600 font-mono tabular-nums">
@@ -626,7 +626,7 @@ export function ResultsClient({ room }: { room: Room }) {
           transition={{ duration: 0.4, delay: 0.3 }}
           className="mt-3 rounded-2xl border border-amber-100 bg-white px-5 py-5"
         >
-          <p className="text-xs text-stone-500 mb-3">친구를 더 초대할까요?</p>
+          <p className="text-xs text-stone-600 mb-3">친구를 더 초대할까요?</p>
           <div className="flex gap-2 mb-5">
             <button
               onClick={copyInviteLink}
@@ -652,7 +652,7 @@ export function ResultsClient({ room }: { room: Room }) {
           <div className="h-px bg-stone-100 mb-5" />
 
           <div className="text-center space-y-2">
-            <p className="text-xs text-stone-500">또 다른 주제로 비교해볼까요?</p>
+            <p className="text-xs text-stone-600">또 다른 주제로 비교해볼까요?</p>
             <Link
               href="/create"
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white text-sm font-medium transition-all duration-200 hover:-translate-y-0.5"
