@@ -38,9 +38,26 @@ Deerlink는 **Answer Lock** 방식을 씁니다. 모두가 답변을 완료하�
 
 ---
 
-## 만든 사람
+## 🤔 기술 선택 이유
+deerlink는 여러 사람이 동시에 접속해 의견을 비교하는 서비스 특성상, 빠른 초기 로딩과 서버 비용 없는 지속 운영이 핵심 과제였습니다.
 
-개인 프로젝트로 혼자 기획, 디자인, 개발했습니다.
+Next.js 16 App Router를 선택한 건 Server Component로 초기 렌더링을 서버에서 처리해 사용자가 체감하는 로딩 시간을 줄이기 위해서였습니다. 실제로 Lighthouse Performance 100점을 달성하며 이 판단이 옳았음을 확인했습니다.
 
-- **GitHub**: [github.com/lcyyyyyyyy/deerlink](https://github.com/lcyyyyyyyy)
-- **서비스**: [deerlink.kr](https://deerlink.kr)
+DB는 Turso(libSQL)를 선택했습니다. 서버리스 환경인 Vercel에 최적화된 SQLite 기반으로, 별도 DB 서버 없이 실서비스를 운영할 수 있어 개인 프로젝트의 지속 가능성을 높였습니다. Prisma 7을 ORM으로 사용해 TypeScript 타입 안전성과 직관적인 스키마 관리를 함께 챙겼습니다.
+
+UI는 shadcn/ui를 택했습니다. npm 패키지 설치 방식이 아닌 컴포넌트를 직접 소유하는 복사 방식이라, 디자인 시스템을 서비스에 맞게 자유롭게 수정할 수 있었습니다.
+
+Answer Lock 기능은 WebSocket 대신 API 레벨 403으로 구현했습니다. 서버리스 환경에서 WebSocket은 지속 연결을 유지하기 어렵고, 이 기능의 본질은 "결과 페이지 접근 차단"이지 실시간 동기화가 아니었기 때문입니다. 과한 기술보다 요구사항에 맞는 단순한 구조를 선택했습니다.
+
+| 기술 | 선택 이유 |
+|------|---------|
+| Next.js 16 App Router | Server Component로 초기 로딩 최적화, Route Handler로 API 구현 |
+| Turso (libSQL) | 서버리스 환경 최적화 SQLite, Vercel 배포와 궁합, 무료 티어 |
+| Prisma 7 | TypeScript 타입 안전성 + 직관적 스키마 관리 |
+| shadcn/ui | 컴포넌트 직접 소유 가능(복사 방식), 커스터마이징 자유도 |
+| Answer Lock (API 403) | WebSocket 없이 서버리스 환경에서 상태 유지 불필요한 구조 |
+## 📊 성능 모니터링
+- Vercel Speed Insights + Analytics 연동으로 실사용 성능 측정
+- Server Component 최대 활용으로 클라이언트 번들 최소화
+
+<img width="565" height="526" alt="2026-05-21_00-29-49" src="https://github.com/user-attachments/assets/d4d41c8c-03aa-4b90-b061-97e52bb19581" />
