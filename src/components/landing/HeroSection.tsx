@@ -204,7 +204,7 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="inline-flex items-center gap-2 text-xs text-stone-500 mb-8 tracking-wide uppercase"
+          className="inline-flex items-center gap-2 text-xs text-stone-600 mb-8 tracking-wide uppercase"
         >
           <span className="w-4 h-px bg-stone-400" />
           그룹 생각 비교 플랫폼
@@ -228,7 +228,7 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="text-base md:text-lg text-stone-500 max-w-md mx-auto mb-10 leading-relaxed"
+          className="text-base md:text-lg text-stone-600 max-w-md mx-auto mb-10 leading-relaxed"
         >
           방을 만들고 링크를 공유하면 — 모두가 같은 질문에 답하고,
           서로의 선택을 한눈에 비교합니다.
@@ -243,12 +243,12 @@ export function HeroSection() {
         >
           <Link
             href="/create"
-            className="group inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-sm font-medium transition-all duration-200 shadow-lg shadow-amber-900/40 hover:shadow-amber-800/50 hover:-translate-y-0.5"
+            className="group inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-amber-700 hover:bg-amber-600 text-white text-sm font-medium transition-all duration-200 shadow-lg shadow-amber-900/40 hover:shadow-amber-800/50 hover:-translate-y-0.5"
           >
             무료로 방 만들기
             <ArrowRight className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
           </Link>
-          <p className="text-[11px] text-stone-500 tracking-wide">
+          <p className="text-[11px] text-stone-600 tracking-wide">
             회원가입 없이 · 30초면 완성
           </p>
         </motion.div>

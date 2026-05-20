@@ -25,13 +25,13 @@ export function StepsSection() {
     <section id="steps" className="py-28 md:py-36 px-6 bg-[#fafaf8]">
       <div className="max-w-5xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 1, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.55 }}
           className="mb-16"
         >
-          <div className="text-xs text-stone-500 uppercase tracking-widest mb-4">
+          <div className="text-xs text-stone-600 uppercase tracking-widest mb-4">
             사용 방법
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-stone-900 tracking-tight">
@@ -43,19 +43,19 @@ export function StepsSection() {
           {steps.map((step, i) => (
             <motion.div
               key={step.number}
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 1, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.45, delay: i * 0.08 }}
               className="bg-[#fafaf8] p-8 md:p-10 relative"
             >
-              <span className="block text-xs font-mono text-amber-600 mb-6 tabular-nums">
+              <span className="block text-xs font-mono text-amber-800 mb-6 tabular-nums">
                 {step.number}
               </span>
               <h3 className="text-base font-semibold text-stone-900 mb-2">
                 {step.title}
               </h3>
-              <p className="text-sm text-stone-500 leading-relaxed">
+              <p className="text-sm text-stone-600 leading-relaxed">
                 {step.description}
               </p>
             </motion.div>

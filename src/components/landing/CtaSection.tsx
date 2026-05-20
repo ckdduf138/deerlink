@@ -37,7 +37,7 @@ export function CtaSection() {
 
           <Link
             href="/create"
-            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-sm font-medium transition-all duration-200 shadow-lg shadow-amber-900/40 hover:shadow-amber-800/50 hover:-translate-y-0.5"
+            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-amber-700 hover:bg-amber-600 text-white text-sm font-medium transition-all duration-200 shadow-lg shadow-amber-900/40 hover:shadow-amber-800/50 hover:-translate-y-0.5"
           >
             방 만들기
             <ArrowRight className="w-3.5 h-3.5" />
@@ -46,13 +46,13 @@ export function CtaSection() {
 
         <div className="mt-24 pt-8 border-t border-amber-100">
           <div className="flex items-center justify-center gap-3">
-            <p className="text-xs text-stone-500">&copy; 2026 Deerlink</p>
-            <span className="text-stone-300 text-xs">·</span>
-            <span className="text-xs text-stone-400">v0.1.0</span>
-            <span className="text-stone-300 text-xs">·</span>
+            <p className="text-xs text-stone-600">&copy; 2026 Deerlink</p>
+            <span className="text-stone-400 text-xs">·</span>
+            <span className="text-xs text-stone-600">v0.1.0</span>
+            <span className="text-stone-400 text-xs">·</span>
             <button
               onClick={() => setFeedbackOpen(true)}
-              className="text-xs text-stone-400 hover:text-stone-600 transition-colors"
+              className="text-xs text-stone-600 hover:text-stone-800 transition-colors"
             >
               피드백
             </button>
