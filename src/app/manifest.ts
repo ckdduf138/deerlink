@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Deerlink — 밸런스게임 만들기",
+    name: "Deerlink - 밸런스게임 만들기",
     short_name: "Deerlink",
     description:
       "링크 하나로 밸런스게임, 투표, 설문을 만들고 친구들과 생각을 비교해요.",

@@ -1,6 +1,8 @@
 "use client";
 
 import { forwardRef } from "react";
+import { bestPair } from "@/lib/group-stats";
+import { parseOptions, type Participant, type Question, type ResultsRoom } from "@/lib/types";
 
 const ANTLER_PATHS = [
   "M12 28 C11 24 9 20 7 16 C5 12 3 8 4 4",
@@ -11,40 +13,12 @@ const ANTLER_PATHS = [
   "M18.5 9 C21 7 22.5 5 22 2",
 ];
 
-interface Answer {
-  id: string;
-  questionId: string;
-  value: string;
-}
-
-interface Participant {
-  id: string;
-  nickname: string;
-  answers: Answer[];
-}
-
-interface Question {
-  id: string;
-  type: "balance" | "multiple" | "subjective";
-  title: string;
-  optionA: string | null;
-  optionB: string | null;
-  options: string | null;
-  order: number;
-}
-
-interface Room {
-  id: string;
-  title: string;
-  questions: Question[];
-  participants: Participant[];
-}
 
 interface ShareCardProps {
-  room: Room;
+  room: ResultsRoom;
 }
 
-function getFeaturedQuestion(room: Room): Question | null {
+function getFeaturedQuestion(room: ResultsRoom): Question | null {
   const candidate = room.questions.find((q) => q.type !== "subjective");
   return candidate ?? room.questions[0] ?? null;
 }
@@ -98,22 +72,19 @@ function renderFeatured(question: Question, participants: Participant[]) {
             </div>
           </div>
         </div>
+        {/* 비율 막대 — 폭이 곧 비율이라 결과 페이지 숫자와 항상 같은 이야기를 한다 */}
         <div
           style={{
             display: "flex",
             height: 20,
+            width: "100%",
             borderRadius: 12,
             overflow: "hidden",
             background: "#f5f5f4",
-            gap: 4,
           }}
         >
-          {pctA > 0 && (
-            <div style={{ width: `${pctA}%`, background: "#e8a038", height: "100%" }} />
-          )}
-          {pctB > 0 && (
-            <div style={{ width: `${pctB}%`, background: "#14b8a6", height: "100%" }} />
-          )}
+          {countA > 0 && <div style={{ width: `${pctA}%`, background: "#d97706" }} />}
+          {countB > 0 && <div style={{ width: `${pctB}%`, background: "#0d9488" }} />}
         </div>
         <div
           style={{
@@ -133,7 +104,7 @@ function renderFeatured(question: Question, participants: Participant[]) {
   }
 
   if (question.type === "multiple") {
-    const options: string[] = question.options ? JSON.parse(question.options) : [];
+    const options = parseOptions(question.options);
     const counts = options.map((_, i) => values.filter((v) => v === String(i)).length);
     const total = counts.reduce((a, b) => a + b, 0) || 1;
     const maxIdx = counts.indexOf(Math.max(...counts));
@@ -204,6 +175,7 @@ export const ShareCard = forwardRef<HTMLDivElement, ShareCardProps>(function Sha
   ref
 ) {
   const featured = getFeaturedQuestion(room);
+  const match = bestPair(room);
 
   return (
     <div
@@ -299,6 +271,24 @@ export const ShareCard = forwardRef<HTMLDivElement, ShareCardProps>(function Sha
         >
           질문 {room.questions.length}개
         </div>
+        {match && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "10px 18px",
+              borderRadius: 9999,
+              background: "#f0fdfa",
+              border: "1px solid #b8e6df",
+              fontSize: 22,
+              fontWeight: 600,
+              color: "#0f766e",
+            }}
+          >
+            {match.a.nickname}·{match.b.nickname} 궁합 {match.pct}%
+          </div>
+        )}
       </div>
 
       {/* Featured question */}

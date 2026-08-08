@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { cookies } from "next/headers";
+import { participantCookieName } from "@/lib/participant-session";
+import { serializeLobbyRoom } from "@/lib/serialize";
 import { AntlerLogo } from "@/components/landing/AntlerLogo";
 import { RoomClient } from "./room-client";
 
@@ -24,7 +26,7 @@ export default async function RoomPage({
 
   // 이미 참여한 사람은 결과 페이지로
   const cookieStore = await cookies();
-  const participantId = cookieStore.get(`participant_${id}`)?.value;
+  const participantId = cookieStore.get(participantCookieName(id))?.value;
   if (participantId && room.participants.some((p) => p.id === participantId)) {
     redirect(`/room/${id}/results`);
   }
@@ -51,24 +53,7 @@ export default async function RoomPage({
     );
   }
 
-  const serializedRoom = {
-    id: room.id,
-    title: room.title,
-    expiresAt: room.expiresAt.toISOString(),
-    questions: room.questions.map((q) => ({
-      id: q.id,
-      type: q.type as "balance" | "multiple" | "subjective",
-      title: q.title,
-      optionA: q.optionA,
-      optionB: q.optionB,
-      options: q.options,
-      order: q.order,
-    })),
-    participants: room.participants.map((p) => ({
-      id: p.id,
-      nickname: p.nickname,
-    })),
-  };
+  const serializedRoom = serializeLobbyRoom(room);
 
   return <RoomClient room={serializedRoom} />;
 }

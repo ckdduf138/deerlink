@@ -101,7 +101,7 @@ export default function PopularPage() {
         <Section
           eyebrow={`밸런스게임 ${balance.length}선`}
           title="둘 중 하나만 골라야 한다면?"
-          description="가치관, 취향, 인간관계까지 — 양자택일로 친구들의 진짜 생각을 확인하는 질문들이에요. 단톡방, MT, 커플 데이트에서 가장 많이 쓰는 유형."
+          description="가치관, 취향, 인간관계까지, 양자택일로 친구들의 진짜 생각을 확인하는 질문들이에요. 단톡방, MT, 커플 데이트에서 가장 많이 쓰는 유형."
           icon={Scale}
           color="amber"
         >

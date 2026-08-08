@@ -97,7 +97,7 @@ export const metadata: Metadata = {
         url: "/opengraph-image",
         width: 1200,
         height: 630,
-        alt: "Deerlink — 밸런스게임 만들기, 링크 하나로 의견 비교",
+        alt: "Deerlink - 밸런스게임 만들기, 링크 하나로 의견 비교",
       },
     ],
   },

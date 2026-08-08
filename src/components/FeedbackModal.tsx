@@ -103,7 +103,7 @@ export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
                       onChange={(e) => setMessage(e.target.value)}
                       placeholder="버그 신고, 기능 제안, 뭐든 좋아요"
                       rows={5}
-                      className="w-full resize-none rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-900 placeholder:text-stone-400 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100 transition-colors"
+                      className="w-full resize-none rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-900 placeholder:text-stone-500 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100 transition-colors"
                     />
                   </div>
                   <div>
@@ -111,8 +111,8 @@ export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
                       type="text"
                       value={contact}
                       onChange={(e) => setContact(e.target.value)}
-                      placeholder="연락처 (선택) — 이메일, 트위터 등"
-                      className="w-full rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-900 placeholder:text-stone-400 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100 transition-colors"
+                      placeholder="연락처 (선택) · 이메일, 트위터 등"
+                      className="w-full rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-900 placeholder:text-stone-500 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100 transition-colors"
                     />
                   </div>
                   {status === "error" && (
@@ -121,7 +121,7 @@ export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
                   <button
                     onClick={handleSubmit}
                     disabled={!message.trim() || status === "sending"}
-                    className="w-full py-3 rounded-xl bg-amber-600 hover:bg-amber-500 disabled:bg-stone-200 disabled:text-stone-400 text-white text-sm font-medium transition-colors"
+                    className="w-full py-3 rounded-xl bg-amber-600 hover:bg-amber-500 disabled:bg-stone-200 disabled:text-stone-500 text-white text-sm font-medium transition-colors"
                   >
                     {status === "sending" ? "전송 중..." : "보내기"}
                   </button>

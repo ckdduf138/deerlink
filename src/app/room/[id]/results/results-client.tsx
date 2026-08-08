@@ -19,60 +19,21 @@ import {
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { AntlerLogo } from "@/components/landing/AntlerLogo";
-import { DeerHoofMark } from "@/components/DeerHoofMark";
+import { formatRemaining } from "@/lib/format";
+import { parseOptions, type ResultsRoom, type Participant, type Question } from "@/lib/types";
+import { BalanceRatioBar } from "@/components/ResultBar";
+import { GroupReport } from "@/components/room/group-report";
 import { ShareCard } from "./share-card";
 
-/* ─── Types ─────────────────────────────── */
-
-interface Answer {
-  id: string;
-  questionId: string;
-  value: string;
-}
-
-interface Participant {
-  id: string;
-  nickname: string;
-  answers: Answer[];
-}
-
-interface Question {
-  id: string;
-  type: "balance" | "multiple" | "subjective";
-  title: string;
-  optionA: string | null;
-  optionB: string | null;
-  options: string | null;
-  order: number;
-}
-
-interface Room {
-  id: string;
-  title: string;
-  expiresAt: string;
-  questions: Question[];
-  participants: Participant[];
-}
-
-function formatRemaining(expiresAt: string): string {
-  const diff = new Date(expiresAt).getTime() - Date.now();
-  if (diff <= 0) return "만료";
-  const hours = Math.floor(diff / (1000 * 60 * 60));
-  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  if (hours > 0) return `${hours}h`;
-  return `${minutes}m`;
-}
 
 /* ─── Balance Result ─────────────────────── */
 
 function BalanceResult({
   question,
   participants,
-  index,
 }: {
   question: Question;
   participants: Participant[];
-  index: number;
 }) {
   const answers = participants
     .map((p) => ({
@@ -85,56 +46,14 @@ function BalanceResult({
   const countA = answers.filter((a) => a.value === "A").length;
   const countB = answers.filter((a) => a.value === "B").length;
   const total = countA + countB;
-  const pctA = total ? Math.round((countA / total) * 100) : 0;
-  const pctB = total ? 100 - pctA : 0;
 
   return (
     <div>
-      {/* Option labels */}
-      <div className="grid grid-cols-2 gap-2 mb-4">
-        <div className="py-2.5 px-3.5 rounded-xl bg-amber-50 border border-amber-100 text-center">
-          <span className="text-[10px] text-amber-600 font-mono block mb-0.5">A</span>
-          <span className="text-xs font-medium text-amber-900">{question.optionA}</span>
-        </div>
-        <div className="py-2.5 px-3.5 rounded-xl bg-teal-50 border border-teal-100 text-center">
-          <span className="text-[10px] text-teal-600 font-mono block mb-0.5">B</span>
-          <span className="text-xs font-medium text-teal-900">{question.optionB}</span>
-        </div>
-      </div>
-
-      {/* Split bar */}
-      {total > 0 && (
-        <div className="mb-4">
-          <div className="flex h-3 rounded-full overflow-hidden bg-stone-100 gap-0.5">
-            {pctA > 0 && (
-              <motion.div
-                initial={{ width: 0 }}
-                whileInView={{ width: `${pctA}%` }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.05 + 0.2, duration: 0.55, ease: "easeOut" }}
-                className="h-full bg-amber-500 rounded-l-full"
-              />
-            )}
-            {pctB > 0 && (
-              <motion.div
-                initial={{ width: 0 }}
-                whileInView={{ width: `${pctB}%` }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.05 + 0.2, duration: 0.55, ease: "easeOut" }}
-                className="h-full bg-teal-500 rounded-r-full"
-              />
-            )}
-          </div>
-          <div className="flex justify-between mt-2">
-            <span className="text-xs text-stone-600 font-mono tabular-nums">
-              {countA}명 · <span className="font-semibold text-amber-600">{pctA}%</span>
-            </span>
-            <span className="text-xs text-stone-600 font-mono tabular-nums">
-              <span className="font-semibold text-teal-600">{pctB}%</span> · {countB}명
-            </span>
-          </div>
-        </div>
-      )}
+      <BalanceRatioBar
+        className="mb-6"
+        a={{ label: question.optionA ?? "A", count: countA }}
+        b={{ label: question.optionB ?? "B", count: countB }}
+      />
 
       {/* Individual answers */}
       <div className="space-y-1.5">
@@ -160,7 +79,7 @@ function BalanceResult({
                 >
                   {a.nickname[0].toUpperCase()}
                 </div>
-                <span className="text-xs text-stone-700">{a.nickname}</span>
+                <span className="text-sm text-stone-700">{a.nickname}</span>
               </div>
               <span
                 className={cn(
@@ -202,13 +121,11 @@ function BalanceResult({
 function MultipleResult({
   question,
   participants,
-  index,
 }: {
   question: Question;
   participants: Participant[];
-  index: number;
 }) {
-  const options: string[] = question.options ? JSON.parse(question.options) : [];
+  const options = parseOptions(question.options);
   const answers = participants
     .map((p) => ({
       id: p.id,
@@ -232,23 +149,17 @@ function MultipleResult({
         return (
           <div key={i}>
             <div className="flex items-center justify-between mb-1.5">
-              <span className={cn("text-xs", isTop ? "text-stone-900 font-medium" : "text-stone-600")}>
+              <span className={cn("text-sm", isTop ? "text-stone-900 font-semibold" : "text-stone-600")}>
                 {opt}
               </span>
               <span className="text-[11px] text-stone-600 font-mono tabular-nums">
                 {count}명 · {pct}%
               </span>
             </div>
-            <div className="h-2 bg-stone-100 rounded-full overflow-hidden mb-2">
-              <motion.div
-                initial={{ width: 0 }}
-                whileInView={{ width: `${pct}%` }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.05 + i * 0.08 + 0.2, duration: 0.5, ease: "easeOut" }}
-                className={cn(
-                  "h-full rounded-full",
-                  isTop ? "bg-amber-500" : "bg-stone-300"
-                )}
+            <div className="mb-2 h-1.5 w-full overflow-hidden rounded-full bg-stone-100" aria-hidden="true">
+              <div
+                className={cn("h-full rounded-full", isTop ? "bg-amber-500" : "bg-stone-300")}
+                style={{ width: `${pct}%` }}
               />
             </div>
             {voters.length > 0 && (
@@ -260,7 +171,7 @@ function MultipleResult({
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.2 }}
-                    className="text-[10px] px-1.5 py-0.5 rounded-md bg-amber-50 text-stone-700 border border-amber-100"
+                    className="text-[10px] px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-900 border border-amber-100"
                   >
                     {v.nickname}
                   </motion.span>
@@ -333,7 +244,7 @@ const TYPE_ICON = {
   subjective: PenLine,
 };
 
-export function ResultsClient({ room }: { room: Room }) {
+export function ResultsClient({ room }: { room: ResultsRoom }) {
   const [copied, setCopied] = useState(false);
   const [imageBusy, setImageBusy] = useState(false);
   const shareCardRef = useRef<HTMLDivElement>(null);
@@ -356,7 +267,7 @@ export function ResultsClient({ room }: { room: Room }) {
 
   const shareInviteLink = async () => {
     const url = window.location.href.replace("/results", "");
-    const text = `${room.title} — Deerlink에서 같이 답해봐요`;
+    const text = `${room.title} - Deerlink에서 같이 답해봐요`;
     if (navigator.share) {
       await navigator.share({ title: room.title, text, url });
     } else {
@@ -382,7 +293,7 @@ export function ResultsClient({ room }: { room: Room }) {
       const file = await generateImage();
       if (!file) return;
       const url = window.location.href.replace("/results", "");
-      const text = `${room.title} — 우리 답 비교해봤어요`;
+      const text = `${room.title} - 우리 답 비교해봤어요`;
       if (
         navigator.canShare &&
         navigator.canShare({ files: [file] }) &&
@@ -459,29 +370,24 @@ export function ResultsClient({ room }: { room: Room }) {
 
         {/* Empty state */}
         {room.participants.length === 0 && (
-          <div className="relative py-20 text-center">
-            <div className="absolute inset-0 pointer-events-none overflow-hidden">
-              <DeerHoofMark className="absolute top-10 left-[18%] w-3 h-4 text-stone-300/50 -rotate-12" />
-              <DeerHoofMark className="absolute top-24 right-[20%] w-3 h-4 text-stone-300/50 rotate-[8deg]" />
-              <DeerHoofMark className="absolute bottom-16 left-[26%] w-2.5 h-3 text-stone-300/40 rotate-3" />
-              <DeerHoofMark className="absolute bottom-24 right-[28%] w-2.5 h-3 text-stone-300/40 -rotate-6" />
-            </div>
-            <div className="relative flex justify-center mb-6">
-              <AntlerLogo animated className="w-10 h-12 text-stone-300" />
-            </div>
-            <p className="relative text-stone-600 text-sm">아직 참여자가 없어요</p>
-            <p className="relative text-stone-600 text-xs mt-1">
+          <div className="py-16 text-center">
+            <Users className="mx-auto mb-5 w-10 h-10 text-stone-300" />
+            <p className="text-stone-600 text-sm">아직 참여자가 없어요</p>
+            <p className="text-stone-600 text-xs mt-1">
               링크를 공유해서 친구들을 초대하세요
             </p>
             <button
               onClick={copyInviteLink}
-              className="relative mt-6 flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-amber-100 bg-amber-50 text-xs text-stone-700 hover:text-stone-900 hover:border-amber-200 transition-colors mx-auto"
+              className="mt-6 flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-amber-100 bg-amber-50 text-xs text-amber-900 hover:text-amber-950 hover:border-amber-200 transition-colors mx-auto"
             >
               <Copy className="w-3.5 h-3.5" />
               초대 링크 복사
             </button>
           </div>
         )}
+
+        {/* Group report — 익명 통계로는 못 만드는, 이름 붙은 그룹만의 숫자 */}
+        {room.participants.length > 0 && <GroupReport room={room} />}
 
         {/* Questions */}
         {room.participants.length > 0 && (
@@ -515,18 +421,10 @@ export function ResultsClient({ room }: { room: Room }) {
                     </h3>
 
                     {q.type === "balance" && (
-                      <BalanceResult
-                        question={q}
-                        participants={room.participants}
-                        index={idx}
-                      />
+                      <BalanceResult question={q} participants={room.participants} />
                     )}
                     {q.type === "multiple" && (
-                      <MultipleResult
-                        question={q}
-                        participants={room.participants}
-                        index={idx}
-                      />
+                      <MultipleResult question={q} participants={room.participants} />
                     )}
                     {q.type === "subjective" && (
                       <SubjectiveResult
@@ -564,7 +462,7 @@ export function ResultsClient({ room }: { room: Room }) {
                   key={p.id}
                   whileHover={{ y: -2 }}
                   transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
-                  className="px-2.5 py-1 rounded-full text-xs border border-amber-100 bg-amber-50 text-stone-700 cursor-default"
+                  className="px-2.5 py-1 rounded-full text-xs border border-amber-100 bg-amber-50 text-amber-900 cursor-default"
                 >
                   {p.nickname}
                 </motion.span>

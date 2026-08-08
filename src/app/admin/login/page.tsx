@@ -43,13 +43,13 @@ export default function AdminLoginPage() {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="비밀번호"
             autoFocus
-            className="w-full rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-900 placeholder:text-stone-400 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100"
+            className="w-full rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-900 placeholder:text-stone-500 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100"
           />
           {error && <p className="text-xs text-red-500">{error}</p>}
           <button
             type="submit"
             disabled={!password || loading}
-            className="w-full py-3 rounded-xl bg-amber-600 hover:bg-amber-500 disabled:bg-stone-200 disabled:text-stone-400 text-white text-sm font-medium transition-colors"
+            className="w-full py-3 rounded-xl bg-amber-600 hover:bg-amber-500 disabled:bg-stone-200 disabled:text-stone-500 text-white text-sm font-medium transition-colors"
           >
             {loading ? "확인 중..." : "입장"}
           </button>

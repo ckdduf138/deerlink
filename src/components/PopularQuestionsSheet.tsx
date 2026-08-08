@@ -1,18 +1,13 @@
 "use client";
 
 import { motion, AnimatePresence, useMotionValue, PanInfo } from "framer-motion";
-import { X, Scale, ListChecks, PenLine } from "lucide-react";
+import { X } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { POPULAR_QUESTIONS, PopularQuestion } from "@/data/popular-questions";
+import { QUESTION_META } from "@/lib/question-meta";
 
 type FilterType = "all" | "balance" | "multiple" | "subjective";
-
-const TYPE_CONFIG = {
-  balance: { icon: Scale, label: "밸런스", color: "text-amber-400", badge: "border-amber-200 bg-amber-50 text-amber-700" },
-  multiple: { icon: ListChecks, label: "객관식", color: "text-teal-400", badge: "border-teal-200 bg-teal-50 text-teal-700" },
-  subjective: { icon: PenLine, label: "주관식", color: "text-stone-400", badge: "border-stone-200 bg-stone-100 text-stone-600" },
-} as const;
 
 const FILTERS: { key: FilterType; label: string }[] = [
   { key: "all", label: "전체" },
@@ -28,7 +23,7 @@ interface PopularQuestionsSheetProps {
 }
 
 function QuestionCard({ question, onSelect }: { question: PopularQuestion; onSelect: (q: PopularQuestion) => void }) {
-  const { icon: Icon } = TYPE_CONFIG[question.type];
+  const { icon: Icon } = QUESTION_META[question.type];
 
   let preview = "";
   if (question.type === "balance") {
@@ -128,7 +123,7 @@ export function PopularQuestionsSheet({ open, onClose, onSelect }: PopularQuesti
                   whileTap={{ scale: 0.95 }}
                   className={cn(
                     "px-3 py-1.5 rounded-full text-xs font-medium transition-colors duration-150",
-                    filter === key ? "bg-amber-100 text-amber-700" : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+                    filter === key ? "bg-amber-100 text-amber-900" : "bg-stone-100 text-stone-600 hover:bg-stone-200"
                   )}
                 >
                   {label}

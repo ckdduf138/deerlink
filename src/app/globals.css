@@ -143,8 +143,3 @@ textarea {
   }
 }
 
-/* Dot grid background utility */
-.dot-grid {
-  background-image: radial-gradient(rgba(232, 160, 56, 0.12) 1px, transparent 1px);
-  background-size: 28px 28px;
-}

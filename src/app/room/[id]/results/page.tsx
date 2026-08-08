@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { cookies } from "next/headers";
+import { hasCompletedAnswers, participantCookieName } from "@/lib/participant-session";
+import { serializeResultsRoom } from "@/lib/serialize";
 import { AntlerLogo } from "@/components/landing/AntlerLogo";
 import { ResultsClient } from "./results-client";
 
@@ -25,12 +27,12 @@ export default async function ResultsPage({
 
   if (!room) notFound();
 
-  // 참여자만 결과 열람 가능
+  // 모든 질문에 답변한 참여자만 결과 열람 가능
   const cookieStore = await cookies();
-  const participantId = cookieStore.get(`participant_${id}`)?.value;
-  const isParticipant = room.participants.some((p) => p.id === participantId);
+  const participantId = cookieStore.get(participantCookieName(id))?.value;
+  const viewer = room.participants.find((p) => p.id === participantId);
 
-  if (!isParticipant) {
+  if (!hasCompletedAnswers(viewer, room.questions.length)) {
     return (
       <div className="min-h-screen bg-[#fafaf8] flex flex-col items-center justify-center gap-6 px-4">
         <AntlerLogo className="w-10 h-12 text-stone-300" />
@@ -74,29 +76,7 @@ export default async function ResultsPage({
     );
   }
 
-  const serializedRoom = {
-    id: room.id,
-    title: room.title,
-    expiresAt: room.expiresAt.toISOString(),
-    questions: room.questions.map((q) => ({
-      id: q.id,
-      type: q.type as "balance" | "multiple" | "subjective",
-      title: q.title,
-      optionA: q.optionA,
-      optionB: q.optionB,
-      options: q.options,
-      order: q.order,
-    })),
-    participants: room.participants.map((p) => ({
-      id: p.id,
-      nickname: p.nickname,
-      answers: p.answers.map((a) => ({
-        id: a.id,
-        questionId: a.questionId,
-        value: a.value,
-      })),
-    })),
-  };
+  const serializedRoom = serializeResultsRoom(room);
 
   return <ResultsClient room={serializedRoom} />;
 }

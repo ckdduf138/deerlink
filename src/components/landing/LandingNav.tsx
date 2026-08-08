@@ -1,36 +1,35 @@
 "use client";
 
-import { motion } from "framer-motion";
 import Link from "next/link";
 import { AntlerLogo } from "./AntlerLogo";
 
 export function LandingNav() {
   return (
-    <motion.nav
-      initial={{ opacity: 0, y: -8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-      className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-10 py-5 bg-transparent backdrop-blur-md border-b border-transparent"
-    >
-      <span className="flex items-center gap-2 text-sm font-semibold text-stone-900 tracking-tight">
-        <AntlerLogo className="w-3.5 h-[18px] text-amber-500" />
-        Deerlink
-      </span>
+    <nav className="fixed inset-x-0 top-0 z-50 border-b border-amber-100 bg-[#fafaf8]/90 backdrop-blur-md">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
+        <Link
+          href="/"
+          className="flex min-h-11 items-center gap-2 text-base font-semibold tracking-tight text-stone-900"
+        >
+          <AntlerLogo className="h-[18px] w-3.5 text-amber-500" />
+          Deerlink
+        </Link>
 
-      <div className="flex items-center gap-5">
-        <Link
-          href="/popular"
-          className="text-sm text-stone-600 hover:text-stone-900 transition-colors duration-200"
-        >
-          인기 질문
-        </Link>
-        <Link
-          href="/create"
-          className="text-sm text-stone-600 hover:text-stone-900 transition-colors duration-200"
-        >
-          방 만들기 &rarr;
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/popular"
+            className="flex min-h-11 items-center px-3 text-base text-stone-600 transition-colors duration-200 hover:text-stone-900"
+          >
+            인기 질문
+          </Link>
+          <Link
+            href="/create"
+            className="flex min-h-11 items-center rounded-xl bg-amber-700 px-5 text-base font-semibold text-white transition-colors duration-200 hover:bg-amber-600"
+          >
+            방 만들기
+          </Link>
+        </div>
       </div>
-    </motion.nav>
+    </nav>
   );
 }

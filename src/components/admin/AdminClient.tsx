@@ -4,26 +4,8 @@ import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronDown, ChevronUp, Trash2, LogOut, Users, MessageSquare, Clock, Copy, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { parseOptions, type AdminRoom, type Question } from "@/lib/types";
 
-type Answer = { id: string; questionId: string; value: string };
-type Participant = { id: string; nickname: string; answers: Answer[] };
-type Question = {
-  id: string;
-  type: string;
-  title: string;
-  optionA: string | null;
-  optionB: string | null;
-  options: string | null;
-  order: number;
-};
-type Room = {
-  id: string;
-  title: string;
-  createdAt: string;
-  expiresAt: string;
-  questions: Question[];
-  participants: Participant[];
-};
 
 type SortKey = "recent" | "participants";
 
@@ -43,17 +25,12 @@ function isExpired(expiresAt: string) {
 function getAnswerLabel(question: Question, value: string) {
   if (question.type === "balance") return value === "A" ? question.optionA ?? "A" : question.optionB ?? "B";
   if (question.type === "multiple") {
-    try {
-      const opts = JSON.parse(question.options ?? "[]") as string[];
-      return opts[parseInt(value)] ?? value;
-    } catch {
-      return value;
-    }
+    return parseOptions(question.options)[Number(value)] ?? value;
   }
   return value;
 }
 
-function RoomDetail({ room }: { room: Room }) {
+function RoomDetail({ room }: { room: AdminRoom }) {
   const { questions, participants } = room;
 
   if (participants.length === 0) {
@@ -93,7 +70,7 @@ function RoomDetail({ room }: { room: Room }) {
   );
 }
 
-function RoomRow({ room, onDelete }: { room: Room; onDelete: (id: string) => void }) {
+function RoomRow({ room, onDelete }: { room: AdminRoom; onDelete: (id: string) => void }) {
   const [expanded, setExpanded] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirm, setConfirm] = useState(false);
@@ -165,7 +142,7 @@ function RoomRow({ room, onDelete }: { room: Room; onDelete: (id: string) => voi
           <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
             <button
               onClick={handleCopy}
-              className="p-1.5 rounded-lg text-stone-400 hover:text-amber-600 hover:bg-amber-50 transition-colors"
+              className="p-1.5 rounded-lg text-stone-500 hover:text-amber-700 hover:bg-amber-50 transition-colors"
               title="방 링크 복사"
             >
               {copied ? <Check className="w-3.5 h-3.5 text-amber-600" /> : <Copy className="w-3.5 h-3.5" />}
@@ -177,7 +154,7 @@ function RoomRow({ room, onDelete }: { room: Room; onDelete: (id: string) => voi
                 "text-xs px-2.5 py-1.5 rounded-lg transition-colors",
                 confirm
                   ? "bg-red-500 text-white"
-                  : "text-stone-400 hover:text-red-500 hover:bg-red-50"
+                  : "text-stone-500 hover:text-red-600 hover:bg-red-50"
               )}
             >
               {deleting ? "..." : confirm ? "확인" : <Trash2 className="w-3.5 h-3.5" />}
@@ -195,7 +172,7 @@ function RoomRow({ room, onDelete }: { room: Room; onDelete: (id: string) => voi
   );
 }
 
-export function AdminClient({ initialRooms }: { initialRooms: Room[] }) {
+export function AdminClient({ initialRooms }: { initialRooms: AdminRoom[] }) {
   const [rooms, setRooms] = useState(initialRooms);
   const [sort, setSort] = useState<SortKey>("recent");
   const router = useRouter();
