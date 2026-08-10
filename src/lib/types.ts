@@ -47,7 +47,20 @@ export interface AdminRoom extends ResultsRoom {
   createdAt: string;
 }
 
-/** 공개방 발견 피드 카드 — 참여자 닉네임·답변은 담지 않는다. Answer Lock과 무관한 디렉터리다. */
+/**
+ * 첫 질문 미리보기 — 밸런스 게임만 실시간 비율을 함께 보여준다. 공개방은 결과 열람에
+ * Answer Lock이 없으니(참고: room.isPublic) 카드에 집계 숫자를 노출해도 원칙에 어긋나지 않는다.
+ */
+export interface DiscoverPreviewQuestion {
+  type: QuestionType;
+  title: string;
+  optionA: string | null;
+  optionB: string | null;
+  countA: number;
+  countB: number;
+}
+
+/** 공개방 발견 피드 카드 — 참여자 닉네임·개별 답변은 담지 않는다. Answer Lock과 무관한 디렉터리다. */
 export interface DiscoverRoom {
   id: string;
   title: string;
@@ -55,6 +68,7 @@ export interface DiscoverRoom {
   participantCount: number;
   createdAt: string;
   expiresAt: string;
+  previewQuestion: DiscoverPreviewQuestion | null;
 }
 
 /** DB의 options는 JSON 문자열이다. 깨져 있어도 화면이 죽지 않아야 한다. */

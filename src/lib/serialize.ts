@@ -106,7 +106,20 @@ export function serializeDiscoverRoom(room: {
   createdAt: Date;
   expiresAt: Date;
   _count: { questions: number; participants: number };
+  questions?: (DbQuestion & { answers: { value: string }[] })[];
 }): DiscoverRoom {
+  const first = room.questions?.[0];
+  const previewQuestion = first
+    ? {
+        type: first.type as QuestionType,
+        title: first.title,
+        optionA: first.optionA,
+        optionB: first.optionB,
+        countA: first.answers.filter((a) => a.value === "A").length,
+        countB: first.answers.filter((a) => a.value === "B").length,
+      }
+    : null;
+
   return {
     id: room.id,
     title: room.title,
@@ -114,6 +127,7 @@ export function serializeDiscoverRoom(room: {
     participantCount: room._count.participants,
     createdAt: room.createdAt.toISOString(),
     expiresAt: room.expiresAt.toISOString(),
+    previewQuestion,
   };
 }
 

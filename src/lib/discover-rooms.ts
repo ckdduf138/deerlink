@@ -26,6 +26,21 @@ export async function getPublicRooms({
   // "답변 많은순"은 참여자 수 × 질문 수의 곱이라 DB의 orderBy 한 번으로 못 낸다.
   // 공개방 규모가 아직 작으니(운영 트래픽이 실제로 커지기 전까지는) 전부 불러와 JS에서
   // 정렬하는 쪽이 raw SQL을 새로 짜는 것보다 단순하다 — admin 목록도 이미 이렇게 한다.
+  const previewSelect = {
+    orderBy: { order: "asc" as const },
+    take: 1,
+    select: {
+      type: true,
+      title: true,
+      optionA: true,
+      optionB: true,
+      options: true,
+      order: true,
+      id: true,
+      answers: { select: { value: true } },
+    },
+  };
+
   if (sort === "answers") {
     const all = await prisma.room.findMany({
       where,
@@ -35,6 +50,7 @@ export async function getPublicRooms({
         createdAt: true,
         expiresAt: true,
         _count: { select: { questions: true, participants: true } },
+        questions: previewSelect,
       },
     });
     const sorted = all.sort(
@@ -59,6 +75,7 @@ export async function getPublicRooms({
         createdAt: true,
         expiresAt: true,
         _count: { select: { questions: true, participants: true } },
+        questions: previewSelect,
       },
       orderBy:
         sort === "popular"

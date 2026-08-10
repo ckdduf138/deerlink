@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Scale, ListChecks, PenLine } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { AntlerLogo } from "@/components/landing/AntlerLogo";
 import { POPULAR_QUESTIONS } from "@/data/popular-questions";
+import { QUESTION_META } from "@/lib/question-meta";
+import type { QuestionType } from "@/lib/types";
 
 export const metadata: Metadata = {
   title: "밸런스게임 질문 모음 28선 - 단톡방·MT에서 바로 쓰는 인기 질문",
@@ -76,9 +78,6 @@ export default function PopularPage() {
 
       <main className="max-w-3xl mx-auto px-6 pt-32 pb-24">
         <header className="mb-16">
-          <div className="text-xs text-stone-600 uppercase tracking-widest mb-4">
-            인기 질문 모음
-          </div>
           <h1 className="text-4xl md:text-5xl font-bold text-stone-900 tracking-tight leading-[1.1] mb-6">
             단톡방에서 바로 쓰는
             <br />
@@ -99,11 +98,10 @@ export default function PopularPage() {
         </header>
 
         <Section
-          eyebrow={`밸런스게임 ${balance.length}선`}
+          type="balance"
+          count={balance.length}
           title="둘 중 하나만 골라야 한다면?"
           description="가치관, 취향, 인간관계까지, 양자택일로 친구들의 진짜 생각을 확인하는 질문들이에요. 단톡방, MT, 커플 데이트에서 가장 많이 쓰는 유형."
-          icon={Scale}
-          color="amber"
         >
           <ol className="space-y-4">
             {balance.map((q, i) => (
@@ -131,11 +129,10 @@ export default function PopularPage() {
         </Section>
 
         <Section
-          eyebrow={`객관식 ${multiple.length}선`}
+          type="multiple"
+          count={multiple.length}
           title="여러 선택지 중에 가장 가까운 건?"
           description="간단한 객관식 질문으로 그룹 내 성향을 빠르게 비교. 가치관 테스트, 팀 빌딩, 아이스브레이킹에 잘 맞아요."
-          icon={ListChecks}
-          color="teal"
         >
           <ol className="space-y-4">
             {multiple.map((q, i) => (
@@ -166,11 +163,10 @@ export default function PopularPage() {
         </Section>
 
         <Section
-          eyebrow={`주관식 ${subjective.length}선`}
+          type="subjective"
+          count={subjective.length}
           title="자유롭게 답하는 질문들"
           description="형식 없는 짧은 답변으로 의외의 진심을 모으는 질문. 모임의 마지막에 던지면 분위기가 깊어져요."
-          icon={PenLine}
-          color="stone"
         >
           <ol className="space-y-4">
             {subjective.map((q, i) => (
@@ -208,9 +204,7 @@ export default function PopularPage() {
         </section>
 
         <footer className="mt-16 pt-8 border-t border-stone-200 text-center">
-          <p className="text-xs text-stone-600">
-            &copy; 2026 Deerlink &middot; 링크 하나로 그룹 의견 비교
-          </p>
+          <p className="text-xs text-stone-600">&copy; 2026 Deerlink</p>
         </footer>
       </main>
     </div>
@@ -218,38 +212,35 @@ export default function PopularPage() {
 }
 
 function Section({
-  eyebrow,
+  type,
+  count,
   title,
   description,
-  icon: Icon,
-  color,
   children,
 }: {
-  eyebrow: string;
+  type: QuestionType;
+  count: number;
   title: string;
   description: string;
-  icon: typeof Scale;
-  color: "amber" | "teal" | "stone";
   children: React.ReactNode;
 }) {
-  const colorMap = {
-    amber: "text-amber-500",
-    teal: "text-teal-500",
-    stone: "text-stone-600",
-  };
+  const meta = QUESTION_META[type];
+  const Icon = meta.icon;
   return (
     <section className="mt-16">
       <div className="mb-8">
-        <div className="flex items-center gap-2 text-xs text-stone-600 uppercase tracking-widest mb-3">
-          <Icon className={`w-3.5 h-3.5 ${colorMap[color]}`} />
-          {eyebrow}
-        </div>
-        <h2 className="text-2xl md:text-3xl font-bold text-stone-900 tracking-tight mb-3">
+        <h2 className="flex items-center gap-2.5 text-2xl md:text-3xl font-bold text-stone-900 tracking-tight mb-3">
+          <Icon className={`h-5 w-5 flex-shrink-0 ${meta.accent}`} />
           {title}
         </h2>
         <p className="text-sm text-stone-600 leading-relaxed max-w-xl">
           {description}
         </p>
+        <span
+          className={`mt-4 inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium ${meta.badge}`}
+        >
+          {meta.longLabel} {count}선
+        </span>
       </div>
       {children}
     </section>

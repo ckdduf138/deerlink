@@ -6,8 +6,10 @@ import { Flame, ListChecks, Loader2, MessagesSquare, Users } from "lucide-react"
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { formatRemaining } from "@/lib/format";
-import type { DiscoverRoom } from "@/lib/types";
+import type { DiscoverPreviewQuestion, DiscoverRoom } from "@/lib/types";
 import type { DiscoverSort } from "@/lib/discover-rooms";
+import { QUESTION_META } from "@/lib/question-meta";
+import { BalanceRatioBar } from "@/components/ResultBar";
 
 /**
  * /discover 페이지와 랜딩 페이지가 공유하는 공개방 목록 UI다.
@@ -145,6 +147,7 @@ export function PublicRoomsFeed({
                       {formatRemaining(room.expiresAt)} 남음
                     </span>
                   </div>
+                  {room.previewQuestion && <QuestionPreview question={room.previewQuestion} />}
                 </Link>
               </motion.div>
             ))}
@@ -161,6 +164,51 @@ export function PublicRoomsFeed({
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "더 보기"}
         </button>
       )}
+    </div>
+  );
+}
+
+/**
+ * 카드 안에서 첫 질문을 미리 보여준다 — "링크 하나로 그룹이 답한다"는 게 실제로
+ * 어떤 화면인지 클릭 전에 보여줘서 호기심을 끈다. 밸런스 게임은 답변이 있으면
+ * 결과 페이지와 같은 BalanceRatioBar로 실시간 비율까지 보여준다.
+ */
+function QuestionPreview({ question }: { question: DiscoverPreviewQuestion }) {
+  const meta = QUESTION_META[question.type];
+  const Icon = meta.icon;
+  const total = question.countA + question.countB;
+
+  if (question.type === "balance" && total > 0) {
+    return (
+      <div className="mt-4 border-t border-stone-100 pt-4">
+        <BalanceRatioBar
+          a={{ label: question.optionA ?? "A", count: question.countA }}
+          b={{ label: question.optionB ?? "B", count: question.countB }}
+        />
+      </div>
+    );
+  }
+
+  if (question.type === "balance") {
+    return (
+      <div className="mt-4 border-t border-stone-100 pt-4">
+        <p className="mb-2 text-sm text-stone-700 leading-snug">{question.title}</p>
+        <div className="grid grid-cols-2 gap-2">
+          <span className="truncate rounded-lg border border-amber-100 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-900 text-center">
+            {question.optionA}
+          </span>
+          <span className="truncate rounded-lg border border-teal-100 bg-teal-50 px-3 py-1.5 text-xs font-medium text-teal-900 text-center">
+            {question.optionB}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-4 flex items-start gap-1.5 border-t border-stone-100 pt-4 text-sm text-stone-700">
+      <Icon className={cn("mt-0.5 h-3.5 w-3.5 flex-shrink-0", meta.accent)} />
+      <span className="leading-snug">{question.title}</span>
     </div>
   );
 }
