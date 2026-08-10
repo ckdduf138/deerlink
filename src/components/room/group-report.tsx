@@ -43,26 +43,32 @@ export function GroupReport({ room }: { room: ResultsRoom }) {
         </div>
       </div>
 
+      {best && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.92 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.15 }}
+          className="mb-4 flex items-end justify-between gap-4 rounded-xl bg-white/70 px-5 py-5"
+        >
+          <div className="min-w-0">
+            <p className="text-xs text-stone-500 mb-1">
+              {room.participants.length === 2 ? "우리 둘의 일치도" : "나랑 제일 비슷한 조합"}
+            </p>
+            <p className="truncate text-base font-semibold text-stone-900">
+              {best.a.nickname} · {best.b.nickname}
+            </p>
+            {tiedForBest && room.participants.length >= 3 && (
+              <p className="mt-0.5 text-[11px] text-stone-500">동률인 조합이 더 있어요</p>
+            )}
+          </div>
+          <div className="flex flex-shrink-0 items-baseline gap-0.5 text-amber-700">
+            <span className="text-4xl font-extrabold tabular-nums leading-none">{best.pct}</span>
+            <span className="text-lg font-bold">%</span>
+          </div>
+        </motion.div>
+      )}
+
       <div className="space-y-3">
-        {best && room.participants.length === 2 && (
-          <ReportRow
-            label="우리 둘의 일치도"
-            value={`${best.a.nickname} · ${best.b.nickname}`}
-            pct={best.pct}
-            tone="amber"
-          />
-        )}
-
-        {best && room.participants.length >= 3 && (
-          <ReportRow
-            label="나랑 제일 비슷한 조합"
-            value={`${best.a.nickname} · ${best.b.nickname}`}
-            pct={best.pct}
-            tone="amber"
-            note={tiedForBest ? "동률인 조합이 더 있어요" : undefined}
-          />
-        )}
-
         {showWorst && (
           <ReportRow
             label="제일 다른 조합"

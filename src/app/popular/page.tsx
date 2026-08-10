@@ -5,14 +5,14 @@ import { AntlerLogo } from "@/components/landing/AntlerLogo";
 import { POPULAR_QUESTIONS } from "@/data/popular-questions";
 
 export const metadata: Metadata = {
-  title: "밸런스게임 질문 모음 20선 - 단톡방·MT에서 바로 쓰는 인기 질문",
+  title: "밸런스게임 질문 모음 28선 - 단톡방·MT에서 바로 쓰는 인기 질문",
   description:
-    "친구들과 단톡방, MT, 회식, 술자리에서 바로 쓸 수 있는 인기 밸런스게임 질문 8개, 객관식 7개, 주관식 5개를 모았어요. 골라서 링크 하나로 공유, 모두 답하면 결과 공개.",
+    "친구들과 단톡방, MT, 회식, 술자리에서 바로 쓸 수 있는 인기 밸런스게임 질문 11개, 객관식 10개, 주관식 7개를 모았어요. 골라서 링크 하나로 공유, 모두 답하면 결과 공개.",
   alternates: {
     canonical: "/popular",
   },
   openGraph: {
-    title: "밸런스게임 질문 모음 20선 | Deerlink",
+    title: "밸런스게임 질문 모음 28선 | Deerlink",
     description:
       "단톡방·MT에서 바로 쓰는 인기 밸런스게임, 객관식, 주관식 질문 모음. 링크 하나로 공유.",
     url: "/popular",
@@ -40,7 +40,7 @@ const subjective = POPULAR_QUESTIONS.filter((q) => q.type === "subjective");
 const itemListJsonLd = {
   "@context": "https://schema.org",
   "@type": "ItemList",
-  name: "밸런스게임 질문 모음 20선",
+  name: "밸런스게임 질문 모음 28선",
   description: "단톡방, MT, 술자리에서 바로 쓰는 인기 질문 모음",
   numberOfItems: POPULAR_QUESTIONS.length,
   itemListElement: POPULAR_QUESTIONS.map((q, i) => ({
@@ -82,7 +82,7 @@ export default function PopularPage() {
           <h1 className="text-4xl md:text-5xl font-bold text-stone-900 tracking-tight leading-[1.1] mb-6">
             단톡방에서 바로 쓰는
             <br />
-            <span className="text-stone-500">밸런스게임 질문 20선</span>
+            <span className="text-stone-500">밸런스게임 질문 28선</span>
           </h1>
           <p className="text-base text-stone-600 leading-relaxed mb-8 max-w-xl">
             친구들과 단톡방·MT·술자리·회식에서 바로 쓸 수 있는 밸런스게임,

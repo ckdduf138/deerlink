@@ -63,7 +63,7 @@ src/
 │   ├── ResultBar.tsx       # 밸런스 게임 결과 비율 막대 (아래 "결과 시각화" 참고)
 │   └── ui/                 # shadcn/ui (수정 금지)
 ├── data/
-│   ├── popular-questions.ts   # id 붙은 인기 질문 20개 (단일 출처)
+│   ├── popular-questions.ts   # id 붙은 인기 질문 28개 (단일 출처)
 │   └── question-packs.ts      # 질문팩 — popular-questions를 id로 참조
 └── lib/
     ├── prisma.ts               # Prisma client 싱글턴 (libSQL adapter)
@@ -339,20 +339,22 @@ const room = await prisma.room.findUnique({
 
 ---
 
-## 인기 질문 · 질문팩
+## 인기 질문 · 질문 테마
 
-`popular-questions.ts`의 20문항이 유일한 출처다. 각 문항은 안정적인 `id`(예: `b-tangsuyuk`)를 갖는다.
+`popular-questions.ts`의 28문항이 유일한 출처다. 각 문항은 안정적인 `id`(예: `b-tangsuyuk`)를 갖는다.
 
-- `question-packs.ts`의 팩은 **문항 텍스트를 복사하지 않고 `id` 배열로 참조**한다. 팩에 새 문항이 필요하면 먼저 `popular-questions.ts`에 `id`를 붙여 추가하고, 팩 정의에서는 그 id만 적을 것. 텍스트를 두 곳에 적으면 나중에 한쪽만 고치는 사고가 난다.
-- 팩 하나는 5문항, 여러 유형을 섞는다. 같은 문항을 두 팩에 중복으로 넣지 않는다 — 사용자가 여러 팩을 훑어볼 때 겹치면 재탕처럼 보인다.
-- `/create`에서 팩을 고르면 `CreateEditor`에 `initialSource="pack"`으로 들어간다. `initialSource="storage"`(기본값)만 "작성 중이던 내용을 불러왔어요" 배너를 띄운다 — 팩 선택은 복원이 아니라 사용자가 방금 고른 것이니 혼동하지 말 것.
+사용자에게 보이는 명칭은 **테마**다 ("팩"은 2026-08에 "테마"로 바꿨다 — `PackPicker`/`question-packs.ts`/`QuestionPack`/`initialSource="pack"` 같은 코드 식별자는 그대로 두고, 화면에 노출되는 문구만 바꿨다는 뜻. 새 코드에서도 변수명은 `pack` 계열을 그대로 쓰고, 사용자 문구에서만 "테마"라고 쓸 것 — 식별자까지 바꾸는 전면 리네임은 하지 않았다).
+
+- `question-packs.ts`의 테마 정의는 **문항 텍스트를 복사하지 않고 `id` 배열로 참조**한다. 테마에 새 문항이 필요하면 먼저 `popular-questions.ts`에 `id`를 붙여 추가하고, 테마 정의에서는 그 id만 적을 것. 텍스트를 두 곳에 적으면 나중에 한쪽만 고치는 사고가 난다.
+- 테마 하나는 5문항, 여러 유형을 섞는다. 같은 문항을 두 테마에 중복으로 넣지 않는다 — 사용자가 여러 테마를 훑어볼 때 겹치면 재탕처럼 보인다.
+- `/create`에서 테마를 고르면 `CreateEditor`에 `initialSource="pack"`으로 들어간다. `initialSource="storage"`(기본값)만 "작성 중이던 내용을 불러왔어요" 배너를 띄운다 — 테마 선택은 복원이 아니라 사용자가 방금 고른 것이니 혼동하지 말 것.
 
 ---
 
 ## DB 스키마 요약
 
 ```
-Room         id(cuid), title, createdAt, expiresAt
+Room         id(cuid), title, isPublic(기본 false), createdAt, expiresAt
 Question     id, roomId, type, title, optionA?, optionB?, options?(JSON), order
 Participant  id, roomId, nickname, createdAt
 Answer       id, questionId, participantId, value
@@ -372,7 +374,7 @@ Answer       id, questionId, participantId, value
 
 ### Answer Lock
 
-남의 답변은 **본인이 전 문항을 답한 뒤에만** 보인다. 방 참여만으로는 부족하다.
+남의 답변은 **본인이 전 문항을 답한 뒤에만** 보인다. 방 참여만으로는 부족하다. **단, `room.isPublic`이 true인 방은 이 게이트를 건너뛴다** — 공개방은 링크를 아는 누구나 답변 없이 결과를 볼 수 있는 게 의도된 동작이다 (`results/page.tsx`에서 `!room.isPublic && !hasCompletedAnswers(...)`로 체크).
 
 ```tsx
 import { hasCompletedAnswers, participantCookieName } from "@/lib/participant-session";
@@ -380,13 +382,16 @@ import { hasCompletedAnswers, participantCookieName } from "@/lib/participant-se
 const participantId = request.cookies.get(participantCookieName(roomId))?.value;
 const viewer = participants.find((p) => p.id === participantId);
 
-if (!hasCompletedAnswers(viewer, room.questions.length)) {
+if (!room.isPublic && !hasCompletedAnswers(viewer, room.questions.length)) {
   // participants[].answers 를 응답에 포함하지 말 것
 }
 ```
 
 - `participant_<roomId>` 쿠키는 **`POST /api/rooms/[id]/answers` 응답에서 서버가 httpOnly로 굽는다.** 클라이언트에서 `document.cookie`로 심지 말 것.
-- 답변 데이터를 반환하는 새 엔드포인트를 만들면 반드시 같은 게이트를 통과시킬 것.
+- 답변 데이터를 반환하는 새 엔드포인트를 만들면 반드시 같은 게이트를 통과시킬 것 (단 위의 공개방 예외는 지킬 것).
+- `GroupReport`(궁합·소수파 통계)는 공개방에서 **숨긴다** (`!room.isPublic && ...`). "지우와 87% 일치"는 이름 붙은 우리 그룹 전제인데, 공개방은 서로 모르는 사람들이 보는 결과라 그 전제가 깨진다. 참여자별 `ResultBar` 집계는 공개방에서도 그대로 보여준다 — 숨기는 건 궁합 계산뿐이다.
+- **공개방은 익명이다** (2026-08 추가). `POST /api/rooms/[id]/answers`는 `room.isPublic`이면 클라이언트가 보낸 닉네임을 무시하고 서버가 `참여자 N`을 자동으로 붙인다. `Participant.nickname`은 공개방에서는 실명이 아니라 서버가 만든 placeholder다 — **새 화면에서 닉네임을 신원처럼 쓰기 전에 반드시 `room.isPublic`을 확인할 것.** 결과 화면의 참여자별 롤스터·투표자 칩·참여자 목록 카드는 공개방에서 전부 숨기고 집계 막대·숫자만 보여준다 (`results-client.tsx`의 `anonymous` prop). `share-card.tsx`의 궁합 칩도 같은 이유로 `!room.isPublic`일 때만 계산한다 — 예전엔 이 게이트가 빠져 있었다.
+- **공개방 발견 피드**(`/discover`, 랜딩의 `DiscoverTeaserSection`, `PackPicker`의 링크)도 2026-08에 붙었다. `GET /api/rooms/discover`가 페이지네이션(최신순/인기순/답변 많은순)을 맡고, `src/lib/discover-rooms.ts`의 `getPublicRooms()` 하나만 랜딩·피드 페이지·API 라우트가 공유한다 — 목록 쿼리를 각자 다시 짜지 말 것. **신고·숨김 같은 모더레이션은 아직 없다** — 낯선 방문자에게 노출되는 표면인데도 사용자 요청으로 이번 범위에서 의도적으로 뺐다. 나중에 붙일 때 숨김 처리는 **어드민 페이지에서만** 하기로 이미 정했다 (공개 피드에 신고 버튼 같은 걸 노출하지 말 것).
 
 ### 어드민
 
@@ -398,7 +403,7 @@ if (!hasCompletedAnswers(viewer, room.questions.length)) {
 
 - 어드민 로그인에 브루트포스 방어 없음.
 - 레이트리밋이 메모리 기반이라 멀티 인스턴스 배포에서는 인스턴스별로 카운터가 따로 논다. 트래픽이 실제로 커지면 Upstash/KV 같은 공유 저장소로 옮길 것.
-- 참여자 중복 제출 방지는 쿠키/리다이렉트뿐이다 (`/room/[id]/page.tsx`가 기존 참여자를 결과로 돌려보냄). 시크릿 모드·쿠키 삭제로 우회 가능 — 친구 그룹 규모에서는 사회적으로 자정된다고 보고 의도적으로 막지 않았다. 무제한 재투표를 허용하는 공개 모드는 계획에서 제외했다 (푸슝·PIKU가 이미 점유한 자리와 겹친다).
+- 참여자 중복 제출 방지는 쿠키/리다이렉트뿐이다 (`/room/[id]/page.tsx`가 기존 참여자를 결과로 돌려보냄). 시크릿 모드·쿠키 삭제로 우회 가능 — 친구 그룹 규모에서는 사회적으로 자정된다고 보고 의도적으로 막지 않았다. 공개방 익명화(위 참고) 이후에도 이건 안 바뀌었다: 답변은 여전히 참여자당 1회(`@@unique([questionId, participantId])`)로 막혀 있다. **무제한 재투표를 허용하는 모드는 여전히 계획에서 제외**되어 있다 (푸슝·PIKU가 이미 점유한 자리와 겹친다). "닉네임을 안 받는다"(신원 비공개)와 "몇 번이든 답할 수 있다"(무제한 재투표)는 서로 다른 결정이다 — 공개방의 익명 참여를 이유로 재투표 제한까지 같이 풀지 말 것.
 
 ---
 
@@ -443,7 +448,16 @@ yarn lint         # ESLint
 npx prisma studio # DB 관리 UI
 ```
 
-**주의**: `.env`가 프로덕션 Turso를 가리킨다. 로컬에서 데이터를 쓰는 실험을 할 땐 `TURSO_DATABASE_URL`/`DATABASE_URL`을 `file:` 로컬 DB로 덮어쓸 것.
+**주의**: `.env`가 프로덕션 Turso를 가리킨다. `src/lib/prisma.ts`는 `TURSO_DATABASE_URL`을 `DATABASE_URL`보다 먼저 본다 — 즉 아무 설정 없이 `yarn dev`를 돌리면 로컬 실험이 그대로 프로덕션 DB에 씁니다.
+
+**로컬 실험은 반드시 `.env.local`로 덮어쓸 것.** 쉘에서 `TURSO_DATABASE_URL=` 처럼 값만 비우거나 `env -u`로 지워도 소용없다 — Next.js가 프로세스 시작 후 자체적으로 `.env`를 다시 읽어서 그 값을 채워 넣는다. `.env.local`은 `.env`보다 우선순위가 높고 `.gitignore`에 이미 걸려 있어서, 여기서 덮어쓴 값만 실제로 이긴다.
+
+```
+# .env.local — 로컬에서만, 절대 커밋되지 않는다
+TURSO_DATABASE_URL="file:./dev.db"
+TURSO_AUTH_TOKEN=
+DATABASE_URL="file:./dev.db"
+```
 
 ### 환경 변수
 

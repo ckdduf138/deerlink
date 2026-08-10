@@ -1,6 +1,7 @@
 import type {
   AdminRoom,
   Answer,
+  DiscoverRoom,
   LobbyRoom,
   Participant,
   ParticipantSummary,
@@ -38,6 +39,7 @@ interface DbParticipant {
 interface DbRoom {
   id: string;
   title: string;
+  isPublic: boolean;
   expiresAt: Date;
   questions: DbQuestion[];
 }
@@ -78,6 +80,7 @@ export function serializeLobbyRoom(
   return {
     id: room.id,
     title: room.title,
+    isPublic: room.isPublic,
     expiresAt: room.expiresAt.toISOString(),
     questions: room.questions.map(serializeQuestion),
     participants: room.participants.map(serializeSummary),
@@ -90,9 +93,27 @@ export function serializeResultsRoom(
   return {
     id: room.id,
     title: room.title,
+    isPublic: room.isPublic,
     expiresAt: room.expiresAt.toISOString(),
     questions: room.questions.map(serializeQuestion),
     participants: room.participants.map(serializeParticipant),
+  };
+}
+
+export function serializeDiscoverRoom(room: {
+  id: string;
+  title: string;
+  createdAt: Date;
+  expiresAt: Date;
+  _count: { questions: number; participants: number };
+}): DiscoverRoom {
+  return {
+    id: room.id,
+    title: room.title,
+    questionCount: room._count.questions,
+    participantCount: room._count.participants,
+    createdAt: room.createdAt.toISOString(),
+    expiresAt: room.expiresAt.toISOString(),
   };
 }
 

@@ -27,12 +27,13 @@ export default async function ResultsPage({
 
   if (!room) notFound();
 
-  // 모든 질문에 답변한 참여자만 결과 열람 가능
+  // 모든 질문에 답변한 참여자만 결과 열람 가능 — 단, 공개방은 링크를 아는
+  // 아무나 결과를 볼 수 있는 게 의도된 동작이라 이 게이트를 건너뛴다.
   const cookieStore = await cookies();
   const participantId = cookieStore.get(participantCookieName(id))?.value;
   const viewer = room.participants.find((p) => p.id === participantId);
 
-  if (!hasCompletedAnswers(viewer, room.questions.length)) {
+  if (!room.isPublic && !hasCompletedAnswers(viewer, room.questions.length)) {
     return (
       <div className="min-h-screen bg-[#fafaf8] flex flex-col items-center justify-center gap-6 px-4">
         <AntlerLogo className="w-10 h-12 text-stone-300" />

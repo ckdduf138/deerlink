@@ -106,7 +106,7 @@ export function AnswerMode({
           <span className="text-xs text-stone-600 font-mono tabular-nums">
             {currentQ + 1} / {room.questions.length}
           </span>
-          <span className="text-xs text-stone-600">{nickname}</span>
+          {nickname && <span className="text-xs text-stone-600">{nickname}</span>}
         </div>
         <div
           className="h-0.5 bg-stone-200 rounded-full overflow-hidden"

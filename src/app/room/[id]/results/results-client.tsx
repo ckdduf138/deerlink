@@ -31,9 +31,11 @@ import { ShareCard } from "./share-card";
 function BalanceResult({
   question,
   participants,
+  anonymous,
 }: {
   question: Question;
   participants: Participant[];
+  anonymous: boolean;
 }) {
   const answers = participants
     .map((p) => ({
@@ -55,46 +57,36 @@ function BalanceResult({
         b={{ label: question.optionB ?? "B", count: countB }}
       />
 
-      {/* Individual answers */}
-      <div className="space-y-1.5">
-        {answers.map((a, i) => {
-          const isA = a.value === "A";
-          return (
-            <motion.div
-              key={a.id}
-              initial={{ opacity: 0, x: -8 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.07 + 0.3, duration: 0.3 }}
-              className="flex items-center justify-between py-1"
-            >
-              <div className="flex items-center gap-2">
-                <div
+      {/* Individual answers — 익명 공개방은 참여자별로 풀지 않고 집계만 보여준다 */}
+      {!anonymous && (
+        <div className="space-y-1.5">
+          {answers.map((a, i) => {
+            const isA = a.value === "A";
+            return (
+              <motion.div
+                key={a.id}
+                initial={{ opacity: 0, x: -8 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.07 + 0.3, duration: 0.3 }}
+                className="flex items-center justify-between py-1"
+              >
+                <span className="text-sm text-stone-700">{a.nickname}</span>
+                <span
                   className={cn(
-                    "w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold",
+                    "text-[11px] px-2 py-0.5 rounded-md border font-medium",
                     isA
-                      ? "bg-amber-100 text-amber-700"
-                      : "bg-teal-100 text-teal-700"
+                      ? "bg-amber-50 border-amber-100 text-amber-900"
+                      : "bg-teal-50 border-teal-100 text-teal-900"
                   )}
                 >
-                  {a.nickname[0].toUpperCase()}
-                </div>
-                <span className="text-sm text-stone-700">{a.nickname}</span>
-              </div>
-              <span
-                className={cn(
-                  "text-[11px] px-2 py-0.5 rounded-md border font-medium",
-                  isA
-                    ? "bg-amber-50 border-amber-100 text-amber-900"
-                    : "bg-teal-50 border-teal-100 text-teal-900"
-                )}
-              >
-                {isA ? question.optionA : question.optionB}
-              </span>
-            </motion.div>
-          );
-        })}
-      </div>
+                  {isA ? question.optionA : question.optionB}
+                </span>
+              </motion.div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Majority note */}
       {total >= 2 && (countA !== countB) && (
@@ -121,9 +113,11 @@ function BalanceResult({
 function MultipleResult({
   question,
   participants,
+  anonymous,
 }: {
   question: Question;
   participants: Participant[];
+  anonymous: boolean;
 }) {
   const options = parseOptions(question.options);
   const answers = participants
@@ -162,7 +156,7 @@ function MultipleResult({
                 style={{ width: `${pct}%` }}
               />
             </div>
-            {voters.length > 0 && (
+            {!anonymous && voters.length > 0 && (
               <div className="flex flex-wrap gap-1">
                 {voters.map((v) => (
                   <motion.span
@@ -190,9 +184,11 @@ function MultipleResult({
 function SubjectiveResult({
   question,
   participants,
+  anonymous,
 }: {
   question: Question;
   participants: Participant[];
+  anonymous: boolean;
 }) {
   const answers = participants
     .map((p) => ({
@@ -217,12 +213,11 @@ function SubjectiveResult({
           transition={{ delay: i * 0.08, duration: 0.3 }}
           className="rounded-xl border border-amber-100 bg-amber-50 p-4"
         >
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-4 h-4 rounded-full bg-amber-100 flex items-center justify-center text-[9px] font-bold text-amber-700">
-              {a.nickname![0].toUpperCase()}
-            </div>
-            <span className="text-[11px] text-stone-700">{a.nickname}</span>
-          </div>
+          {!anonymous && (
+            <span className="mb-2 block text-[11px] font-medium text-stone-500">
+              {a.nickname}
+            </span>
+          )}
           <p className="text-sm text-stone-700 leading-relaxed">{a.value}</p>
         </motion.div>
       ))}
@@ -249,14 +244,18 @@ export function ResultsClient({ room }: { room: ResultsRoom }) {
   const [imageBusy, setImageBusy] = useState(false);
   const shareCardRef = useRef<HTMLDivElement>(null);
 
-  const unanimousCount = room.questions.filter((q) => {
-    if (q.type === "subjective") return false;
-    const values = room.participants
-      .flatMap((p) => p.answers.filter((a) => a.questionId === q.id))
-      .map((a) => a.value);
-    if (values.length < 2) return false;
-    return new Set(values).size === 1;
-  }).length;
+  const unanimousQuestionIds = new Set(
+    room.questions
+      .filter((q) => {
+        if (q.type === "subjective") return false;
+        const values = room.participants
+          .flatMap((p) => p.answers.filter((a) => a.questionId === q.id))
+          .map((a) => a.value);
+        return values.length >= 2 && new Set(values).size === 1;
+      })
+      .map((q) => q.id)
+  );
+  const unanimousCount = unanimousQuestionIds.size;
 
   const copyInviteLink = async () => {
     const url = window.location.href.replace("/results", "");
@@ -330,21 +329,21 @@ export function ResultsClient({ room }: { room: ResultsRoom }) {
       <div className="max-w-2xl mx-auto px-4 pt-20 pb-16">
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           className="mb-10"
         >
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center gap-2 mb-4">
             <AntlerLogo
               animated
-              className="w-3 h-[15px] text-amber-500"
+              className="w-4 h-5 text-amber-500"
             />
             <div className="text-[10px] uppercase tracking-widest text-stone-600">
               결과 비교
             </div>
           </div>
-          <h1 className="text-2xl font-bold text-stone-900 mb-2 leading-snug">
+          <h1 className="text-3xl sm:text-4xl font-bold text-stone-900 mb-3 leading-[1.15] tracking-tight">
             {room.title}
           </h1>
           <div className="flex items-center gap-3 text-xs text-stone-600 flex-wrap">
@@ -387,178 +386,172 @@ export function ResultsClient({ room }: { room: ResultsRoom }) {
         )}
 
         {/* Group report — 익명 통계로는 못 만드는, 이름 붙은 그룹만의 숫자 */}
-        {room.participants.length > 0 && <GroupReport room={room} />}
+        {/* 궁합·소수파 통계는 "이름 붙은 우리 그룹" 전제라 공개방(모르는 사람도 보는 방)엔 안 어울린다 */}
+        {!room.isPublic && room.participants.length > 0 && <GroupReport room={room} />}
 
         {/* Questions */}
         {room.participants.length > 0 && (
-          <div className="space-y-4">
+          <div className="space-y-5">
             {room.questions.map((q, idx) => {
               const Icon = TYPE_ICON[q.type];
               return (
                 <motion.div
                   key={q.id}
-                  initial={{ opacity: 0, y: 12 }}
+                  initial={{ opacity: 0, y: 14 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-40px" }}
-                  transition={{ duration: 0.4, delay: idx * 0.06 }}
-                  className="rounded-2xl border border-amber-100 bg-white overflow-hidden"
+                  transition={{ duration: 0.45, delay: idx * 0.07, ease: [0.16, 1, 0.3, 1] }}
+                  className={cn(
+                    "rounded-2xl border px-5 py-6",
+                    unanimousQuestionIds.has(q.id)
+                      ? "border-amber-200 bg-amber-50/40"
+                      : "border-amber-100 bg-white"
+                  )}
                 >
-                  {/* Card header */}
-                  <div className="flex items-center gap-2 px-5 py-3.5 border-b border-stone-200">
-                    <span className="text-[10px] font-mono text-stone-600 tabular-nums w-5">
-                      {String(idx + 1).padStart(2, "0")}
+                  <h3 className="mb-6 flex items-start gap-2 text-lg font-semibold leading-snug tracking-tight text-stone-900">
+                    <span className="mt-0.5 font-mono text-xs tabular-nums text-stone-400">
+                      {idx + 1}
                     </span>
-                    <Icon className="w-3 h-3 text-stone-600" />
-                    <span className="text-[10px] uppercase tracking-widest text-stone-600">
-                      {TYPE_LABEL[q.type]}
-                    </span>
-                  </div>
+                    <Icon className="mt-0.5 h-4 w-4 flex-shrink-0 text-stone-400" aria-hidden="true" />
+                    <span className="sr-only">{TYPE_LABEL[q.type]}</span>
+                    <span className="flex-1">{q.title}</span>
+                    {unanimousQuestionIds.has(q.id) && (
+                      <Sparkles className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-500" aria-label="만장일치" />
+                    )}
+                  </h3>
 
-                  {/* Question + result */}
-                  <div className="px-5 py-5">
-                    <h3 className="text-base font-semibold text-stone-900 mb-5 leading-snug">
-                      {q.title}
-                    </h3>
-
-                    {q.type === "balance" && (
-                      <BalanceResult question={q} participants={room.participants} />
-                    )}
-                    {q.type === "multiple" && (
-                      <MultipleResult question={q} participants={room.participants} />
-                    )}
-                    {q.type === "subjective" && (
-                      <SubjectiveResult
-                        question={q}
-                        participants={room.participants}
-                      />
-                    )}
-                  </div>
+                  {q.type === "balance" && (
+                    <BalanceResult
+                      question={q}
+                      participants={room.participants}
+                      anonymous={room.isPublic}
+                    />
+                  )}
+                  {q.type === "multiple" && (
+                    <MultipleResult
+                      question={q}
+                      participants={room.participants}
+                      anonymous={room.isPublic}
+                    />
+                  )}
+                  {q.type === "subjective" && (
+                    <SubjectiveResult
+                      question={q}
+                      participants={room.participants}
+                      anonymous={room.isPublic}
+                    />
+                  )}
                 </motion.div>
               );
             })}
           </div>
         )}
 
-        {/* Participant summary */}
-        {room.participants.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: 0.2 }}
-            className="mt-6 rounded-2xl border border-amber-100 bg-white px-5 py-4"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <div className="text-[10px] uppercase tracking-widest text-stone-600">
-                참여자
-              </div>
-              <span className="text-xs text-stone-600 font-mono tabular-nums">
-                {room.participants.length}명
-              </span>
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {room.participants.map((p) => (
-                <motion.span
-                  key={p.id}
-                  whileHover={{ y: -2 }}
-                  transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
-                  className="px-2.5 py-1 rounded-full text-xs border border-amber-100 bg-amber-50 text-amber-900 cursor-default"
-                >
-                  {p.nickname}
-                </motion.span>
-              ))}
-            </div>
-          </motion.div>
-        )}
-
-        {/* Result image share — primary viral hook */}
+        {/* 마무리 블록 — 참여자 요약·결과 공유·초대를 하나의 흐름으로 묶는다.
+            예전엔 이 셋이 거의 똑같이 생긴 흰 카드로 세 번 반복돼서 리포트 템플릿처럼 보였다. */}
         {room.participants.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: 0.25 }}
-            className="mt-6 rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-amber-100/40 px-5 py-5"
+            transition={{ duration: 0.4, delay: 0.2 }}
+            className="mt-8 divide-y divide-stone-100 rounded-2xl border border-amber-100 bg-white"
           >
-            <div className="flex items-start gap-3 mb-4">
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-stone-900 mb-1">
-                  친구한테 결과 보여주기
-                </p>
-                <p className="text-xs text-stone-600 leading-relaxed">
-                  이미지로 저장해서 카톡·인스타에 공유하세요
-                </p>
+            {/* 참여자 — 공개방은 익명이라 닉네임 목록이 의미가 없다. 헤더의 참여자 수로 충분하다. */}
+            {!room.isPublic && (
+              <div className="px-5 py-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <span className="text-xs text-stone-500">참여자</span>
+                  <span className="text-xs font-mono tabular-nums text-stone-500">
+                    {room.participants.length}명
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {room.participants.map((p) => (
+                    <motion.span
+                      key={p.id}
+                      whileHover={{ y: -2 }}
+                      transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                      className="px-2.5 py-1 rounded-full text-xs border border-amber-100 bg-amber-50 text-amber-900 cursor-default"
+                    >
+                      {p.nickname}
+                    </motion.span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 결과 이미지 공유 — 가장 중요한 액션이라 버튼 색으로 무게를 준다 */}
+            <div className="px-5 py-5">
+              <p className="mb-1 text-sm font-semibold text-stone-900">
+                친구한테 결과 보여주기
+              </p>
+              <p className="mb-4 text-xs text-stone-600 leading-relaxed">
+                이미지로 저장해서 카톡·인스타에 공유하세요
+              </p>
+              <button
+                onClick={shareResultImage}
+                disabled={imageBusy}
+                className={cn(
+                  "w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium transition-all duration-200",
+                  imageBusy
+                    ? "bg-amber-300 text-white cursor-wait"
+                    : "bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-900/25 hover:-translate-y-0.5"
+                )}
+              >
+                {imageBusy ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    이미지 만드는 중…
+                  </>
+                ) : (
+                  <>
+                    <ImageIcon className="w-4 h-4" />
+                    결과 이미지 공유
+                    <Download className="w-3.5 h-3.5 opacity-70" />
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* 초대 + 새 방 */}
+            <div className="px-5 py-5">
+              <p className="mb-3 text-xs text-stone-600">친구를 더 초대할까요?</p>
+              <div className="flex gap-2">
+                <button
+                  onClick={copyInviteLink}
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border text-xs transition-colors",
+                    copied
+                      ? "border-amber-200 bg-amber-50 text-amber-700"
+                      : "border-amber-100 text-stone-700 hover:text-stone-900 hover:border-amber-200"
+                  )}
+                >
+                  {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copied ? "복사됨" : "방 링크 복사"}
+                </button>
+                <button
+                  onClick={shareInviteLink}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-amber-100 text-xs text-stone-700 hover:text-stone-900 hover:border-amber-200 transition-colors"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                  방 공유하기
+                </button>
               </div>
             </div>
-            <button
-              onClick={shareResultImage}
-              disabled={imageBusy}
-              className={cn(
-                "w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium transition-all duration-200",
-                imageBusy
-                  ? "bg-amber-300 text-white cursor-wait"
-                  : "bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-900/25 hover:-translate-y-0.5"
-              )}
-            >
-              {imageBusy ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  이미지 만드는 중…
-                </>
-              ) : (
-                <>
-                  <ImageIcon className="w-4 h-4" />
-                  결과 이미지 공유
-                  <Download className="w-3.5 h-3.5 opacity-70" />
-                </>
-              )}
-            </button>
+
+            {/* 새 방 */}
+            <div className="px-5 py-5 text-center space-y-2">
+              <p className="text-xs text-stone-600">또 다른 주제로 비교해볼까요?</p>
+              <Link
+                href="/create"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white text-sm font-medium transition-all duration-200 hover:-translate-y-0.5"
+              >
+                새 방 만들기
+              </Link>
+            </div>
           </motion.div>
         )}
-
-        {/* Invite + new room */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.4, delay: 0.3 }}
-          className="mt-3 rounded-2xl border border-amber-100 bg-white px-5 py-5"
-        >
-          <p className="text-xs text-stone-600 mb-3">친구를 더 초대할까요?</p>
-          <div className="flex gap-2 mb-5">
-            <button
-              onClick={copyInviteLink}
-              className={cn(
-                "flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border text-xs transition-colors",
-                copied
-                  ? "border-amber-200 bg-amber-50 text-amber-700"
-                  : "border-amber-100 text-stone-700 hover:text-stone-900 hover:border-amber-200"
-              )}
-            >
-              {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-              {copied ? "복사됨" : "방 링크 복사"}
-            </button>
-            <button
-              onClick={shareInviteLink}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-amber-100 text-xs text-stone-700 hover:text-stone-900 hover:border-amber-200 transition-colors"
-            >
-              <Share2 className="w-3.5 h-3.5" />
-              방 공유하기
-            </button>
-          </div>
-
-          <div className="h-px bg-stone-100 mb-5" />
-
-          <div className="text-center space-y-2">
-            <p className="text-xs text-stone-600">또 다른 주제로 비교해볼까요?</p>
-            <Link
-              href="/create"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white text-sm font-medium transition-all duration-200 hover:-translate-y-0.5"
-            >
-              새 방 만들기
-            </Link>
-          </div>
-        </motion.div>
       </div>
 
       {/* Hidden share card — rendered off-screen for html-to-image capture */}

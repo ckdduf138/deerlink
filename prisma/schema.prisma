@@ -10,6 +10,7 @@ datasource db {
 model Room {
   id        String   @id @default(cuid())
   title     String
+  isPublic  Boolean  @default(false)
   createdAt DateTime @default(now())
   expiresAt DateTime
 

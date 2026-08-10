@@ -10,7 +10,7 @@ export interface PopularQuestion {
 }
 
 export const POPULAR_QUESTIONS: PopularQuestion[] = [
-  // 밸런스 8개
+  // 밸런스 11개
   {
     id: "b-1eok-jeolyeon",
     type: "balance",
@@ -67,8 +67,29 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     optionA: "혼자지만 풍요",
     optionB: "함께지만 가난",
   },
+  {
+    id: "b-chicken",
+    type: "balance",
+    title: "치킨은 후라이드 vs 양념",
+    optionA: "후라이드",
+    optionB: "양념",
+  },
+  {
+    id: "b-yeohaeng-style",
+    type: "balance",
+    title: "여행 스타일: 빡빡한 일정표 vs 그때그때 즉흥",
+    optionA: "일정표파",
+    optionB: "즉흥파",
+  },
+  {
+    id: "b-sanbada",
+    type: "balance",
+    title: "여행지 고르면 산 vs 바다",
+    optionA: "산",
+    optionB: "바다",
+  },
 
-  // 객관식 7개
+  // 객관식 10개
   {
     id: "m-katok-wass",
     type: "multiple",
@@ -111,8 +132,26 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     title: "공포영화 보면 나는?",
     options: ["눈 딱 감음", "소리 지름", "옆사람 붙잡음", "멀쩡하게 봄"],
   },
+  {
+    id: "m-jumal-achim",
+    type: "multiple",
+    title: "주말 아침에 눈뜨면 나는?",
+    options: ["바로 일어나서 뭐라도 함", "핸드폰 보다가 다시 잠", "커피부터 내림", "정오까지 안 일어남"],
+  },
+  {
+    id: "m-danche-sajin",
+    type: "multiple",
+    title: "단체 사진 찍을 때 나는?",
+    options: ["항상 가운데로 감", "구석에서 조용히", "포즈 열심히 잡음", "눈 감아서 다시 찍자고 함"],
+  },
+  {
+    id: "m-yeohaeng-jjim",
+    type: "multiple",
+    title: "여행 짐 쌀 때 나는?",
+    options: ["며칠 전부터 리스트 작성", "전날 밤에 몰아서", "당일 아침에 대충", "캐리어 상시 대기"],
+  },
 
-  // 주관식 5개
+  // 주관식 7개
   {
     id: "s-first-married",
     type: "subjective",
@@ -137,5 +176,15 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     id: "s-ten-years",
     type: "subjective",
     title: "10년 후 나는 어디서 뭘 하고 있을 것 같아?",
+  },
+  {
+    id: "s-choegeun-utgin",
+    type: "subjective",
+    title: "최근 본 것 중에 제일 웃겼던 거 하나만",
+  },
+  {
+    id: "s-gachi-yeohaeng",
+    type: "subjective",
+    title: "이 그룹이랑 같이 가고 싶은 여행지 한 곳만 말해봐",
   },
 ];

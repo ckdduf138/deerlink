@@ -50,9 +50,6 @@ export async function POST(
 
   const { nickname, answers } = body as { nickname: unknown; answers: unknown };
 
-  if (typeof nickname !== "string" || !nickname.trim() || nickname.length > NICKNAME_MAX) {
-    return NextResponse.json({ error: "닉네임을 확인해주세요" }, { status: 400 });
-  }
   if (!validAnswers(answers)) {
     return NextResponse.json({ error: "답변 형식을 확인해주세요" }, { status: 400 });
   }
@@ -69,6 +66,14 @@ export async function POST(
     return NextResponse.json({ error: "만료된 방이에요" }, { status: 410 });
   }
 
+  // 공개방은 닉네임 없이 익명으로 참여한다 — 서버가 "참여자 N"을 붙인다.
+  // 비공개방은 지금까지와 동일하게 닉네임을 요구한다.
+  if (!room.isPublic) {
+    if (typeof nickname !== "string" || !nickname.trim() || nickname.length > NICKNAME_MAX) {
+      return NextResponse.json({ error: "닉네임을 확인해주세요" }, { status: 400 });
+    }
+  }
+
   // 다른 방의 questionId가 섞여 들어오면 여기서 걸러진다
   const validQuestionIds = new Set(room.questions.map((q) => q.id));
   if (!answers.every((a) => validQuestionIds.has(a.questionId))) {
@@ -80,8 +85,12 @@ export async function POST(
   const deduped = [...new Map(answers.map((a) => [a.questionId, a])).values()];
 
   const participant = await prisma.$transaction(async (tx) => {
+    const resolvedNickname = room.isPublic
+      ? `참여자 ${(await tx.participant.count({ where: { roomId } })) + 1}`
+      : (nickname as string).trim();
+
     const p = await tx.participant.create({
-      data: { roomId, nickname: nickname.trim() },
+      data: { roomId, nickname: resolvedNickname },
     });
 
     await tx.answer.createMany({

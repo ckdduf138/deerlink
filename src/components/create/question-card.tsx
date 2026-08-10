@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { GripVertical, Trash2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { GripVertical, Plus, Trash2 } from "lucide-react";
 import { Reorder, useDragControls } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { QUESTION_META } from "@/lib/question-meta";
 import type { CreateDraftQuestion } from "@/lib/draft-storage";
+
+const DELETE_ARM_MS = 2500;
 
 export const QUESTION_TITLE_MAX = 80;
 export const OPTION_MAX = 30;
@@ -28,11 +30,31 @@ export function QuestionCard({
   const { icon: Icon, label, accent } = QUESTION_META[question.type];
   const dragControls = useDragControls();
   const titleRef = useRef<HTMLInputElement>(null);
+  const [armed, setArmed] = useState(false);
+  const armTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // 새로 추가한 카드로 커서를 옮긴다. 예전에는 DOM 셀렉터로 찾다가 항상 1번 질문을 잡았다.
+  // preventScroll: 스크롤은 create-editor.tsx의 bottomRef 하나로만 한다 — 안 그러면
+  // 브라우저 기본 포커스 스크롤과 겹쳐서 두 번 움직이는 것처럼 보인다.
   useEffect(() => {
-    if (autoFocus) titleRef.current?.focus();
+    if (autoFocus) titleRef.current?.focus({ preventScroll: true });
   }, [autoFocus]);
+
+  useEffect(() => {
+    return () => {
+      if (armTimeout.current) clearTimeout(armTimeout.current);
+    };
+  }, []);
+
+  const handleDeleteClick = () => {
+    if (armed) {
+      if (armTimeout.current) clearTimeout(armTimeout.current);
+      onRemove(question.id);
+      return;
+    }
+    setArmed(true);
+    armTimeout.current = setTimeout(() => setArmed(false), DELETE_ARM_MS);
+  };
 
   const options = question.options ?? [];
 
@@ -65,10 +87,10 @@ export function QuestionCard({
       transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
       className="rounded-2xl border border-amber-100 bg-white overflow-hidden"
     >
-      <div className="flex items-center gap-2 px-4 py-2 border-b border-stone-200">
+      <div className="flex items-center gap-2 px-5 py-1.5 border-b border-stone-200">
         <button
           onPointerDown={(e) => dragControls.start(e)}
-          className="touch-none cursor-grab active:cursor-grabbing w-8 h-9 -ml-1.5 flex items-center justify-center text-stone-500 hover:text-stone-800 transition-colors"
+          className="touch-none cursor-grab active:cursor-grabbing min-w-11 min-h-11 -ml-2 flex items-center justify-center text-stone-500 hover:text-stone-800 transition-colors"
           aria-label={`질문 ${index + 1} 순서 변경`}
         >
           <GripVertical className="w-3.5 h-3.5" />
@@ -86,15 +108,24 @@ export function QuestionCard({
         </div>
 
         <button
-          onClick={() => onRemove(question.id)}
-          className="w-9 h-9 -mr-2 flex items-center justify-center text-stone-500 hover:text-red-600 transition-colors"
-          aria-label={`질문 ${index + 1} 삭제`}
+          onClick={handleDeleteClick}
+          className={cn(
+            "min-w-11 min-h-11 -mr-2.5 flex items-center justify-center rounded-lg transition-colors",
+            armed
+              ? "bg-red-50 text-red-600"
+              : "text-stone-500 hover:text-red-600"
+          )}
+          aria-label={
+            armed
+              ? `질문 ${index + 1} 삭제를 확인하려면 다시 누르세요`
+              : `질문 ${index + 1} 삭제`
+          }
         >
           <Trash2 className="w-3.5 h-3.5" />
         </button>
       </div>
 
-      <div className="px-4 pt-3.5 pb-3">
+      <div className="px-5 pt-3.5 pb-3">
         <input
           ref={titleRef}
           type="text"
@@ -108,7 +139,7 @@ export function QuestionCard({
       </div>
 
       {question.type === "balance" && (
-        <div className="px-4 pb-4 grid grid-cols-2 gap-2">
+        <div className="px-5 pb-4 grid grid-cols-2 gap-2">
           {(["optionA", "optionB"] as const).map((key, i) => (
             <input
               key={key}
@@ -125,10 +156,10 @@ export function QuestionCard({
       )}
 
       {question.type === "multiple" && (
-        <div className="px-4 pb-4 space-y-1.5">
+        <div className="px-5 pb-4 space-y-1.5">
           {options.map((opt, i) => (
             <div key={i} className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-stone-300 flex-shrink-0" />
+              <span className="w-1.5 h-1.5 rounded-full bg-teal-300 flex-shrink-0" />
               <input
                 type="text"
                 value={opt}
@@ -136,12 +167,12 @@ export function QuestionCard({
                 placeholder={`선택지 ${i + 1}`}
                 maxLength={OPTION_MAX}
                 aria-label={`질문 ${index + 1} 선택지 ${i + 1}`}
-                className="flex-1 min-h-11 px-3 rounded-xl border border-stone-200 bg-stone-50 text-xs text-stone-900 placeholder:text-stone-500 outline-none focus:border-stone-400 transition-colors"
+                className="flex-1 min-h-11 px-3 rounded-xl border border-teal-100 bg-teal-50 text-xs text-stone-900 placeholder:text-stone-500 outline-none focus:border-teal-300 transition-colors"
               />
               {options.length > MIN_OPTIONS && (
                 <button
                   onClick={() => removeOption(i)}
-                  className="w-9 h-9 flex items-center justify-center text-stone-500 hover:text-red-600 transition-colors flex-shrink-0"
+                  className="min-w-11 min-h-11 flex items-center justify-center text-stone-500 hover:text-red-600 transition-colors flex-shrink-0"
                   aria-label={`선택지 ${i + 1} 삭제`}
                 >
                   <Trash2 className="w-3 h-3" />
@@ -152,16 +183,17 @@ export function QuestionCard({
           {options.length < MAX_OPTIONS && (
             <button
               onClick={addOption}
-              className="text-[11px] text-stone-600 hover:text-amber-700 transition-colors pl-3.5 min-h-9"
+              className="mt-1 flex w-full min-h-11 items-center justify-center gap-1.5 rounded-xl border border-dashed border-teal-200 text-teal-700 hover:border-teal-400 hover:bg-teal-50/60 text-xs transition-colors"
             >
-              + 선택지 추가
+              <Plus className="w-3.5 h-3.5" />
+              선택지 추가
             </button>
           )}
         </div>
       )}
 
       {question.type === "subjective" && (
-        <div className="px-4 pb-3">
+        <div className="px-5 pb-3">
           <p className="text-xs text-stone-500">참여자가 자유롭게 텍스트로 답변해요</p>
         </div>
       )}

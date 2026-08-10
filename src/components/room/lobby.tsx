@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
-import { ArrowRight, Check, Copy, ListChecks, Share2, Users } from "lucide-react";
+import { ArrowRight, Check, Copy, Globe, ListChecks, Lock, Share2, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
 import { cn } from "@/lib/utils";
@@ -21,10 +21,13 @@ export function Lobby({
   room,
   initialNickname,
   onStart,
+  justCreated = false,
 }: {
   room: LobbyRoom;
   initialNickname: string;
   onStart: (nickname: string) => void;
+  /** 방금 이 화면에서 방을 만들었다 — 초대받아 들어온 사람과 같은 화면이지만 문구는 다르게 */
+  justCreated?: boolean;
 }) {
   const [nickname, setNickname] = useState(initialNickname);
   const [copied, setCopied] = useState(false);
@@ -32,8 +35,9 @@ export function Lobby({
   const url = useSyncExternalStore(neverChanges, readHref, noHref);
 
   const trimmed = nickname.trim();
-  const isDuplicate = room.participants.some((p) => p.nickname === trimmed);
-  const canStart = trimmed.length > 0 && !isDuplicate;
+  const isDuplicate = !room.isPublic && room.participants.some((p) => p.nickname === trimmed);
+  // 공개방은 닉네임을 안 받는다 — 서버가 "참여자 N"을 대신 붙인다.
+  const canStart = room.isPublic || (trimmed.length > 0 && !isDuplicate);
 
   const copyLink = async () => {
     try {
@@ -59,14 +63,40 @@ export function Lobby({
   };
 
   const handleStart = () => {
-    if (canStart) onStart(trimmed);
+    if (canStart) onStart(room.isPublic ? "" : trimmed);
   };
 
   return (
     <div className="max-w-md mx-auto px-4 pt-20 pb-10">
+      {justCreated && (
+        <motion.div
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-5 flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3"
+        >
+          <Check className="w-4 h-4 text-amber-700 flex-shrink-0" />
+          <p className="text-xs text-amber-900">
+            {room.isPublic
+              ? "방을 만들었어요. 닉네임 없이 누구나 링크나 발견 피드로 바로 답할 수 있어요."
+              : "방을 만들었어요. 아래 QR이나 링크를 공유해서 친구들을 초대해보세요."}
+          </p>
+        </motion.div>
+      )}
+
       <div className="mb-8">
-        <div className="text-[10px] uppercase tracking-widest text-stone-500 mb-3">
-          Deerlink
+        <div className="mb-3 flex items-center justify-between">
+          <div className="text-[10px] uppercase tracking-widest text-stone-500">
+            Deerlink
+          </div>
+          <span
+            className={cn(
+              "flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px]",
+              room.isPublic ? "bg-amber-50 text-amber-900" : "bg-stone-100 text-stone-600"
+            )}
+          >
+            {room.isPublic ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
+            {room.isPublic ? "공개" : "비공개"}
+          </span>
         </div>
         <h1 className="text-2xl font-bold text-stone-900 mb-2 leading-snug">
           {room.title}
@@ -149,21 +179,28 @@ export function Lobby({
       </div>
 
       {room.participants.length > 0 ? (
-        <div className="mb-6">
-          <div className="text-[10px] uppercase tracking-widest text-stone-500 mb-2">
-            이미 참여한 사람
+        room.isPublic ? (
+          <div className="mb-6 flex items-center gap-1.5 text-xs text-stone-600">
+            <Users className="w-3.5 h-3.5" />
+            {room.participants.length}명이 벌써 참여했어요
           </div>
-          <div className="flex flex-wrap gap-1.5">
-            {room.participants.map((p) => (
-              <span
-                key={p.id}
-                className="px-2.5 py-1 rounded-full text-xs border border-amber-100 bg-amber-50 text-amber-900"
-              >
-                {p.nickname}
-              </span>
-            ))}
+        ) : (
+          <div className="mb-6">
+            <div className="text-[10px] uppercase tracking-widest text-stone-500 mb-2">
+              이미 참여한 사람
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {room.participants.map((p) => (
+                <span
+                  key={p.id}
+                  className="px-2.5 py-1 rounded-full text-xs border border-amber-100 bg-amber-50 text-amber-900"
+                >
+                  {p.nickname}
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
+        )
       ) : (
         <div className="relative flex flex-col items-center justify-center py-8 mb-6">
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -178,44 +215,52 @@ export function Lobby({
       )}
 
       <div className="space-y-3">
-        <div>
-          <label
-            htmlFor="nickname"
-            className="block text-[10px] uppercase tracking-widest text-stone-500 mb-3"
-          >
-            닉네임
-          </label>
-          <input
-            id="nickname"
-            type="text"
-            value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleStart()}
-            placeholder="나를 뭐라고 부를까요?"
-            maxLength={NICKNAME_MAX}
-            autoComplete="nickname"
-            aria-invalid={isDuplicate}
-            aria-describedby={isDuplicate ? "nickname-error" : undefined}
-            className={cn(
-              "w-full py-3.5 px-4 rounded-xl border bg-amber-50 text-sm text-stone-900 placeholder:text-stone-500 outline-none transition-colors",
-              isDuplicate
-                ? "border-red-300 focus:border-red-400"
-                : "border-amber-100 focus:border-amber-300"
-            )}
-          />
-          <div className="flex items-center justify-between mt-2 min-h-4">
-            {isDuplicate ? (
-              <p id="nickname-error" className="text-xs text-red-600" role="alert">
-                이미 있는 닉네임이에요. 다른 이름을 써주세요.
+        {!room.isPublic && (
+          <div>
+            <label
+              htmlFor="nickname"
+              className="block text-[10px] uppercase tracking-widest text-stone-500 mb-3"
+            >
+              닉네임
+            </label>
+            {justCreated && (
+              <p className="mb-3 text-xs text-stone-600">
+                본인도 답변에 참여할 계획이면 닉네임을 적고 시작하세요. 공유만 하고
+                나중에 돌아와도 돼요.
               </p>
-            ) : (
-              <span />
             )}
-            <span className="text-[11px] text-stone-400 font-mono tabular-nums">
-              {nickname.length}/{NICKNAME_MAX}
-            </span>
+            <input
+              id="nickname"
+              type="text"
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleStart()}
+              placeholder="나를 뭐라고 부를까요?"
+              maxLength={NICKNAME_MAX}
+              autoComplete="nickname"
+              aria-invalid={isDuplicate}
+              aria-describedby={isDuplicate ? "nickname-error" : undefined}
+              className={cn(
+                "w-full py-3.5 px-4 rounded-xl border bg-amber-50 text-sm text-stone-900 placeholder:text-stone-500 outline-none transition-colors",
+                isDuplicate
+                  ? "border-red-300 focus:border-red-400"
+                  : "border-amber-100 focus:border-amber-300"
+              )}
+            />
+            <div className="flex items-center justify-between mt-2 min-h-4">
+              {isDuplicate ? (
+                <p id="nickname-error" className="text-xs text-red-600" role="alert">
+                  이미 있는 닉네임이에요. 다른 이름을 써주세요.
+                </p>
+              ) : (
+                <span />
+              )}
+              <span className="text-[11px] text-stone-400 font-mono tabular-nums">
+                {nickname.length}/{NICKNAME_MAX}
+              </span>
+            </div>
           </div>
-        </div>
+        )}
         <motion.button
           onClick={handleStart}
           disabled={!canStart}
@@ -227,7 +272,7 @@ export function Lobby({
               : "bg-stone-100 text-stone-400"
           )}
         >
-          참여하기
+          {room.isPublic ? "답변하기" : "참여하기"}
           <ArrowRight className="w-4 h-4" />
         </motion.button>
       </div>

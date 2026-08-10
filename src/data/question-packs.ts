@@ -1,8 +1,8 @@
 import { POPULAR_QUESTIONS, type PopularQuestion } from "./popular-questions";
 
 /**
- * 질문팩 — 지금 가장 큰 이탈 지점은 "누군가 질문을 먼저 만들어야 함"이다.
- * 팩 하나를 고르면 제목·질문 5개가 채워진 채로 바로 제출 화면까지 간다.
+ * 질문 테마 — 지금 가장 큰 이탈 지점은 "누군가 질문을 먼저 만들어야 함"이다.
+ * 테마 하나를 고르면 제목·질문 5개가 채워진 채로 바로 제출 화면까지 간다.
  * 문항은 POPULAR_QUESTIONS를 id로 참조한다 — 텍스트를 두 곳에 중복해서
  * 적으면 나중에 한쪽만 고치는 사고가 난다.
  */
@@ -59,6 +59,13 @@ const PACK_DEFS: PackDef[] = [
     roomTitle: "MT 단체 게임",
     description: "여행 가서 바로 돌리기 좋은 아이스브레이커",
     ids: ["b-sowon-changpi", "s-anywhere", "m-stress", "m-yaksok-sigan", "s-into-lately"],
+  },
+  {
+    id: "light",
+    title: "가벼운 취향",
+    roomTitle: "가볍게 취향 비교",
+    description: "치킨 취향부터 여행 스타일까지, 부담 없이 시작하기 좋은 질문",
+    ids: ["b-chicken", "b-yeohaeng-style", "m-jumal-achim", "m-danche-sajin", "s-choegeun-utgin"],
   },
 ];
 

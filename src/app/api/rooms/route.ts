@@ -55,7 +55,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "잘못된 요청이에요" }, { status: 400 });
   }
 
-  const { title, questions } = body as { title: unknown; questions: unknown };
+  const { title, questions, isPublic } = body as {
+    title: unknown;
+    questions: unknown;
+    isPublic?: unknown;
+  };
 
   if (typeof title !== "string" || !title.trim() || title.length > TITLE_MAX) {
     return NextResponse.json({ error: "제목을 확인해주세요" }, { status: 400 });
@@ -66,12 +70,16 @@ export async function POST(request: Request) {
   if (!questions.every(validQuestion)) {
     return NextResponse.json({ error: "질문 내용을 확인해주세요" }, { status: 400 });
   }
+  if (isPublic !== undefined && typeof isPublic !== "boolean") {
+    return NextResponse.json({ error: "공개 설정을 확인해주세요" }, { status: 400 });
+  }
 
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
   const room = await prisma.room.create({
     data: {
       title: title.trim(),
+      isPublic: isPublic === true,
       expiresAt,
       questions: {
         create: (questions as QuestionInput[]).map((q, i) => ({

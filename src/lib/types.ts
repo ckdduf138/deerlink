@@ -28,6 +28,7 @@ export interface Participant extends ParticipantSummary {
 interface RoomBase {
   id: string;
   title: string;
+  isPublic: boolean;
   expiresAt: string;
   questions: Question[];
 }
@@ -44,6 +45,16 @@ export interface ResultsRoom extends RoomBase {
 
 export interface AdminRoom extends ResultsRoom {
   createdAt: string;
+}
+
+/** 공개방 발견 피드 카드 — 참여자 닉네임·답변은 담지 않는다. Answer Lock과 무관한 디렉터리다. */
+export interface DiscoverRoom {
+  id: string;
+  title: string;
+  questionCount: number;
+  participantCount: number;
+  createdAt: string;
+  expiresAt: string;
 }
 
 /** DB의 options는 JSON 문자열이다. 깨져 있어도 화면이 죽지 않아야 한다. */

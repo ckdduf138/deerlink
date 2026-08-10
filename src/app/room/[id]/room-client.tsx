@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Lobby } from "@/components/room/lobby";
@@ -26,8 +26,13 @@ const EMPTY_DRAFT: AnswerDraft = { nickname: "", answers: {}, currentQuestion: 0
  */
 export function RoomClient({ room }: { room: LobbyRoom }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const justCreated = searchParams.get("new") === "1";
+  // 발견 피드(랜딩 티저 · /discover)에서 온 방문자는 공개방 QR 로비를 볼 이유가 없다 —
+  // 닉네임도 필요 없으니 바로 답변 화면으로 들어간다.
+  const skipLobby = searchParams.get("join") === "1" && room.isPublic;
   const draftKey = answerDraftKey(room.id);
-  const [mode, setMode] = useState<"lobby" | "answer">("lobby");
+  const [mode, setMode] = useState<"lobby" | "answer">(skipLobby ? "answer" : "lobby");
 
   const raw = useSyncExternalStore(
     subscribeDrafts,
@@ -111,6 +116,7 @@ export function RoomClient({ room }: { room: LobbyRoom }) {
             room={room}
             initialNickname={draft.nickname}
             onStart={handleStart}
+            justCreated={justCreated}
           />
           {canResume && (
             <div className="mx-auto -mt-4 max-w-md px-4 pb-10">

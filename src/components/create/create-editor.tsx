@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence, Reorder } from "framer-motion";
-import { AlertCircle, ArrowLeft, ArrowRight, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { QUESTION_META, QUESTION_TYPES } from "@/lib/question-meta";
@@ -18,9 +18,12 @@ import type { QuestionType } from "@/lib/types";
 import { AntlerLogo } from "@/components/landing/AntlerLogo";
 import { PopularQuestionsSheet } from "@/components/PopularQuestionsSheet";
 import { QuestionCard, MIN_OPTIONS } from "@/components/create/question-card";
+import { PublishModal } from "@/components/create/publish-modal";
+import { DiscardConfirmModal } from "@/components/create/discard-confirm-modal";
 import type { PopularQuestion } from "@/data/popular-questions";
 
 const MAX_QUESTIONS = 20;
+const APPROACHING_LIMIT = 15;
 const TITLE_MAX = 50;
 
 const TITLE_EXAMPLES = [
@@ -60,20 +63,26 @@ function findMissing(title: string, questions: CreateDraftQuestion[]): string | 
 export function CreateEditor({
   initialDraft,
   initialSource = "storage",
+  onStartOver,
 }: {
   initialDraft: CreateDraft | null;
-  /** "storage"만 "작성 중이던 내용을 불러왔어요" 배너를 띄운다 — 팩 선택은 복원이 아니다 */
+  /** "storage"만 "작성 중이던 내용을 불러왔어요" 배너를 띄운다 — 테마 선택은 복원이 아니다 */
   initialSource?: "storage" | "pack";
+  /** "새로 쓰기"는 임시저장만 지우지 않고 테마 선택 화면으로도 되돌려야 한다 */
+  onStartOver: () => void;
 }) {
   const router = useRouter();
   const [title, setTitle] = useState(initialDraft?.title ?? "");
   const [questions, setQuestions] = useState<CreateDraftQuestion[]>(
     initialDraft?.questions ?? []
   );
+  const [isPublic, setIsPublic] = useState(false);
   const [restored, setRestored] = useState(initialDraft !== null && initialSource === "storage");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showSheet, setShowSheet] = useState(false);
+  const [showPublishModal, setShowPublishModal] = useState(false);
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
   const [exampleIndex, setExampleIndex] = useState(0);
   const [focusId, setFocusId] = useState<string | null>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
@@ -99,13 +108,15 @@ export function CreateEditor({
     return () => clearInterval(interval);
   }, [title]);
 
+  // 질문 추가 시 스크롤은 여기서만 한다 — QuestionCard의 자동 포커스는
+  // preventScroll로 브라우저 기본 스크롤을 죽여서 트리거가 겹치지 않게 한다.
   useEffect(() => {
-    if (questions.length === 0) return;
+    if (!focusId) return;
     const timer = setTimeout(() => {
       bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }, 100);
     return () => clearTimeout(timer);
-  }, [questions.length]);
+  }, [focusId]);
 
   const atMax = questions.length >= MAX_QUESTIONS;
 
@@ -150,15 +161,22 @@ export function CreateEditor({
   }, []);
 
   const discardDraft = () => {
+    setShowDiscardConfirm(false);
     setTitle("");
     setQuestions([]);
     setRestored(false);
     clearDraft(CREATE_DRAFT_KEY);
-    titleInputRef.current?.focus();
+    onStartOver();
   };
 
   const missing = findMissing(title, questions);
   const isValid = missing === null;
+
+  const openPublishModal = () => {
+    if (!isValid || loading) return;
+    setError(null);
+    setShowPublishModal(true);
+  };
 
   const handleSubmit = async () => {
     if (!isValid || loading) return;
@@ -168,7 +186,7 @@ export function CreateEditor({
       const res = await fetch("/api/rooms", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: title.trim(), questions }),
+        body: JSON.stringify({ title: title.trim(), questions, isPublic }),
       });
       if (!res.ok) {
         const body = await res.json().catch(() => null);
@@ -178,14 +196,12 @@ export function CreateEditor({
       }
       const room = await res.json();
       clearDraft(CREATE_DRAFT_KEY);
-      router.push(`/room/${room.id}`);
+      router.push(`/room/${room.id}?new=1`);
     } catch {
       setError("네트워크 연결을 확인하고 다시 시도해주세요.");
       setLoading(false);
     }
   };
-
-  const submitLabel = loading ? "만드는 중" : error ? "다시 시도" : "링크 만들기";
 
   return (
     <div className="min-h-screen bg-[#fafaf8] text-stone-900">
@@ -202,24 +218,18 @@ export function CreateEditor({
         </Link>
 
         <button
-          onClick={handleSubmit}
-          disabled={!isValid || loading}
+          onClick={openPublishModal}
+          disabled={!isValid}
           title={missing ?? undefined}
           className={cn(
             "hidden md:flex items-center gap-1.5 px-4 min-h-10 rounded-xl text-sm font-medium transition-colors duration-200",
-            isValid && !loading
+            isValid
               ? "bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-900/30"
               : "bg-stone-100 text-stone-400 cursor-not-allowed"
           )}
         >
-          {loading ? (
-            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-          ) : (
-            <>
-              {submitLabel}
-              <ArrowRight className="w-3.5 h-3.5" />
-            </>
-          )}
+          링크 만들기
+          <ArrowRight className="w-3.5 h-3.5" />
         </button>
       </nav>
 
@@ -232,7 +242,7 @@ export function CreateEditor({
           >
             <p className="text-xs text-amber-900">작성 중이던 내용을 불러왔어요.</p>
             <button
-              onClick={discardDraft}
+              onClick={() => setShowDiscardConfirm(true)}
               className="text-xs text-amber-800 underline underline-offset-2 hover:text-amber-900 transition-colors flex-shrink-0"
             >
               새로 쓰기
@@ -335,6 +345,12 @@ export function CreateEditor({
             </p>
           )}
 
+          {!atMax && questions.length >= APPROACHING_LIMIT && (
+            <p className="text-center text-[11px] text-stone-400">
+              질문 {questions.length}/{MAX_QUESTIONS}개
+            </p>
+          )}
+
           <AnimatePresence>
             {!atMax && title.trim().length > 0 && (
               <motion.button
@@ -363,22 +379,6 @@ export function CreateEditor({
             </motion.div>
           )}
 
-          {error && (
-            <div
-              role="alert"
-              className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3"
-            >
-              <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-red-700 leading-relaxed">
-                {error}
-                <br />
-                <span className="text-red-600">
-                  작성한 내용은 저장돼 있으니 그대로 다시 시도하면 돼요.
-                </span>
-              </p>
-            </div>
-          )}
-
           <div ref={bottomRef} />
         </div>
       </div>
@@ -386,23 +386,17 @@ export function CreateEditor({
       <div className="fixed bottom-0 inset-x-0 md:hidden z-40">
         <div className="bg-gradient-to-t from-[#fafaf8] via-[#fafaf8]/95 to-transparent pt-8 px-4 pb-safe">
           <button
-            onClick={handleSubmit}
-            disabled={!isValid || loading}
+            onClick={openPublishModal}
+            disabled={!isValid}
             className={cn(
               "w-full min-h-12 rounded-xl text-sm font-semibold transition-colors duration-200 flex items-center justify-center gap-2",
-              isValid && !loading
+              isValid
                 ? "bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-900/40"
                 : "bg-stone-100 text-stone-400"
             )}
           >
-            {loading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <>
-                {submitLabel}
-                <ArrowRight className="w-4 h-4" />
-              </>
-            )}
+            링크 만들기
+            <ArrowRight className="w-4 h-4" />
           </button>
           {missing && (
             <p className="text-center text-[11px] text-stone-500 mt-2">{missing}</p>
@@ -414,6 +408,22 @@ export function CreateEditor({
         open={showSheet}
         onClose={() => setShowSheet(false)}
         onSelect={addFromPopular}
+      />
+
+      <PublishModal
+        open={showPublishModal}
+        onClose={() => setShowPublishModal(false)}
+        isPublic={isPublic}
+        onPublicChange={setIsPublic}
+        onConfirm={handleSubmit}
+        loading={loading}
+        error={error}
+      />
+
+      <DiscardConfirmModal
+        open={showDiscardConfirm}
+        onClose={() => setShowDiscardConfirm(false)}
+        onConfirm={discardDraft}
       />
     </div>
   );

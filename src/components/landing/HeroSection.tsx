@@ -6,6 +6,7 @@ import { ArrowRight, Lock, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { BalanceRatioBar } from "@/components/ResultBar";
+import { AntlerLogo } from "@/components/landing/AntlerLogo";
 
 /**
  * 히어로의 질문은 목업이 아니라 실제로 동작한다.
@@ -170,6 +171,11 @@ export function HeroSection() {
     <section className="relative min-h-[100dvh] bg-[#fafaf8] px-6 pt-28 pb-20 md:pt-32">
       <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-16">
         <div>
+          <AntlerLogo
+            animated
+            className="mb-5 h-16 w-14 text-amber-500 sm:h-20 sm:w-[70px]"
+          />
+
           <motion.h1
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}

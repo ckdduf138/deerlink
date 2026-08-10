@@ -13,7 +13,6 @@ const ANTLER_PATHS = [
   "M18.5 9 C21 7 22.5 5 22 2",
 ];
 
-
 interface ShareCardProps {
   room: ResultsRoom;
 }
@@ -23,6 +22,10 @@ function getFeaturedQuestion(room: ResultsRoom): Question | null {
   return candidate ?? room.questions[0] ?? null;
 }
 
+/**
+ * 인스타 피드 썸네일 크기에서도 한눈에 읽히도록, 숫자를 카드의 가장 큰 시각 요소로 둔다.
+ * "제목 → 뱃지 → 카드 → 구석의 작은 숫자" 순서였던 이전 레이아웃은 숫자가 안 보였다.
+ */
 function renderFeatured(question: Question, participants: Participant[]) {
   const values = participants
     .map((p) => p.answers.find((a) => a.questionId === question.id)?.value)
@@ -36,39 +39,60 @@ function renderFeatured(question: Question, participants: Participant[]) {
     const pctB = 100 - pctA;
     return (
       <div style={{ width: "100%" }}>
-        <div style={{ display: "flex", gap: 16, marginBottom: 28 }}>
-          <div
-            style={{
-              flex: 1,
-              padding: "28px 24px",
-              borderRadius: 24,
-              border: "2px solid #fde6c1",
-              background: "#fff8ec",
-              textAlign: "center",
-            }}
-          >
-            <div style={{ fontSize: 18, color: "#b45309", fontWeight: 600, marginBottom: 8 }}>
-              A
-            </div>
-            <div style={{ fontSize: 28, color: "#78350f", fontWeight: 700 }}>
+        <div style={{ display: "flex", alignItems: "flex-end", gap: 32 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div
+              style={{
+                fontSize: 22,
+                fontWeight: 600,
+                color: "#b45309",
+                marginBottom: 6,
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
               {question.optionA}
             </div>
-          </div>
-          <div
-            style={{
-              flex: 1,
-              padding: "28px 24px",
-              borderRadius: 24,
-              border: "2px solid #b8e6df",
-              background: "#effaf7",
-              textAlign: "center",
-            }}
-          >
-            <div style={{ fontSize: 18, color: "#0f766e", fontWeight: 600, marginBottom: 8 }}>
-              B
+            <div
+              style={{
+                fontSize: 132,
+                fontWeight: 800,
+                color: "#92400e",
+                lineHeight: 1,
+                letterSpacing: -4,
+              }}
+            >
+              {pctA}
+              <span style={{ fontSize: 48 }}>%</span>
             </div>
-            <div style={{ fontSize: 28, color: "#134e4a", fontWeight: 700 }}>
+          </div>
+          <div style={{ width: 2, height: 120, background: "#e7e5e4", flexShrink: 0 }} />
+          <div style={{ flex: 1, minWidth: 0, textAlign: "right" }}>
+            <div
+              style={{
+                fontSize: 22,
+                fontWeight: 600,
+                color: "#0f766e",
+                marginBottom: 6,
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
               {question.optionB}
+            </div>
+            <div
+              style={{
+                fontSize: 132,
+                fontWeight: 800,
+                color: "#115e59",
+                lineHeight: 1,
+                letterSpacing: -4,
+              }}
+            >
+              {pctB}
+              <span style={{ fontSize: 48 }}>%</span>
             </div>
           </div>
         </div>
@@ -76,28 +100,16 @@ function renderFeatured(question: Question, participants: Participant[]) {
         <div
           style={{
             display: "flex",
-            height: 20,
+            height: 18,
             width: "100%",
-            borderRadius: 12,
+            borderRadius: 10,
             overflow: "hidden",
             background: "#f5f5f4",
+            marginTop: 32,
           }}
         >
           {countA > 0 && <div style={{ width: `${pctA}%`, background: "#d97706" }} />}
           {countB > 0 && <div style={{ width: `${pctB}%`, background: "#0d9488" }} />}
-        </div>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            marginTop: 12,
-            fontSize: 22,
-            color: "#57534e",
-            fontWeight: 600,
-          }}
-        >
-          <span style={{ color: "#b45309" }}>{pctA}%</span>
-          <span style={{ color: "#0f766e" }}>{pctB}%</span>
         </div>
       </div>
     );
@@ -108,45 +120,90 @@ function renderFeatured(question: Question, participants: Participant[]) {
     const counts = options.map((_, i) => values.filter((v) => v === String(i)).length);
     const total = counts.reduce((a, b) => a + b, 0) || 1;
     const maxIdx = counts.indexOf(Math.max(...counts));
+    const topPct = Math.round((counts[maxIdx] / total) * 100);
+
     return (
-      <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 14 }}>
-        {options.map((opt, i) => {
-          const pct = Math.round((counts[i] / total) * 100);
-          const isTop = i === maxIdx && counts[i] > 0;
-          return (
-            <div key={i}>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  marginBottom: 8,
-                  fontSize: 22,
-                  color: isTop ? "#1c1917" : "#78716c",
-                  fontWeight: isTop ? 700 : 500,
-                }}
-              >
-                <span>{opt}</span>
-                <span>{pct}%</span>
-              </div>
-              <div
-                style={{
-                  height: 12,
-                  borderRadius: 8,
-                  background: "#f5f5f4",
-                  overflow: "hidden",
-                }}
-              >
+      <div style={{ width: "100%" }}>
+        <div style={{ marginBottom: 28 }}>
+          <div
+            style={{
+              fontSize: 24,
+              fontWeight: 600,
+              color: "#78350f",
+              marginBottom: 4,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {options[maxIdx]}
+          </div>
+          <div
+            style={{
+              fontSize: 112,
+              fontWeight: 800,
+              color: "#92400e",
+              lineHeight: 1,
+              letterSpacing: -3,
+            }}
+          >
+            {topPct}
+            <span style={{ fontSize: 44 }}>%</span>
+          </div>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {options.map((opt, i) => {
+            const pct = Math.round((counts[i] / total) * 100);
+            const isTop = i === maxIdx && counts[i] > 0;
+            return (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 16 }}>
                 <div
                   style={{
-                    width: `${pct}%`,
-                    height: "100%",
-                    background: isTop ? "#e8a038" : "#d6d3d1",
+                    flex: 1,
+                    fontSize: 20,
+                    color: isTop ? "#1c1917" : "#78716c",
+                    fontWeight: isTop ? 700 : 500,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
                   }}
-                />
+                >
+                  {opt}
+                </div>
+                <div
+                  style={{
+                    width: 220,
+                    height: 10,
+                    borderRadius: 6,
+                    background: "#f5f5f4",
+                    overflow: "hidden",
+                    flexShrink: 0,
+                  }}
+                >
+                  <div
+                    style={{
+                      width: `${pct}%`,
+                      height: "100%",
+                      background: isTop ? "#e8a038" : "#d6d3d1",
+                    }}
+                  />
+                </div>
+                <div
+                  style={{
+                    width: 56,
+                    textAlign: "right",
+                    fontSize: 20,
+                    color: "#78716c",
+                    flexShrink: 0,
+                  }}
+                >
+                  {pct}%
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     );
   }
@@ -155,11 +212,11 @@ function renderFeatured(question: Question, participants: Participant[]) {
     <div
       style={{
         width: "100%",
-        padding: "32px",
+        padding: "36px 32px",
         borderRadius: 24,
         background: "#fff8ec",
         border: "2px solid #fde6c1",
-        fontSize: 24,
+        fontSize: 30,
         color: "#78350f",
         lineHeight: 1.5,
         fontStyle: "italic",
@@ -175,103 +232,109 @@ export const ShareCard = forwardRef<HTMLDivElement, ShareCardProps>(function Sha
   ref
 ) {
   const featured = getFeaturedQuestion(room);
-  const match = bestPair(room);
+  // 궁합 통계는 "이름 붙은 우리 그룹" 전제다 — 공개방은 익명이라 이 전제가 없다
+  const match = room.isPublic ? null : bestPair(room);
 
   return (
     <div
       ref={ref}
       style={{
+        position: "relative",
         width: 1080,
         height: 1080,
         background: "#fafaf8",
-        display: "flex",
-        flexDirection: "column",
-        padding: 64,
+        overflow: "hidden",
         fontFamily:
           "'Gowun Dodum', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif",
-        boxSizing: "border-box",
       }}
     >
-      {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 48 }}>
-        <svg
-          viewBox="0 0 24 28"
-          width="36"
-          height="44"
-          fill="none"
-          stroke="#e8a038"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          {ANTLER_PATHS.map((d, i) => (
-            <path key={i} d={d} />
-          ))}
-        </svg>
-        <div style={{ fontSize: 28, fontWeight: 700, color: "#1c1917", letterSpacing: -1 }}>
-          Deerlink
-        </div>
-        <div style={{ flex: 1 }} />
-        <div
-          style={{
-            fontSize: 18,
-            color: "#a8a29e",
-            textTransform: "uppercase",
-            letterSpacing: 4,
-          }}
-        >
-          결과 비교
-        </div>
-      </div>
-
-      {/* Title */}
+      {/* 은은한 amber 도트 텍스처 — 흰 카드가 평면적으로 보이지 않게 하는 배경 한 겹 */}
       <div
         style={{
-          fontSize: 56,
-          fontWeight: 700,
-          color: "#1c1917",
-          lineHeight: 1.15,
-          letterSpacing: -1.5,
-          marginBottom: 24,
+          position: "absolute",
+          inset: 0,
+          backgroundImage: "radial-gradient(#f3d9a8 2px, transparent 2px)",
+          backgroundSize: "28px 28px",
+          opacity: 0.4,
+        }}
+      />
+
+      <div
+        style={{
+          position: "relative",
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          padding: 64,
+          boxSizing: "border-box",
         }}
       >
-        {room.title}
-      </div>
+        {/* Header */}
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 40 }}>
+          <svg
+            viewBox="0 0 24 28"
+            width="30"
+            height="36"
+            fill="none"
+            stroke="#e8a038"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            {ANTLER_PATHS.map((d, i) => (
+              <path key={i} d={d} />
+            ))}
+          </svg>
+          <div style={{ fontSize: 24, fontWeight: 700, color: "#1c1917", letterSpacing: -1 }}>
+            Deerlink
+          </div>
+        </div>
 
-      {/* Stats */}
-      <div style={{ display: "flex", alignItems: "center", gap: 24, marginBottom: 48 }}>
+        {/* Title */}
         <div
           style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "10px 18px",
-            borderRadius: 9999,
-            background: "#fff8ec",
-            border: "1px solid #fde6c1",
-            fontSize: 22,
-            fontWeight: 600,
-            color: "#78350f",
+            fontSize: 52,
+            fontWeight: 700,
+            color: "#1c1917",
+            lineHeight: 1.15,
+            letterSpacing: -1.5,
+            marginBottom: 32,
           }}
         >
-          {room.participants.length}명 참여
+          {room.title}
         </div>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "10px 18px",
-            borderRadius: 9999,
-            background: "#fafaf8",
-            border: "1px solid #e7e5e4",
-            fontSize: 22,
-            color: "#57534e",
-          }}
-        >
-          질문 {room.questions.length}개
-        </div>
-        {match && (
+
+        {/* Featured question — 숫자가 이 카드의 주인공이다 */}
+        {featured && (
+          <div
+            style={{
+              background: "white",
+              border: "1px solid #fde6c1",
+              borderRadius: 32,
+              padding: 48,
+              marginBottom: 32,
+              display: "flex",
+              flexDirection: "column",
+              gap: 20,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 30,
+                fontWeight: 700,
+                color: "#1c1917",
+                lineHeight: 1.3,
+                letterSpacing: -0.5,
+              }}
+            >
+              {featured.title}
+            </div>
+            {renderFeatured(featured, room.participants)}
+          </div>
+        )}
+
+        {/* Stats */}
+        <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: "auto" }}>
           <div
             style={{
               display: "flex",
@@ -279,77 +342,63 @@ export const ShareCard = forwardRef<HTMLDivElement, ShareCardProps>(function Sha
               gap: 8,
               padding: "10px 18px",
               borderRadius: 9999,
-              background: "#f0fdfa",
-              border: "1px solid #b8e6df",
-              fontSize: 22,
+              background: "#fff8ec",
+              border: "1px solid #fde6c1",
+              fontSize: 20,
               fontWeight: 600,
-              color: "#0f766e",
+              color: "#78350f",
             }}
           >
-            {match.a.nickname}·{match.b.nickname} 궁합 {match.pct}%
+            {room.participants.length}명 참여
           </div>
-        )}
-      </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "10px 18px",
+              borderRadius: 9999,
+              background: "#fafaf8",
+              border: "1px solid #e7e5e4",
+              fontSize: 20,
+              color: "#57534e",
+            }}
+          >
+            질문 {room.questions.length}개
+          </div>
+          {match && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "10px 18px",
+                borderRadius: 9999,
+                background: "#f0fdfa",
+                border: "1px solid #b8e6df",
+                fontSize: 20,
+                fontWeight: 600,
+                color: "#0f766e",
+              }}
+            >
+              {match.a.nickname}·{match.b.nickname} 궁합 {match.pct}%
+            </div>
+          )}
+        </div>
 
-      {/* Featured question */}
-      {featured && (
+        {/* Footer */}
         <div
           style={{
-            background: "white",
-            border: "1px solid #fde6c1",
-            borderRadius: 32,
-            padding: 48,
-            marginBottom: "auto",
+            marginTop: 32,
+            paddingTop: 28,
+            borderTop: "1px solid #e7e5e4",
             display: "flex",
-            flexDirection: "column",
-            gap: 24,
+            alignItems: "center",
+            justifyContent: "space-between",
           }}
         >
-          <div
-            style={{
-              fontSize: 18,
-              color: "#a8a29e",
-              textTransform: "uppercase",
-              letterSpacing: 4,
-            }}
-          >
-            {featured.type === "balance"
-              ? "밸런스 게임"
-              : featured.type === "multiple"
-                ? "객관식"
-                : "주관식"}
-          </div>
-          <div
-            style={{
-              fontSize: 36,
-              fontWeight: 700,
-              color: "#1c1917",
-              lineHeight: 1.3,
-              letterSpacing: -0.5,
-            }}
-          >
-            {featured.title}
-          </div>
-          {renderFeatured(featured, room.participants)}
-        </div>
-      )}
-
-      {/* Footer */}
-      <div
-        style={{
-          marginTop: 48,
-          paddingTop: 32,
-          borderTop: "1px solid #e7e5e4",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <div style={{ fontSize: 22, color: "#78716c" }}>
-          링크 하나로 친구들과 의견 비교
-        </div>
-        <div style={{ fontSize: 26, fontWeight: 600, color: "#e8a038" }}>
-          deerlink.kr
+          <div style={{ fontSize: 20, color: "#78716c" }}>링크 하나로 친구들과 의견 비교</div>
+          <div style={{ fontSize: 24, fontWeight: 600, color: "#e8a038" }}>deerlink.kr</div>
         </div>
       </div>
     </div>
