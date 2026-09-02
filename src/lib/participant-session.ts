@@ -14,3 +14,15 @@ export function hasCompletedAnswers(
 ): boolean {
   return participant !== undefined && participant.answers.length >= totalQuestions;
 }
+
+export function canViewResults({
+  isPublic,
+  participant,
+  totalQuestions,
+}: {
+  isPublic: boolean;
+  participant: { answers: unknown[] } | undefined;
+  totalQuestions: number;
+}): boolean {
+  return isPublic || hasCompletedAnswers(participant, totalQuestions);
+}

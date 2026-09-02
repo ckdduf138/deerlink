@@ -45,3 +45,4 @@ next-env.d.ts
 # local db & generated sql
 *.db
 *.sql
+!prisma/migrations/**/*.sql

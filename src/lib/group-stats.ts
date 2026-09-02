@@ -1,4 +1,4 @@
-import type { Participant, Question, ResultsRoom } from "./types";
+import { parseOptions, type Participant, type Question, type ResultsRoom } from "./types";
 
 /**
  * "지우와 87% 일치" 같은 그룹 리포트 계산. 결과 페이지와 공유 카드가
@@ -106,4 +106,108 @@ export function computeClosestBalance(
 
   // "가장" 팽팽한 걸 뽑으려면 비교 대상이 최소 둘은 있어야 한다
   return qualifying >= 2 ? best : null;
+}
+
+export interface QuestionAggregate {
+  question: Question;
+  options: { label: string; count: number; pct: number }[];
+  total: number;
+  topCount: number;
+  topLabels: string[];
+}
+
+function answerLabel(question: Question, value: string): string | null {
+  if (question.type === "balance") {
+    if (value === "A") return question.optionA ?? "A";
+    if (value === "B") return question.optionB ?? "B";
+    return null;
+  }
+  if (question.type === "multiple") {
+    const index = Number(value);
+    return Number.isInteger(index) ? (parseOptions(question.options)[index] ?? null) : null;
+  }
+  return null;
+}
+
+export function questionAggregate(
+  room: ResultsRoom,
+  question: Question
+): QuestionAggregate | null {
+  if (question.type === "subjective") return null;
+
+  const labels =
+    question.type === "balance"
+      ? [question.optionA ?? "A", question.optionB ?? "B"]
+      : parseOptions(question.options);
+  const values = room.participants
+    .map((participant) =>
+      participant.answers.find((answer) => answer.questionId === question.id)?.value
+    )
+    .filter((value): value is string => value !== undefined);
+  const resolved = values
+    .map((value) => answerLabel(question, value))
+    .filter((label): label is string => label !== null);
+  const total = resolved.length;
+  const options = labels.map((label) => {
+    const count = resolved.filter((value) => value === label).length;
+    return { label, count, pct: total ? Math.round((count / total) * 100) : 0 };
+  });
+  const topCount = Math.max(...options.map((option) => option.count), 0);
+
+  return {
+    question,
+    options,
+    total,
+    topCount,
+    topLabels: options.filter((option) => option.count === topCount && topCount > 0).map((option) => option.label),
+  };
+}
+
+export function computeQuestionAggregates(room: ResultsRoom): QuestionAggregate[] {
+  return room.questions
+    .map((question) => questionAggregate(room, question))
+    .filter((aggregate): aggregate is QuestionAggregate => aggregate !== null);
+}
+
+export function computeUnanimousAggregates(room: ResultsRoom): QuestionAggregate[] {
+  return computeQuestionAggregates(room).filter(
+    (aggregate) => aggregate.total >= 2 && aggregate.topCount === aggregate.total
+  );
+}
+
+export function mostMeaningfulAggregate(room: ResultsRoom): QuestionAggregate | null {
+  const aggregates = computeQuestionAggregates(room).filter((aggregate) => aggregate.total > 0);
+  aggregates.sort((a, b) => {
+    if (b.total !== a.total) return b.total - a.total;
+    const bShare = b.total ? b.topCount / b.total : 0;
+    const aShare = a.total ? a.topCount / a.total : 0;
+    if (bShare !== aShare) return bShare - aShare;
+    return a.question.order - b.question.order;
+  });
+  return aggregates[0] ?? null;
+}
+
+export type PrimaryResultInsight =
+  | { kind: "best-pair"; pair: PairScore }
+  | {
+      kind: "closest-balance";
+      result: NonNullable<ReturnType<typeof computeClosestBalance>>;
+    }
+  | { kind: "unanimous"; aggregate: QuestionAggregate }
+  | { kind: "aggregate"; aggregate: QuestionAggregate };
+
+export function primaryResultInsight(room: ResultsRoom): PrimaryResultInsight | null {
+  if (!room.isPublic) {
+    const pair = bestPair(room);
+    if (pair) return { kind: "best-pair", pair };
+  }
+
+  const closest = computeClosestBalance(room);
+  if (closest) return { kind: "closest-balance", result: closest };
+
+  const unanimous = computeUnanimousAggregates(room)[0];
+  if (unanimous) return { kind: "unanimous", aggregate: unanimous };
+
+  const aggregate = mostMeaningfulAggregate(room);
+  return aggregate ? { kind: "aggregate", aggregate } : null;
 }

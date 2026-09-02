@@ -3,6 +3,7 @@
 import { motion, AnimatePresence, useMotionValue, PanInfo } from "framer-motion";
 import { X } from "lucide-react";
 import { useState } from "react";
+import { useAccessibleDialog } from "@/lib/use-accessible-dialog";
 
 interface FeedbackModalProps {
   open: boolean;
@@ -30,6 +31,7 @@ export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
       setStatus("idle");
     }, 300);
   };
+  const dialogRef = useAccessibleDialog(open, handleClose, status === "sending");
 
   const handleSubmit = async () => {
     if (!message.trim() || status === "sending") return;
@@ -59,9 +61,11 @@ export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
             transition={{ duration: 0.2 }}
             className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm"
             onClick={handleClose}
+            aria-hidden="true"
           />
 
           <motion.div
+            ref={dialogRef}
             key="sheet"
             style={{ y }}
             drag="y"
@@ -73,16 +77,23 @@ export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
             exit={{ y: "100%" }}
             transition={{ type: "spring", stiffness: 320, damping: 32, mass: 0.8 }}
             className="fixed bottom-0 inset-x-0 z-[60] rounded-t-3xl bg-white border-t border-amber-100 overflow-hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="feedback-dialog-title"
+            tabIndex={-1}
           >
             <div className="flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing">
               <div className="w-10 h-1 rounded-full bg-stone-200" />
             </div>
 
             <div className="flex items-center justify-between px-6 pb-4">
-              <h2 className="text-base font-semibold text-stone-900">피드백 보내기</h2>
+              <h2 id="feedback-dialog-title" className="text-base font-semibold text-stone-900">
+                피드백 보내기
+              </h2>
               <button
                 onClick={handleClose}
-                className="p-1.5 text-stone-400 hover:text-stone-600 transition-colors"
+                disabled={status === "sending"}
+                className="flex min-h-11 min-w-11 items-center justify-center text-stone-500 transition-colors hover:text-stone-700 disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label="닫기"
               >
                 <X className="w-4 h-4" />
@@ -91,7 +102,7 @@ export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
 
             <div className="px-6 pb-8 space-y-4">
               {status === "done" ? (
-                <div className="py-10 text-center">
+                <div className="py-10 text-center" aria-live="polite">
                   <p className="text-sm font-medium text-stone-900 mb-1">피드백이 전달됐어요</p>
                   <p className="text-xs text-stone-500">소중한 의견 감사합니다.</p>
                 </div>
@@ -102,6 +113,8 @@ export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
                       placeholder="버그 신고, 기능 제안, 뭐든 좋아요"
+                      aria-label="피드백 내용"
+                      data-dialog-autofocus
                       rows={5}
                       className="w-full resize-none rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-900 placeholder:text-stone-500 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100 transition-colors"
                     />
@@ -111,12 +124,15 @@ export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
                       type="text"
                       value={contact}
                       onChange={(e) => setContact(e.target.value)}
-                      placeholder="연락처 (선택) · 이메일, 트위터 등"
+                      placeholder="연락처 (선택), 이메일이나 SNS 계정"
+                      aria-label="연락처 (선택)"
                       className="w-full rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-900 placeholder:text-stone-500 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100 transition-colors"
                     />
                   </div>
                   {status === "error" && (
-                    <p className="text-xs text-red-500">전송에 실패했어요. 다시 시도해 주세요.</p>
+                    <p className="text-xs text-red-600" role="alert">
+                      전송에 실패했어요. 작성한 내용은 그대로 있으니 다시 시도해 주세요.
+                    </p>
                   )}
                   <button
                     onClick={handleSubmit}

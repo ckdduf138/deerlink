@@ -7,16 +7,16 @@ import { QUESTION_META } from "@/lib/question-meta";
 import type { QuestionType } from "@/lib/types";
 
 export const metadata: Metadata = {
-  title: "밸런스게임 질문 모음 28선 - 단톡방·MT에서 바로 쓰는 인기 질문",
+  title: "밸런스게임 질문 모음 28선 - 단톡방과 MT에서 바로 쓰는 인기 질문",
   description:
-    "친구들과 단톡방, MT, 회식, 술자리에서 바로 쓸 수 있는 인기 밸런스게임 질문 11개, 객관식 10개, 주관식 7개를 모았어요. 골라서 링크 하나로 공유, 모두 답하면 결과 공개.",
+    "친구들과 단톡방, MT, 회식, 술자리에서 바로 쓸 수 있는 인기 밸런스게임 질문 11개, 객관식 10개, 주관식 7개를 모았어요. 내가 답을 마치면 친구들의 선택이 열립니다.",
   alternates: {
     canonical: "/popular",
   },
   openGraph: {
     title: "밸런스게임 질문 모음 28선 | Deerlink",
     description:
-      "단톡방·MT에서 바로 쓰는 인기 밸런스게임, 객관식, 주관식 질문 모음. 링크 하나로 공유.",
+      "단톡방과 MT에서 바로 쓰는 인기 밸런스게임, 객관식, 주관식 질문 모음. 링크 하나로 공유.",
     url: "/popular",
   },
   keywords: [
@@ -63,14 +63,14 @@ export default function PopularPage() {
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-10 py-5 bg-[#fafaf8]/80 backdrop-blur-md border-b border-amber-100/50">
         <Link
           href="/"
-          className="flex items-center gap-2 text-sm font-semibold text-stone-900 tracking-tight"
+          className="flex min-h-11 items-center gap-2 text-sm font-semibold text-stone-900 tracking-tight"
         >
           <AntlerLogo className="w-3.5 h-[18px] text-amber-500" />
           Deerlink
         </Link>
         <Link
           href="/create"
-          className="text-sm text-stone-600 hover:text-stone-900 transition-colors"
+          className="flex min-h-11 items-center px-2 text-sm text-stone-600 hover:text-stone-900 transition-colors"
         >
           방 만들기 &rarr;
         </Link>
@@ -84,9 +84,9 @@ export default function PopularPage() {
             <span className="text-stone-500">밸런스게임 질문 28선</span>
           </h1>
           <p className="text-base text-stone-600 leading-relaxed mb-8 max-w-xl">
-            친구들과 단톡방·MT·술자리·회식에서 바로 쓸 수 있는 밸런스게임,
+            친구들과 단톡방, MT, 술자리, 회식에서 바로 쓸 수 있는 밸런스게임,
             객관식, 주관식 질문을 모았어요. 마음에 드는 질문을 골라 링크 하나로
-            공유하면, 모두가 답을 마친 순간 결과가 한꺼번에 공개됩니다.
+            공유하면, 내가 모든 질문에 답한 뒤 친구들의 선택과 결과를 볼 수 있어요.
           </p>
           <Link
             href="/create"
@@ -123,6 +123,7 @@ export default function PopularPage() {
                     {q.optionB}
                   </div>
                 </div>
+                <QuestionStartLink questionId={q.id} />
               </li>
             ))}
           </ol>
@@ -157,6 +158,7 @@ export default function PopularPage() {
                     </li>
                   ))}
                 </ul>
+                <QuestionStartLink questionId={q.id} />
               </li>
             ))}
           </ol>
@@ -180,6 +182,7 @@ export default function PopularPage() {
                 <h3 className="text-base font-semibold text-stone-900 leading-snug">
                   {q.title}
                 </h3>
+                <QuestionStartLink questionId={q.id} />
               </li>
             ))}
           </ol>
@@ -208,6 +211,18 @@ export default function PopularPage() {
         </footer>
       </main>
     </div>
+  );
+}
+
+function QuestionStartLink({ questionId }: { questionId: string }) {
+  return (
+    <Link
+      href={`/create?question=${encodeURIComponent(questionId)}`}
+      className="mt-4 flex min-h-11 items-center justify-end gap-1.5 border-t border-amber-100 pt-3 text-sm font-semibold text-amber-800 transition-colors hover:text-amber-950"
+    >
+      이 질문으로 시작
+      <ArrowRight className="h-4 w-4" aria-hidden="true" />
+    </Link>
   );
 }
 

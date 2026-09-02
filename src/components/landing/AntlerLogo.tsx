@@ -1,21 +1,13 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { ANTLER_LOGO_PATHS } from "./antler-logo-paths";
 
 interface AntlerLogoProps {
   className?: string;
   variant?: "stroke" | "filled";
   animated?: boolean;
 }
-
-const ANTLER_PATHS = [
-  "M12 28 C11 24 9 20 7 16 C5 12 3 8 4 4",
-  "M12 28 C13 24 15 20 17 16 C19 12 21 8 20 4",
-  "M7.5 14 C5 13 3.5 11 4 8",
-  "M16.5 14 C19 13 20.5 11 20 8",
-  "M5.5 9 C3 7 1.5 5 2 2",
-  "M18.5 9 C21 7 22.5 5 22 2",
-];
 
 export function AntlerLogo({
   className = "w-4 h-5",
@@ -36,7 +28,7 @@ export function AntlerLogo({
         className={className}
         aria-hidden="true"
       >
-        {ANTLER_PATHS.map((d, i) => (
+        {ANTLER_LOGO_PATHS.map((d, i) => (
           <motion.path
             key={i}
             d={d}
@@ -63,7 +55,7 @@ export function AntlerLogo({
       className={className}
       aria-hidden="true"
     >
-      {ANTLER_PATHS.map((d, i) => (
+      {ANTLER_LOGO_PATHS.map((d, i) => (
         <path key={i} d={d} />
       ))}
     </svg>

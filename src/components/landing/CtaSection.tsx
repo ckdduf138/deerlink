@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -9,11 +9,12 @@ import { FeedbackModal } from "@/components/FeedbackModal";
 
 export function CtaSection() {
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const reduceMotion = useReducedMotion();
 
   return (
     <section className="bg-amber-50 px-6 pt-24 pb-14 md:pt-32">
       <motion.div
-        initial={{ opacity: 0, y: 16 }}
+        initial={reduceMotion ? false : { opacity: 0, y: 16 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-80px" }}
         transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
@@ -21,10 +22,10 @@ export function CtaSection() {
       >
         <AntlerLogo className="mx-auto mb-8 h-14 w-12 text-amber-500" />
         <h2 className="text-3xl font-bold leading-snug tracking-tight text-stone-900 md:text-4xl">
-          질문 하나로 시작해보세요
+          질문 하나로 시작하세요
         </h2>
         <p className="mt-5 text-lg leading-relaxed text-stone-600">
-          회원가입 없이 무료예요. 만드는 데 30초면 됩니다.
+          회원가입 없이, 30초면 돼요.
         </p>
         <Link
           href="/create"

@@ -34,8 +34,8 @@ export function BalanceRatioBar({
   return (
     <div className={cn("w-full", className)}>
       <div className="mb-2 flex items-baseline justify-between gap-4">
-        <p className="min-w-0 truncate text-base font-semibold text-amber-800">{a.label}</p>
-        <p className="min-w-0 truncate text-right text-base font-semibold text-teal-800">
+        <p className="min-w-0 flex-1 truncate text-base font-semibold text-amber-800">{a.label}</p>
+        <p className="min-w-0 flex-1 truncate text-right text-base font-semibold text-teal-800">
           {b.label}
         </p>
       </div>

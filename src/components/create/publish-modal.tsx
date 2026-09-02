@@ -1,8 +1,9 @@
 "use client";
 
 import { motion, AnimatePresence, useMotionValue, PanInfo } from "framer-motion";
-import { AlertCircle, ArrowRight, Globe, Loader2, Lock, X } from "lucide-react";
+import { AlertCircle, ArrowRight, Clock3, Globe, Loader2, Lock, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAccessibleDialog } from "@/lib/use-accessible-dialog";
 
 interface PublishModalProps {
   open: boolean;
@@ -35,6 +36,7 @@ export function PublishModal({
       handleClose();
     }
   };
+  const dialogRef = useAccessibleDialog(open, handleClose, loading);
 
   return (
     <AnimatePresence>
@@ -48,9 +50,11 @@ export function PublishModal({
             transition={{ duration: 0.2 }}
             className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm"
             onClick={handleClose}
+            aria-hidden="true"
           />
 
           <motion.div
+            ref={dialogRef}
             key="sheet"
             style={{ y }}
             drag="y"
@@ -62,16 +66,23 @@ export function PublishModal({
             exit={{ y: "100%" }}
             transition={{ type: "spring", stiffness: 320, damping: 32, mass: 0.8 }}
             className="fixed bottom-0 inset-x-0 z-[60] rounded-t-3xl bg-white border-t border-amber-100 overflow-hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="publish-dialog-title"
+            tabIndex={-1}
           >
             <div className="flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing">
               <div className="w-10 h-1 rounded-full bg-stone-200" />
             </div>
 
             <div className="flex items-center justify-between px-6 pb-4">
-              <h2 className="text-base font-semibold text-stone-900">공개 범위를 선택하세요</h2>
+              <h2 id="publish-dialog-title" className="text-base font-semibold text-stone-900">
+                공개 범위를 선택하세요
+              </h2>
               <button
                 onClick={handleClose}
-                className="p-1.5 text-stone-400 hover:text-stone-600 transition-colors"
+                disabled={loading}
+                className="flex min-h-11 min-w-11 items-center justify-center text-stone-500 transition-colors hover:text-stone-700 disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label="닫기"
               >
                 <X className="w-4 h-4" />
@@ -84,6 +95,7 @@ export function PublishModal({
                   type="button"
                   onClick={() => onPublicChange(false)}
                   aria-pressed={!isPublic}
+                  data-dialog-autofocus
                   className={cn(
                     "rounded-xl border p-4 text-left transition-colors",
                     !isPublic
@@ -118,6 +130,13 @@ export function PublishModal({
                     누구나 발견하고 답할 수 있어요. 닉네임 없이 익명으로 참여해요
                   </p>
                 </button>
+              </div>
+
+              <div className="flex items-start gap-2 rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-amber-900">
+                <Clock3 className="mt-0.5 h-4 w-4 flex-shrink-0" aria-hidden="true" />
+                <p className="text-xs leading-relaxed">
+                  방과 답변은 생성 후 24시간 동안 유지돼요. 시간이 지나면 자동으로 삭제됩니다.
+                </p>
               </div>
 
               {error && (

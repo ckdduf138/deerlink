@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { hasCompletedAnswers, participantCookieName } from "@/lib/participant-session";
+import { canViewResults, participantCookieName } from "@/lib/participant-session";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
@@ -33,13 +33,31 @@ export async function GET(
   const participantId = request.cookies.get(participantCookieName(id))?.value;
   const viewer = participants.find((p) => p.id === participantId);
 
-  if (!hasCompletedAnswers(viewer, room.questions.length)) {
+  if (!canViewResults({
+    isPublic: room.isPublic,
+    participant: viewer,
+    totalQuestions: room.questions.length,
+  })) {
     // participant.id 는 곧 결과 열람 자격이다 — 잠긴 응답에 실으면 쿠키로 위조할 수 있다
     return NextResponse.json({
       ...roomWithoutParticipants,
       locked: true,
       participantCount: participants.length,
       participants: participants.map((p) => ({ nickname: p.nickname })),
+    });
+  }
+
+  if (room.isPublic) {
+    return NextResponse.json({
+      ...roomWithoutParticipants,
+      locked: false,
+      participantCount: participants.length,
+      participants: participants.map((participant) => ({
+        answers: participant.answers.map((answer) => ({
+          questionId: answer.questionId,
+          value: answer.value,
+        })),
+      })),
     });
   }
 

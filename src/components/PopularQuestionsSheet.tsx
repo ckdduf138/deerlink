@@ -6,6 +6,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { POPULAR_QUESTIONS, PopularQuestion } from "@/data/popular-questions";
 import { QUESTION_META } from "@/lib/question-meta";
+import { useAccessibleDialog } from "@/lib/use-accessible-dialog";
 
 type FilterType = "all" | "balance" | "multiple" | "subjective";
 
@@ -27,10 +28,10 @@ function QuestionCard({ question, onSelect }: { question: PopularQuestion; onSel
 
   let preview = "";
   if (question.type === "balance") {
-    preview = `${question.optionA} · ${question.optionB}`;
+    preview = `${question.optionA} / ${question.optionB}`;
   } else if (question.type === "multiple") {
     const opts = question.options?.slice(0, 2) ?? [];
-    preview = opts.join(" · ");
+    preview = opts.join(" / ");
   } else {
     preview = "자유 답변";
   }
@@ -45,7 +46,7 @@ function QuestionCard({ question, onSelect }: { question: PopularQuestion; onSel
         <Icon className="w-4 h-4 mt-0.5 flex-shrink-0" />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-stone-900 leading-snug mb-1.5">{question.title}</p>
-          <p className="text-[11px] text-stone-500 truncate">{preview}</p>
+          <p className="text-xs text-stone-500 truncate">{preview}</p>
         </div>
       </div>
     </motion.button>
@@ -67,6 +68,7 @@ export function PopularQuestionsSheet({ open, onClose, onSelect }: PopularQuesti
   const handleSelect = (question: PopularQuestion) => {
     onSelect(question);
   };
+  const dialogRef = useAccessibleDialog(open, onClose);
 
   return (
     <AnimatePresence>
@@ -81,10 +83,12 @@ export function PopularQuestionsSheet({ open, onClose, onSelect }: PopularQuesti
             transition={{ duration: 0.2 }}
             className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm"
             onClick={onClose}
+            aria-hidden="true"
           />
 
           {/* Sheet */}
           <motion.div
+            ref={dialogRef}
             key="sheet"
             style={{ y }}
             drag="y"
@@ -96,6 +100,10 @@ export function PopularQuestionsSheet({ open, onClose, onSelect }: PopularQuesti
             exit={{ y: "100%" }}
             transition={{ type: "spring", stiffness: 320, damping: 32, mass: 0.8 }}
             className="fixed bottom-0 inset-x-0 z-[60] h-[70vh] rounded-t-3xl bg-white border-t border-amber-100 overflow-hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="popular-questions-title"
+            tabIndex={-1}
           >
             {/* Drag Handle */}
             <div className="flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing">
@@ -104,10 +112,12 @@ export function PopularQuestionsSheet({ open, onClose, onSelect }: PopularQuesti
 
             {/* Header */}
             <div className="flex items-center justify-between px-6 pb-4">
-              <h2 className="text-base font-semibold text-stone-900">인기 질문</h2>
+              <h2 id="popular-questions-title" className="text-base font-semibold text-stone-900">
+                인기 질문
+              </h2>
               <button
                 onClick={onClose}
-                className="p-1.5 text-stone-400 hover:text-stone-600 transition-colors"
+                className="flex min-h-11 min-w-11 items-center justify-center text-stone-500 transition-colors hover:text-stone-700"
                 aria-label="닫기"
               >
                 <X className="w-4 h-4" />
@@ -115,14 +125,20 @@ export function PopularQuestionsSheet({ open, onClose, onSelect }: PopularQuesti
             </div>
 
             {/* Filter Tabs */}
-            <div className="px-4 pb-4 flex gap-2 border-b border-stone-200">
+            <div
+              className="px-4 pb-4 flex gap-2 border-b border-stone-200"
+              role="group"
+              aria-label="질문 유형 필터"
+            >
               {FILTERS.map(({ key, label }) => (
                 <motion.button
                   key={key}
                   onClick={() => setFilter(key)}
                   whileTap={{ scale: 0.95 }}
+                  aria-pressed={filter === key}
+                  data-dialog-autofocus={key === "all" ? "true" : undefined}
                   className={cn(
-                    "px-3 py-1.5 rounded-full text-xs font-medium transition-colors duration-150",
+                    "min-h-11 px-3 rounded-full text-xs font-medium transition-colors duration-150",
                     filter === key ? "bg-amber-100 text-amber-900" : "bg-stone-100 text-stone-600 hover:bg-stone-200"
                   )}
                 >

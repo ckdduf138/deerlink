@@ -2,8 +2,8 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence, Reorder } from "framer-motion";
-import { ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
+import { motion, AnimatePresence, Reorder, useReducedMotion } from "framer-motion";
+import { ArrowLeft, ArrowRight, Pencil, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { QUESTION_META, QUESTION_TYPES } from "@/lib/question-meta";
@@ -67,7 +67,7 @@ export function CreateEditor({
 }: {
   initialDraft: CreateDraft | null;
   /** "storage"만 "작성 중이던 내용을 불러왔어요" 배너를 띄운다 — 테마 선택은 복원이 아니다 */
-  initialSource?: "storage" | "pack";
+  initialSource?: "storage" | "pack" | "question";
   /** "새로 쓰기"는 임시저장만 지우지 않고 테마 선택 화면으로도 되돌려야 한다 */
   onStartOver: () => void;
 }) {
@@ -83,10 +83,12 @@ export function CreateEditor({
   const [showSheet, setShowSheet] = useState(false);
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
+  const [showFullEditor, setShowFullEditor] = useState(initialSource !== "pack");
   const [exampleIndex, setExampleIndex] = useState(0);
   const [focusId, setFocusId] = useState<string | null>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     if (initialDraft === null) titleInputRef.current?.focus();
@@ -101,12 +103,12 @@ export function CreateEditor({
   }, [title, questions]);
 
   useEffect(() => {
-    if (title.length > 0) return;
+    if (title.length > 0 || reduceMotion) return;
     const interval = setInterval(() => {
       setExampleIndex((prev) => (prev + 1) % TITLE_EXAMPLES.length);
     }, 2800);
     return () => clearInterval(interval);
-  }, [title]);
+  }, [reduceMotion, title]);
 
   // 질문 추가 시 스크롤은 여기서만 한다 — QuestionCard의 자동 포커스는
   // preventScroll로 브라우저 기본 스크롤을 죽여서 트리거가 겹치지 않게 한다.
@@ -160,6 +162,17 @@ export function CreateEditor({
     setQuestions((prev) => prev.filter((q) => q.id !== id));
   }, []);
 
+  const moveQuestion = useCallback((id: string, direction: -1 | 1) => {
+    setQuestions((prev) => {
+      const index = prev.findIndex((question) => question.id === id);
+      const nextIndex = index + direction;
+      if (index < 0 || nextIndex < 0 || nextIndex >= prev.length) return prev;
+      const next = [...prev];
+      [next[index], next[nextIndex]] = [next[nextIndex], next[index]];
+      return next;
+    });
+  }, []);
+
   const discardDraft = () => {
     setShowDiscardConfirm(false);
     setTitle("");
@@ -196,19 +209,100 @@ export function CreateEditor({
       }
       const room = await res.json();
       clearDraft(CREATE_DRAFT_KEY);
-      router.push(`/room/${room.id}?new=1`);
+      router.push(`/room/${room.id}/share`);
     } catch {
       setError("네트워크 연결을 확인하고 다시 시도해주세요.");
       setLoading(false);
     }
   };
 
+  if (!showFullEditor) {
+    return (
+      <div className="min-h-screen bg-[#fafaf8] text-stone-900">
+        <nav className="fixed inset-x-0 top-0 z-50 flex items-center justify-between border-b border-amber-100 bg-white/90 px-4 py-4 backdrop-blur-md md:px-8">
+          <button
+            type="button"
+            onClick={discardDraft}
+            className="flex min-h-11 min-w-11 items-center gap-2 text-sm text-stone-600 transition-colors hover:text-stone-900"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span className="hidden sm:inline">테마 선택</span>
+          </button>
+          <span className="inline-flex items-center gap-1.5 text-sm font-semibold tracking-tight text-stone-900">
+            <AntlerLogo className="h-[15px] w-3 text-amber-500" />
+            Deerlink
+          </span>
+        </nav>
+
+        <main className="mx-auto max-w-xl px-4 pb-16 pt-24">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold leading-tight tracking-tight text-stone-900">
+              질문 {questions.length}개 준비됐어요
+            </h1>
+            <p className="mt-3 break-words text-base leading-relaxed text-stone-600">{title}</p>
+          </div>
+
+          <section aria-labelledby="prepared-questions-heading">
+            <h2 id="prepared-questions-heading" className="sr-only">준비된 질문</h2>
+            <ol className="divide-y divide-amber-100 border-y border-amber-100">
+              {questions.map((question, index) => {
+                const meta = QUESTION_META[question.type];
+                const Icon = meta.icon;
+                return (
+                  <li key={question.id} className="flex items-start gap-3 py-4">
+                    <span className="mt-0.5 w-5 flex-shrink-0 font-mono text-xs tabular-nums text-stone-500">
+                      {index + 1}
+                    </span>
+                    <Icon className={cn("mt-0.5 h-4 w-4 flex-shrink-0", meta.accent)} aria-hidden="true" />
+                    <span className="min-w-0 flex-1 line-clamp-2 break-words text-sm font-medium leading-relaxed text-stone-800">
+                      {question.title}
+                    </span>
+                  </li>
+                );
+              })}
+            </ol>
+          </section>
+
+          <div className="mt-7 space-y-2">
+            <button
+              type="button"
+              onClick={openPublishModal}
+              className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-amber-600 text-sm font-semibold text-white shadow-lg shadow-amber-900/25 transition-colors hover:bg-amber-500"
+            >
+              링크 만들기
+              <ArrowRight className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowFullEditor(true)}
+              className="flex min-h-11 w-full items-center justify-center gap-2 text-sm font-medium text-stone-600 transition-colors hover:text-stone-900"
+            >
+              <Pencil className="h-3.5 w-3.5" />
+              수정하기
+            </button>
+          </div>
+        </main>
+
+        <PublishModal
+          open={showPublishModal}
+          onClose={() => setShowPublishModal(false)}
+          isPublic={isPublic}
+          onPublicChange={setIsPublic}
+          onConfirm={handleSubmit}
+          loading={loading}
+          error={error}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#fafaf8] text-stone-900">
       <nav className="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-4 md:px-8 py-4 border-b border-amber-100 bg-white/90 backdrop-blur-md">
         <Link
           href="/"
-          className="flex items-center gap-2 text-sm text-stone-600 hover:text-stone-900 transition-colors"
+          aria-label="홈으로 돌아가기"
+          className="flex min-h-11 min-w-11 items-center gap-2 text-sm text-stone-600 hover:text-stone-900 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-stone-900 tracking-tight">
@@ -222,10 +316,10 @@ export function CreateEditor({
           disabled={!isValid}
           title={missing ?? undefined}
           className={cn(
-            "hidden md:flex items-center gap-1.5 px-4 min-h-10 rounded-xl text-sm font-medium transition-colors duration-200",
+            "hidden md:flex items-center gap-1.5 px-4 min-h-11 rounded-xl text-sm font-medium transition-colors duration-200",
             isValid
               ? "bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-900/30"
-              : "bg-stone-100 text-stone-400 cursor-not-allowed"
+              : "bg-stone-200 text-stone-500 cursor-not-allowed"
           )}
         >
           링크 만들기
@@ -243,7 +337,7 @@ export function CreateEditor({
             <p className="text-xs text-amber-900">작성 중이던 내용을 불러왔어요.</p>
             <button
               onClick={() => setShowDiscardConfirm(true)}
-              className="text-xs text-amber-800 underline underline-offset-2 hover:text-amber-900 transition-colors flex-shrink-0"
+              className="min-h-11 flex-shrink-0 px-2 text-xs text-amber-800 underline underline-offset-2 transition-colors hover:text-amber-900"
             >
               새로 쓰기
             </button>
@@ -251,8 +345,10 @@ export function CreateEditor({
         )}
 
         <div className="mb-8">
-          <p className="text-xs text-stone-500 mb-1">질문 만들고 공유해요</p>
+          <h1 className="mb-1 text-sm font-semibold text-stone-700">질문 만들기</h1>
+          <label htmlFor="room-title" className="sr-only">방 제목</label>
           <input
+            id="room-title"
             ref={titleInputRef}
             type="text"
             value={title}
@@ -260,26 +356,26 @@ export function CreateEditor({
             placeholder="제목을 입력하세요"
             maxLength={TITLE_MAX}
             aria-label="방 제목"
-            className="w-full text-2xl font-bold bg-transparent text-stone-900 placeholder:text-stone-500 outline-none border-b border-amber-100 focus:border-amber-300 pb-3 transition-colors"
+            className="min-h-11 w-full border-b border-amber-100 bg-transparent pb-3 text-2xl font-bold text-stone-900 placeholder:text-stone-500 transition-colors focus-visible:border-amber-500 focus-visible:outline-none"
           />
           <div className="flex items-start justify-between gap-3 mt-2.5">
             <AnimatePresence mode="wait">
               {title.length === 0 && (
                 <motion.p
                   key={exampleIndex}
-                  initial={{ opacity: 0, y: -3 }}
+                  initial={reduceMotion ? false : { opacity: 0, y: -3 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 3 }}
                   transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                  className="text-[11px] text-stone-500 tracking-wide"
+                  className="text-xs text-stone-500"
                 >
-                  <span className="text-stone-400">예시 · </span>
+                  <span>예시: </span>
                   {TITLE_EXAMPLES[exampleIndex]}
                 </motion.p>
               )}
             </AnimatePresence>
             {title.length > 0 && (
-              <span className="ml-auto text-[11px] text-stone-400 font-mono tabular-nums">
+              <span className="ml-auto text-xs text-stone-500 font-mono tabular-nums">
                 {title.length}/{TITLE_MAX}
               </span>
             )}
@@ -302,6 +398,7 @@ export function CreateEditor({
                   autoFocus={focusId === q.id}
                   onChange={updateQuestion}
                   onRemove={removeQuestion}
+                  onMove={moveQuestion}
                 />
               ))}
             </AnimatePresence>
@@ -340,13 +437,13 @@ export function CreateEditor({
           </AnimatePresence>
 
           {atMax && (
-            <p className="text-center text-[11px] text-stone-500">
+            <p className="text-center text-xs text-stone-500">
               질문은 최대 {MAX_QUESTIONS}개까지 넣을 수 있어요
             </p>
           )}
 
           {!atMax && questions.length >= APPROACHING_LIMIT && (
-            <p className="text-center text-[11px] text-stone-400">
+            <p className="text-center text-xs text-stone-500">
               질문 {questions.length}/{MAX_QUESTIONS}개
             </p>
           )}
@@ -392,14 +489,14 @@ export function CreateEditor({
               "w-full min-h-12 rounded-xl text-sm font-semibold transition-colors duration-200 flex items-center justify-center gap-2",
               isValid
                 ? "bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-900/40"
-                : "bg-stone-100 text-stone-400"
+                : "bg-stone-200 text-stone-500"
             )}
           >
             링크 만들기
             <ArrowRight className="w-4 h-4" />
           </button>
           {missing && (
-            <p className="text-center text-[11px] text-stone-500 mt-2">{missing}</p>
+            <p className="mt-2 text-center text-xs text-stone-500">{missing}</p>
           )}
         </div>
       </div>

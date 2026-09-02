@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
+import { DISCOVER_CACHE_TAG } from "@/lib/discover-rooms";
 import { checkRateLimit, clientKey } from "@/lib/rate-limit";
+import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 
 // 클라이언트 입력 제한(create-editor.tsx, question-card.tsx)과 값을 맞춘다 —
@@ -94,6 +96,8 @@ export async function POST(request: Request) {
     },
     include: { questions: { orderBy: { order: "asc" } } },
   });
+
+  if (room.isPublic) revalidateTag(DISCOVER_CACHE_TAG, { expire: 0 });
 
   return NextResponse.json(room);
 }

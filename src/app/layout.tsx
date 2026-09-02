@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     template: "%s | Deerlink",
   },
   description:
-    "링크 하나로 밸런스게임·투표·설문. 모두가 답해야 결과 공개되는 단톡방 투표 도구. 회원가입 없이 30초 만에 친구들과 공유하세요.",
+    "링크 하나로 만드는 밸런스게임, 투표, 설문. 내 답을 마치기 전까지 친구들의 선택이 잠기는 단톡방 의견 비교 도구입니다.",
   alternates: {
     canonical: baseUrl,
   },
@@ -87,7 +87,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "우리 답이 얼마나 다를까? 밸런스게임 만들기 | Deerlink",
     description:
-      "링크 하나 공유하면 끝. 모두가 답해야 결과 공개되는 단톡방 밸런스게임·투표. 회원가입 없이 무료.",
+      "링크 하나 공유하면 끝. 내 답을 마치면 친구들의 선택과 그룹 리포트가 열리는 단톡방 밸런스게임과 투표.",
     siteName: "Deerlink",
     type: "website",
     locale: "ko_KR",
@@ -105,7 +105,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "우리 답이 얼마나 다를까? 밸런스게임 만들기 | Deerlink",
     description:
-      "링크 하나 공유하면 끝. 모두가 답해야 결과 공개되는 단톡방 밸런스게임·투표.",
+      "링크 하나 공유하면 끝. 내 답을 마치면 친구들의 선택과 그룹 리포트가 열리는 단톡방 밸런스게임과 투표.",
     images: ["/opengraph-image"],
   },
   robots: {
@@ -136,85 +136,6 @@ const webAppJsonLd = {
   inLanguage: "ko-KR",
 };
 
-const faqJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  mainEntity: [
-    {
-      "@type": "Question",
-      name: "Deerlink는 무료인가요?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "네, 완전 무료입니다. 회원가입도 필요 없어요.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "몇 명까지 참여할 수 있나요?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "인원 제한 없이 링크를 공유하면 누구나 참여할 수 있습니다.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "어떤 질문 유형을 만들 수 있나요?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "밸런스 게임(A vs B), 객관식, 주관식 세 가지 유형을 지원합니다.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "답변 결과는 언제 공개되나요?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "모든 참여자가 답변을 완료해야 결과가 공개됩니다. 미리 볼 수 없어요.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "링크는 얼마나 유효한가요?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "생성 후 24시간 동안 유효합니다.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "밸런스게임 질문은 직접 만들 수 있나요?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "네, 밸런스게임(A vs B), 객관식, 주관식 질문을 자유롭게 만들 수 있습니다. 인기 질문 모음에서 바로 추가할 수도 있어요.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "술자리나 MT에서도 사용할 수 있나요?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "네, 링크 하나만 공유하면 되기 때문에 술자리, MT, 워크샵, 팀빌딩 등 어떤 모임에서도 바로 사용할 수 있습니다.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "이심전심 게임처럼 서로 답을 비교할 수 있나요?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "네, 모든 참여자가 답변을 완료하면 한꺼번에 결과가 공개되어 서로의 생각을 비교할 수 있습니다. 답변 전에는 다른 사람의 선택을 볼 수 없어요.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "고민이나 의견을 익명으로 나눌 수 있나요?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "닉네임만 입력하면 참여할 수 있어 익명 또는 별명으로 자유롭게 의견을 나눌 수 있습니다. 회원가입이 필요 없어요.",
-      },
-    },
-  ],
-};
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -227,10 +148,6 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppJsonLd) }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
         />
       </head>
       <body className="antialiased">

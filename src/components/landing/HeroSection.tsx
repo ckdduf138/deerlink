@@ -15,9 +15,9 @@ import { AntlerLogo } from "@/components/landing/AntlerLogo";
  */
 
 const DEMO = {
-  question: "월 500 야근 vs 월 300 칼퇴?",
-  a: "칼퇴",
-  b: "야근",
+  question: "하나만 고른다면?",
+  a: "월 500 야근",
+  b: "월 300 칼퇴",
   friends: [
     { name: "지우", pick: "a" as const },
     { name: "서연", pick: "a" as const },
@@ -28,6 +28,7 @@ const DEMO = {
 
 function Roster({ picked }: { picked: "a" | "b" | null }) {
   const rows = [...DEMO.friends, ...(picked ? [{ name: "나", pick: picked }] : [])];
+  const reduce = useReducedMotion();
 
   return (
     <ul className="space-y-2.5">
@@ -37,7 +38,7 @@ function Roster({ picked }: { picked: "a" | "b" | null }) {
           <motion.li
             key={person.name}
             layout
-            initial={isMe ? { opacity: 0, y: 6 } : false}
+            initial={isMe && !reduce ? { opacity: 0, y: 6 } : false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
             className="flex items-center justify-between"
@@ -59,13 +60,13 @@ function Roster({ picked }: { picked: "a" | "b" | null }) {
                   transition={{ duration: 0.15 }}
                   className="flex h-8 w-20 items-center justify-center rounded-full bg-stone-100"
                 >
-                  <Lock className="h-3.5 w-3.5 text-stone-400" />
+                  <Lock className="h-3.5 w-3.5 text-stone-500" />
                   <span className="sr-only">답하면 열려요</span>
                 </motion.span>
               ) : (
                 <motion.span
                   key="shown"
-                  initial={{ opacity: 0, scale: 0.9 }}
+                  initial={reduce ? false : { opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.3, delay: isMe ? 0.1 : i * 0.07 }}
                   className={cn(
@@ -86,7 +87,7 @@ function Roster({ picked }: { picked: "a" | "b" | null }) {
   );
 }
 
-function LiveQuestion() {
+function FriendsAnswerDemo() {
   const [picked, setPicked] = useState<"a" | "b" | null>(null);
   const reduce = useReducedMotion();
 
@@ -94,12 +95,8 @@ function LiveQuestion() {
   const bCount = DEMO.friends.filter((f) => f.pick === "b").length + (picked === "b" ? 1 : 0);
 
   return (
-    <div className="rounded-3xl border border-amber-100 bg-white p-6 shadow-xl shadow-amber-100/50 sm:p-8">
-      <p className="text-lg font-bold leading-snug text-stone-900 sm:text-xl">
-        {DEMO.question}
-      </p>
-
-      <div className="mt-6 grid grid-cols-2 gap-3">
+    <>
+      <div className="grid grid-cols-2 gap-3">
         {(["a", "b"] as const).map((key) => {
           const label = key === "a" ? DEMO.a : DEMO.b;
           const active = picked === key;
@@ -162,22 +159,37 @@ function LiveQuestion() {
           )}
         </AnimatePresence>
       </div>
+    </>
+  );
+}
+
+function LiveQuestion() {
+  return (
+    <div className="rounded-3xl border border-amber-100 bg-white p-6 shadow-xl shadow-amber-100/50 sm:p-8">
+      <p className="text-lg font-bold leading-snug text-stone-900 sm:text-xl">
+        {DEMO.question}
+      </p>
+      <div className="mt-6">
+        <FriendsAnswerDemo />
+      </div>
     </div>
   );
 }
 
 export function HeroSection() {
+  const reduce = useReducedMotion();
+
   return (
-    <section className="relative min-h-[100dvh] bg-[#fafaf8] px-6 pt-28 pb-20 md:pt-32">
-      <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-16">
+    <section className="relative min-h-[100dvh] bg-[#fafaf8] px-6 pb-14 pt-24 md:pb-16 md:pt-28 lg:min-h-[720px]">
+      <div className="mx-auto grid max-w-6xl items-start gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-14">
         <div>
           <AntlerLogo
             animated
-            className="mb-5 h-16 w-14 text-amber-500 sm:h-20 sm:w-[70px]"
+            className="mb-4 h-12 w-11 text-amber-500 sm:h-14 sm:w-12"
           />
 
           <motion.h1
-            initial={{ opacity: 0, y: 16 }}
+            initial={reduce ? false : { opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             className="text-4xl font-bold leading-[1.15] tracking-tight text-stone-900 sm:text-5xl lg:text-6xl"
@@ -188,20 +200,20 @@ export function HeroSection() {
           </motion.h1>
 
           <motion.p
-            initial={{ opacity: 0, y: 12 }}
+            initial={reduce ? false : { opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="mt-6 max-w-md text-lg leading-relaxed text-stone-600"
+            className="mt-5 max-w-md text-lg leading-relaxed text-stone-600"
           >
             질문을 만들고 링크를 보내면, 친구들이 답한 결과를 나란히 놓고 볼 수
             있어요.
           </motion.p>
 
           <motion.div
-            initial={{ opacity: 0, y: 12 }}
+            initial={reduce ? false : { opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="mt-9"
+            className="mt-7"
           >
             <Link
               href="/create"
@@ -214,9 +226,10 @@ export function HeroSection() {
         </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={reduce ? false : { opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+          className="lg:pt-2"
         >
           <LiveQuestion />
         </motion.div>

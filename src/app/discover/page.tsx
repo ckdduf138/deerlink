@@ -7,10 +7,24 @@ export const metadata: Metadata = {
   description: "Deerlink에서 공개로 만들어진 방을 둘러보고 참여해보세요.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function DiscoverPage() {
-  const { rooms, total, hasMore } = await getPublicRooms({ page: 1, sort: "recent" });
+  const result = await getPublicRooms({ page: 1, sort: "recent" })
+    .then((data) => ({ ...data, initialError: null }))
+    .catch(() => ({
+      rooms: [],
+      total: 0,
+      hasMore: false,
+      initialError: "공개방을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.",
+    }));
 
   return (
-    <DiscoverClient initialRooms={rooms} initialTotal={total} initialHasMore={hasMore} />
+    <DiscoverClient
+      initialRooms={result.rooms}
+      initialTotal={result.total}
+      initialHasMore={result.hasMore}
+      initialError={result.initialError}
+    />
   );
 }

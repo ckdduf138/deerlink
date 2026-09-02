@@ -10,17 +10,20 @@ export function DiscoverClient({
   initialRooms,
   initialTotal,
   initialHasMore,
+  initialError,
 }: {
   initialRooms: DiscoverRoom[];
   initialTotal: number;
   initialHasMore: boolean;
+  initialError: string | null;
 }) {
   return (
     <div className="min-h-screen bg-[#fafaf8] text-stone-900">
       <nav className="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-4 md:px-8 py-4 border-b border-amber-100 bg-white/90 backdrop-blur-md">
         <Link
           href="/"
-          className="flex items-center gap-2 text-sm text-stone-600 hover:text-stone-900 transition-colors"
+          aria-label="홈으로 돌아가기"
+          className="flex min-h-11 min-w-11 items-center gap-2 text-sm text-stone-600 hover:text-stone-900 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-stone-900 tracking-tight">
@@ -36,7 +39,7 @@ export function DiscoverClient({
             공개방 둘러보기
           </h1>
           <p className="text-sm text-stone-600 leading-relaxed">
-            누구나 링크 없이 결과를 볼 수 있는 공개방이에요. 닉네임 없이 익명으로 바로 답할 수 있어요.
+            질문을 골라 익명으로 답해보세요.
           </p>
         </div>
 
@@ -45,6 +48,7 @@ export function DiscoverClient({
           initialTotal={initialTotal}
           initialHasMore={initialHasMore}
           initialSort="recent"
+          initialError={initialError}
         />
       </div>
     </div>

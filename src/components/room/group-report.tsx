@@ -15,64 +15,41 @@ import type { ResultsRoom } from "@/lib/types";
  * 데이터가 부족한 통계는 보여주지 않는다 — 가짜 정밀도보다 침묵이 낫다.
  */
 
-export function GroupReport({ room }: { room: ResultsRoom }) {
+export function GroupReport({
+  room,
+  primaryKind,
+}: {
+  room: ResultsRoom;
+  primaryKind: "best-pair" | "closest-balance" | "unanimous" | "aggregate" | null;
+}) {
   const pairs = computePairScores(room);
   const dissenter = computeLoneDissenter(room);
   const closest = computeClosestBalance(room);
-
-  if (pairs.length === 0 && !dissenter && !closest) return null;
 
   const sorted = [...pairs].sort((x, y) => y.pct - x.pct);
   const best = sorted[0];
   const worst = sorted[sorted.length - 1];
   const showWorst = worst && best && worst.pct < best.pct;
-  const tiedForBest = sorted.filter((p) => p.pct === best?.pct).length > 1;
+  const showClosest = closest && primaryKind !== "closest-balance";
+
+  if (!showWorst && !dissenter && !showClosest) return null;
 
   return (
-    <motion.div
+    <motion.details
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.05 }}
-      className="mb-4 rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-amber-100/40 px-5 py-6"
+      className="mt-4 border-b border-amber-100"
     >
-      <div className="mb-5 flex items-center gap-3">
-        <Sparkles className="w-5 h-5 text-amber-500 flex-shrink-0" />
-        <div>
-          <h2 className="text-base font-bold text-stone-900">우리 그룹 리포트</h2>
-          <p className="text-xs text-stone-600">답변으로만 계산했어요</p>
-        </div>
-      </div>
-
-      {best && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.92 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.15 }}
-          className="mb-4 flex items-end justify-between gap-4 rounded-xl bg-white/70 px-5 py-5"
-        >
-          <div className="min-w-0">
-            <p className="text-xs text-stone-500 mb-1">
-              {room.participants.length === 2 ? "우리 둘의 일치도" : "나랑 제일 비슷한 조합"}
-            </p>
-            <p className="truncate text-base font-semibold text-stone-900">
-              {best.a.nickname} · {best.b.nickname}
-            </p>
-            {tiedForBest && room.participants.length >= 3 && (
-              <p className="mt-0.5 text-[11px] text-stone-500">동률인 조합이 더 있어요</p>
-            )}
-          </div>
-          <div className="flex flex-shrink-0 items-baseline gap-0.5 text-amber-700">
-            <span className="text-4xl font-extrabold tabular-nums leading-none">{best.pct}</span>
-            <span className="text-lg font-bold">%</span>
-          </div>
-        </motion.div>
-      )}
-
-      <div className="space-y-3">
+      <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between text-sm font-semibold text-stone-700 marker:hidden">
+        다른 인사이트 더 보기
+        <Sparkles className="h-4 w-4 text-amber-700" aria-hidden="true" />
+      </summary>
+      <div className="space-y-3 pb-5">
         {showWorst && (
           <ReportRow
             label="제일 다른 조합"
-            value={`${worst.a.nickname} · ${worst.b.nickname}`}
+            value={`${worst.a.nickname}, ${worst.b.nickname}`}
             pct={worst.pct}
             tone="teal"
           />
@@ -90,7 +67,7 @@ export function GroupReport({ room }: { room: ResultsRoom }) {
           </div>
         )}
 
-        {closest && (
+        {showClosest && (
           <div className="flex items-center justify-between rounded-xl bg-white/70 px-4 py-3">
             <div className="min-w-0">
               <p className="text-xs text-stone-500">가장 팽팽했던 질문</p>
@@ -102,7 +79,7 @@ export function GroupReport({ room }: { room: ResultsRoom }) {
           </div>
         )}
       </div>
-    </motion.div>
+    </motion.details>
   );
 }
 
@@ -124,7 +101,7 @@ function ReportRow({
       <div className="min-w-0">
         <p className="text-xs text-stone-500">{label}</p>
         <p className="truncate text-sm font-semibold text-stone-900">{value}</p>
-        {note && <p className="text-[11px] text-stone-500">{note}</p>}
+        {note && <p className="text-xs text-stone-500">{note}</p>}
       </div>
       <div
         className={

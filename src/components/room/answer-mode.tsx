@@ -2,13 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AlertCircle, ArrowLeft, ArrowRight, Check, Loader2 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { QUESTION_META } from "@/lib/question-meta";
 import { parseOptions, type LobbyRoom } from "@/lib/types";
 import { DeerHoofMark } from "@/components/DeerHoofMark";
 
-const AUTO_ADVANCE_MS = 650;
 const SUBJECTIVE_MAX = 500;
 
 export interface SubmitResult {
@@ -38,18 +37,21 @@ export function AnswerMode({
   const [direction, setDirection] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const autoAdvanceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const progressRef = useRef<HTMLDivElement>(null);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     onAnswersChange(answers, currentQ);
   }, [answers, currentQ, onAnswersChange]);
 
-  // 자동 넘김 타이머가 언마운트 뒤에 상태를 건드리지 않도록
   useEffect(() => {
-    return () => {
-      if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
-    };
-  }, []);
+    const current = progressRef.current?.querySelector<HTMLElement>('[aria-current="step"]');
+    current?.scrollIntoView({
+      behavior: reduceMotion ? "auto" : "smooth",
+      block: "nearest",
+      inline: "center",
+    });
+  }, [currentQ, reduceMotion]);
 
   const question = room.questions[currentQ];
   const parsedOptions = parseOptions(question?.options ?? null);
@@ -60,35 +62,18 @@ export function AnswerMode({
   const meta = QUESTION_META[question?.type ?? "balance"];
   const IconComponent = meta.icon;
 
-  const cancelAutoAdvance = () => {
-    if (autoAdvanceRef.current) {
-      clearTimeout(autoAdvanceRef.current);
-      autoAdvanceRef.current = null;
-    }
-  };
-
   const selectAnswer = (value: string) => {
     setAnswers((prev) => ({ ...prev, [question.id]: value }));
     if (error) setError(null);
-    if (question.type !== "subjective" && currentQ < room.questions.length - 1) {
-      cancelAutoAdvance();
-      autoAdvanceRef.current = setTimeout(() => {
-        setDirection(1);
-        setCurrentQ((q) => q + 1);
-        autoAdvanceRef.current = null;
-      }, AUTO_ADVANCE_MS);
-    }
   };
 
   const goTo = (index: number) => {
-    cancelAutoAdvance();
     setDirection(index > currentQ ? 1 : -1);
     setCurrentQ(index);
   };
 
   const handleSubmit = async () => {
     if (!allAnswered || submitting) return;
-    cancelAutoAdvance();
     setSubmitting(true);
     setError(null);
     const result = await onComplete(answers);
@@ -122,15 +107,19 @@ export function AnswerMode({
             transition={{ duration: 0.3 }}
           />
         </div>
-        {/* 지나온 질문을 발자국으로 남긴다. 마크는 작지만 탭 영역은 44px다. */}
-        <div className="-mx-1 mt-1 flex items-center">
+        <div
+          ref={progressRef}
+          className="-mx-4 mt-1 flex snap-x items-center overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          role="navigation"
+          aria-label="질문 이동"
+        >
           {room.questions.map((q, i) => (
             <button
               key={q.id}
               onClick={() => goTo(i)}
-              className="group flex h-11 w-7 items-center justify-center px-1"
+              className="group flex h-11 w-11 flex-shrink-0 snap-center items-center justify-center"
               aria-label={`질문 ${i + 1}${answers[q.id] ? " (답변함)" : " (아직 답변 안 함)"}`}
-              aria-current={i === currentQ}
+              aria-current={i === currentQ ? "step" : undefined}
             >
               <DeerHoofMark
                 className={cn(
@@ -139,8 +128,8 @@ export function AnswerMode({
                   i === currentQ
                     ? "h-4 w-3 text-amber-600"
                     : answers[q.id]
-                    ? "h-3.5 w-2.5 text-amber-400 group-hover:text-amber-600"
-                    : "h-3 w-2 text-stone-300 group-hover:text-stone-400"
+                    ? "h-3.5 w-2.5 text-amber-600 group-hover:text-amber-700"
+                    : "h-3 w-2 text-stone-500 group-hover:text-stone-700"
                 )}
               />
             </button>
@@ -152,7 +141,7 @@ export function AnswerMode({
         <motion.div
           key={currentQ}
           custom={direction}
-          initial={{ opacity: 0, x: direction * 24 }}
+          initial={reduceMotion ? false : { opacity: 0, x: direction * 24 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: direction * -24 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
@@ -160,13 +149,13 @@ export function AnswerMode({
           <div className="mb-6">
             <div className={cn("flex items-center gap-2 mb-3", meta.accent)}>
               <IconComponent className="w-3.5 h-3.5" />
-              <span className="text-[10px] uppercase tracking-widest font-medium">
+              <span className="text-xs font-medium">
                 {meta.longLabel}
               </span>
             </div>
-            <h2 className="text-xl font-bold text-stone-900 leading-snug">
+            <h1 className="text-xl font-bold text-stone-900 leading-snug">
               {question?.title}
-            </h2>
+            </h1>
           </div>
 
           {question?.type === "balance" && (
@@ -181,8 +170,8 @@ export function AnswerMode({
                     <motion.button
                       key={opt.value}
                       onClick={() => selectAnswer(opt.value)}
-                      animate={{ scale: isSelected ? 1.03 : 1 }}
-                      whileTap={{ scale: 0.97 }}
+                      animate={reduceMotion ? undefined : { scale: isSelected ? 1.03 : 1 }}
+                      whileTap={reduceMotion ? undefined : { scale: 0.97 }}
                       transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
                       aria-pressed={isSelected}
                       className={cn(
@@ -194,7 +183,7 @@ export function AnswerMode({
                     >
                       <span
                         className={cn(
-                          "block text-[10px] font-mono mb-2",
+                          "mb-2 block text-xs font-mono",
                           isSelected ? "text-amber-700" : "text-stone-500"
                         )}
                       >
@@ -205,25 +194,16 @@ export function AnswerMode({
                         <motion.span
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
-                          className="mt-3 mx-auto w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center"
+                          className="mx-auto mt-3 flex items-center justify-center"
+                          aria-hidden="true"
                         >
-                          <Check className="w-3 h-3 text-amber-700" />
+                          <Check className="h-4 w-4 text-amber-700" />
                         </motion.span>
                       )}
                     </motion.button>
                   );
                 })}
               </div>
-              {currentAnswer && currentQ < room.questions.length - 1 && (
-                <motion.div
-                  key={`balance-${question.id}-${currentAnswer}`}
-                  initial={{ scaleX: 0 }}
-                  animate={{ scaleX: 1 }}
-                  transition={{ duration: AUTO_ADVANCE_MS / 1000, ease: "linear" }}
-                  style={{ transformOrigin: "left" }}
-                  className="h-0.5 bg-amber-300 rounded-full"
-                />
-              )}
             </div>
           )}
 
@@ -257,16 +237,6 @@ export function AnswerMode({
                   </motion.button>
                 );
               })}
-              {currentAnswer && currentQ < room.questions.length - 1 && (
-                <motion.div
-                  key={`multiple-${question.id}-${currentAnswer}`}
-                  initial={{ scaleX: 0 }}
-                  animate={{ scaleX: 1 }}
-                  transition={{ duration: AUTO_ADVANCE_MS / 1000, ease: "linear" }}
-                  style={{ transformOrigin: "left" }}
-                  className="mt-1 h-0.5 bg-amber-300 rounded-full"
-                />
-              )}
             </div>
           )}
 
@@ -279,9 +249,9 @@ export function AnswerMode({
                 rows={5}
                 maxLength={SUBJECTIVE_MAX}
                 aria-label={question.title}
-                className="w-full py-3.5 px-4 rounded-xl border border-amber-100 bg-amber-50 text-sm text-stone-900 placeholder:text-stone-500 outline-none focus:border-amber-300 transition-colors resize-none leading-relaxed"
+                className="w-full py-3.5 px-4 rounded-xl border border-amber-100 bg-amber-50 text-sm text-stone-900 placeholder:text-stone-500 focus:border-amber-300 transition-colors resize-none leading-relaxed"
               />
-              <p className="mt-2 text-right text-[11px] text-stone-500 font-mono tabular-nums">
+              <p className="mt-2 text-right text-xs text-stone-500 font-mono tabular-nums">
                 {(currentAnswer ?? "").length}/{SUBJECTIVE_MAX}
               </p>
             </div>
@@ -322,7 +292,7 @@ export function AnswerMode({
               "flex items-center gap-1.5 px-5 min-h-11 rounded-xl text-sm font-medium transition-colors duration-200",
               answered
                 ? "bg-amber-600 hover:bg-amber-500 text-white"
-                : "bg-stone-100 text-stone-400"
+                : "bg-stone-200 text-stone-500"
             )}
           >
             다음
@@ -336,7 +306,7 @@ export function AnswerMode({
               "flex items-center gap-1.5 px-5 min-h-11 rounded-xl text-sm font-medium transition-colors duration-200",
               allAnswered && !submitting
                 ? "bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-900/30"
-                : "bg-stone-100 text-stone-400"
+                : "bg-stone-200 text-stone-500"
             )}
           >
             {submitting ? (
@@ -355,8 +325,8 @@ export function AnswerMode({
       </div>
 
       {!allAnswered && currentQ === room.questions.length - 1 && (
-        <p className="mt-3 text-center text-[11px] text-stone-500">
-          아직 답하지 않은 질문이 있어요. 위 점을 눌러 이동할 수 있어요.
+        <p className="mt-3 text-center text-xs text-stone-500">
+          아직 답하지 않은 질문이 있어요. 위 발굽을 눌러 이동할 수 있어요.
         </p>
       )}
     </div>

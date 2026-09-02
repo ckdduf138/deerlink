@@ -16,6 +16,9 @@ model Room {
 
   questions Question[]
   participants Participant[]
+
+  @@index([isPublic, expiresAt])
+  @@index([isPublic, createdAt])
 }
 
 model Question {

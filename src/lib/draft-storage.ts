@@ -30,6 +30,7 @@ export interface AnswerDraft {
   nickname: string;
   answers: Record<string, string>;
   currentQuestion: number;
+  submissionId?: string;
 }
 
 export const CREATE_DRAFT_KEY = "deerlink:draft:create";

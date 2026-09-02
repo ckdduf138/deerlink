@@ -1,281 +1,155 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
-import { ArrowRight, Check, Copy, Globe, ListChecks, Lock, Share2, Users } from "lucide-react";
-import { motion } from "framer-motion";
-import { QRCodeSVG } from "qrcode.react";
-import { cn } from "@/lib/utils";
-import { formatRemaining } from "@/lib/format";
+import { useState } from "react";
+import { ArrowRight, Clock3, Globe, ListChecks, Lock, Users } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
+import { formatEstimatedDuration, formatRemaining } from "@/lib/format";
 import type { LobbyRoom } from "@/lib/types";
-import { AntlerLogo } from "@/components/landing/AntlerLogo";
-import { DeerHoofMark } from "@/components/DeerHoofMark";
+import { cn } from "@/lib/utils";
 
 const NICKNAME_MAX = 20;
-
-// 방 주소는 브라우저에만 있다. 렌더 중 window를 읽으면 QR이 빈 값으로 하이드레이션된다.
-const neverChanges = () => () => {};
-const readHref = () => window.location.href;
-const noHref = () => "";
 
 export function Lobby({
   room,
   initialNickname,
   onStart,
-  justCreated = false,
 }: {
   room: LobbyRoom;
   initialNickname: string;
   onStart: (nickname: string) => void;
-  /** 방금 이 화면에서 방을 만들었다 — 초대받아 들어온 사람과 같은 화면이지만 문구는 다르게 */
-  justCreated?: boolean;
 }) {
   const [nickname, setNickname] = useState(initialNickname);
-  const [copied, setCopied] = useState(false);
-  const [shareFailed, setShareFailed] = useState(false);
-  const url = useSyncExternalStore(neverChanges, readHref, noHref);
-
+  const reduceMotion = useReducedMotion();
   const trimmed = nickname.trim();
   const isDuplicate = !room.isPublic && room.participants.some((p) => p.nickname === trimmed);
-  // 공개방은 닉네임을 안 받는다 — 서버가 "참여자 N"을 대신 붙인다.
   const canStart = room.isPublic || (trimmed.length > 0 && !isDuplicate);
-
-  const copyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setShareFailed(false);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      setShareFailed(true);
-    }
-  };
-
-  const shareLink = async () => {
-    if (!navigator.share) {
-      copyLink();
-      return;
-    }
-    try {
-      await navigator.share({ title: room.title, url });
-    } catch {
-      // 사용자가 공유 시트를 닫은 경우도 여기로 온다 — 조용히 무시
-    }
-  };
 
   const handleStart = () => {
     if (canStart) onStart(room.isPublic ? "" : trimmed);
   };
 
   return (
-    <div className="max-w-md mx-auto px-4 pt-20 pb-10">
-      {justCreated && (
-        <motion.div
-          initial={{ opacity: 0, y: -6 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-5 flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3"
-        >
-          <Check className="w-4 h-4 text-amber-700 flex-shrink-0" />
-          <p className="text-xs text-amber-900">
-            {room.isPublic
-              ? "방을 만들었어요. 닉네임 없이 누구나 링크나 발견 피드로 바로 답할 수 있어요."
-              : "방을 만들었어요. 아래 QR이나 링크를 공유해서 친구들을 초대해보세요."}
-          </p>
-        </motion.div>
-      )}
-
-      <div className="mb-8">
-        <div className="mb-3 flex items-center justify-between">
-          <div className="text-[10px] uppercase tracking-widest text-stone-500">
-            Deerlink
-          </div>
-          <span
-            className={cn(
-              "flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px]",
-              room.isPublic ? "bg-amber-50 text-amber-900" : "bg-stone-100 text-stone-600"
-            )}
-          >
-            {room.isPublic ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
-            {room.isPublic ? "공개" : "비공개"}
-          </span>
-        </div>
-        <h1 className="text-2xl font-bold text-stone-900 mb-2 leading-snug">
-          {room.title}
-        </h1>
-        <div className="flex items-center gap-3 text-xs text-stone-600">
-          <span className="flex items-center gap-1">
-            <ListChecks className="w-3 h-3" />
-            {room.questions.length}개 질문
-          </span>
-          <span className="w-px h-3 bg-stone-300" />
-          <span className="flex items-center gap-1">
-            <Users className="w-3 h-3" />
-            {room.participants.length}명 참여 중
-          </span>
-          <span className="w-px h-3 bg-stone-300" />
-          <span className="font-mono tabular-nums">{formatRemaining(room.expiresAt)}</span>
-        </div>
-      </div>
-
-      <div className="mb-6 rounded-2xl border border-amber-100 bg-white overflow-hidden">
-        <div className="px-5 py-3 border-b border-stone-100 text-center">
-          <p className="text-xs text-stone-600">QR을 보여주거나 링크를 보내세요</p>
-        </div>
-        <div className="flex justify-center py-5 border-b border-stone-100">
-          {url ? (
-            <QRCodeSVG
-              value={url}
-              size={128}
-              fgColor="#1c1917"
-              bgColor="transparent"
-              imageSettings={{ src: "/icon.png", width: 24, height: 24, excavate: true }}
-            />
-          ) : (
-            <div
-              className="w-32 h-32 rounded-lg bg-stone-100 animate-pulse"
-              aria-label="QR 코드 준비 중"
-            />
-          )}
-        </div>
-        <div className="px-5 py-3 border-b border-stone-100">
-          <p className="text-xs text-stone-500 truncate" aria-live="polite">
-            {url || "주소를 불러오는 중"}
-          </p>
-        </div>
-        <div className="flex">
-          <button
-            onClick={copyLink}
-            disabled={!url}
-            className={cn(
-              "flex-1 flex items-center justify-center gap-1.5 min-h-11 text-xs border-r border-stone-100 transition-colors disabled:text-stone-300",
-              copied ? "text-amber-700" : "text-stone-600 hover:text-stone-900"
-            )}
-          >
-            {copied ? (
-              <>
-                <Check className="w-3 h-3" />
-                복사됨
-              </>
-            ) : (
-              <>
-                <Copy className="w-3 h-3" />
-                링크 복사
-              </>
-            )}
-          </button>
-          <button
-            onClick={shareLink}
-            disabled={!url}
-            className="flex-1 flex items-center justify-center gap-1.5 min-h-11 text-xs text-stone-600 hover:text-stone-900 transition-colors disabled:text-stone-300"
-          >
-            <Share2 className="w-3 h-3" />
-            공유하기
-          </button>
-        </div>
-        {shareFailed && (
-          <p className="px-5 pb-3 text-xs text-red-600" role="alert">
-            복사에 실패했어요. 위 주소를 길게 눌러 직접 복사해주세요.
-          </p>
-        )}
-      </div>
-
-      {room.participants.length > 0 ? (
-        room.isPublic ? (
-          <div className="mb-6 flex items-center gap-1.5 text-xs text-stone-600">
-            <Users className="w-3.5 h-3.5" />
-            {room.participants.length}명이 벌써 참여했어요
-          </div>
-        ) : (
-          <div className="mb-6">
-            <div className="text-[10px] uppercase tracking-widest text-stone-500 mb-2">
-              이미 참여한 사람
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {room.participants.map((p) => (
-                <span
-                  key={p.id}
-                  className="px-2.5 py-1 rounded-full text-xs border border-amber-100 bg-amber-50 text-amber-900"
-                >
-                  {p.nickname}
-                </span>
-              ))}
-            </div>
-          </div>
-        )
-      ) : (
-        <div className="relative flex flex-col items-center justify-center py-8 mb-6">
-          <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            <DeerHoofMark className="absolute top-1 left-[22%] w-2 h-2.5 text-stone-300/50 -rotate-12" />
-            <DeerHoofMark className="absolute bottom-3 right-[24%] w-2 h-2.5 text-stone-300/50 rotate-6" />
-          </div>
-          <AntlerLogo animated className="relative w-8 h-10 text-stone-300 mb-4" />
-          <p className="relative text-center text-xs text-stone-600">
-            아직 아무도 없어요. 링크를 공유하면 모두가 함께할 수 있어요.
-          </p>
-        </div>
-      )}
-
-      <div className="space-y-3">
-        {!room.isPublic && (
-          <div>
-            <label
-              htmlFor="nickname"
-              className="block text-[10px] uppercase tracking-widest text-stone-500 mb-3"
+    <main className="mx-auto max-w-md px-4 pb-12 pt-24">
+      <motion.div
+        initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <div className="mb-8">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <span className="text-sm font-semibold tracking-tight text-stone-700">Deerlink</span>
+            <span
+              className={cn(
+                "inline-flex min-h-7 items-center gap-1.5 rounded-full px-2.5 text-xs font-medium",
+                room.isPublic ? "bg-amber-50 text-amber-900" : "bg-stone-100 text-stone-700"
+              )}
             >
+              {room.isPublic ? <Globe className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+              {room.isPublic ? "공개방" : "비공개방"}
+            </span>
+          </div>
+
+          <h1 className="break-words text-3xl font-bold leading-tight tracking-tight text-stone-900">
+            {room.title}
+          </h1>
+          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-stone-600">
+            <span className="inline-flex items-center gap-1.5">
+              <ListChecks className="h-4 w-4" aria-hidden="true" />
+              질문 {room.questions.length}개
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Clock3 className="h-4 w-4" aria-hidden="true" />
+              {formatEstimatedDuration(room.questions.length)}
+            </span>
+            <span>{formatRemaining(room.expiresAt)}</span>
+          </div>
+        </div>
+
+        <div className="mb-8 border-y border-amber-100 py-5">
+          <p className="text-base font-semibold text-stone-900">
+            {room.isPublic ? "답변을 마치면 전체 집계로 이어져요." : "모든 질문에 답하면 결과가 열려요."}
+          </p>
+          <p className="mt-2 text-sm leading-relaxed text-stone-600">
+            {room.isPublic
+              ? "닉네임 없이 참여하며, 결과에는 개인 신원이 표시되지 않아요."
+              : "내 답을 끝내기 전에는 다른 사람의 선택을 볼 수 없어요."}
+          </p>
+        </div>
+
+        {room.participants.length > 0 && (
+          <div className="mb-7">
+            <div className="mb-3 flex items-center gap-1.5 text-sm text-stone-600">
+              <Users className="h-4 w-4" aria-hidden="true" />
+              <span>{room.participants.length}명이 먼저 참여했어요.</span>
+            </div>
+            {!room.isPublic && (
+              <div className="flex flex-wrap gap-1.5" aria-label="참여자">
+                {room.participants.map((participant) => (
+                  <span
+                    key={participant.id}
+                    className="max-w-full truncate rounded-full border border-amber-100 bg-amber-50 px-2.5 py-1 text-xs text-amber-900"
+                  >
+                    {participant.nickname}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {!room.isPublic && (
+          <div className="mb-5">
+            <label htmlFor="nickname" className="mb-2 block text-sm font-semibold text-stone-900">
               닉네임
             </label>
-            {justCreated && (
-              <p className="mb-3 text-xs text-stone-600">
-                본인도 답변에 참여할 계획이면 닉네임을 적고 시작하세요. 공유만 하고
-                나중에 돌아와도 돼요.
-              </p>
-            )}
             <input
               id="nickname"
               type="text"
               value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleStart()}
-              placeholder="나를 뭐라고 부를까요?"
+              onChange={(event) => setNickname(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") handleStart();
+              }}
               maxLength={NICKNAME_MAX}
               autoComplete="nickname"
+              placeholder="친구들이 알아볼 이름"
               aria-invalid={isDuplicate}
-              aria-describedby={isDuplicate ? "nickname-error" : undefined}
+              aria-describedby={isDuplicate ? "nickname-error" : "nickname-count"}
               className={cn(
-                "w-full py-3.5 px-4 rounded-xl border bg-amber-50 text-sm text-stone-900 placeholder:text-stone-500 outline-none transition-colors",
-                isDuplicate
-                  ? "border-red-300 focus:border-red-400"
-                  : "border-amber-100 focus:border-amber-300"
+                "min-h-12 w-full rounded-xl border bg-white px-4 text-stone-900 placeholder:text-stone-500 transition-colors",
+                isDuplicate ? "border-red-400" : "border-amber-100 focus:border-amber-400"
               )}
             />
-            <div className="flex items-center justify-between mt-2 min-h-4">
+            <div className="mt-2 flex items-start justify-between gap-3">
               {isDuplicate ? (
-                <p id="nickname-error" className="text-xs text-red-600" role="alert">
-                  이미 있는 닉네임이에요. 다른 이름을 써주세요.
+                <p id="nickname-error" className="text-xs leading-relaxed text-red-700" role="alert">
+                  이미 사용 중인 닉네임이에요. 다른 이름을 입력해 주세요.
                 </p>
               ) : (
                 <span />
               )}
-              <span className="text-[11px] text-stone-400 font-mono tabular-nums">
+              <span id="nickname-count" className="flex-shrink-0 font-mono text-xs tabular-nums text-stone-500">
                 {nickname.length}/{NICKNAME_MAX}
               </span>
             </div>
           </div>
         )}
-        <motion.button
+
+        <button
+          type="button"
           onClick={handleStart}
           disabled={!canStart}
-          whileTap={canStart ? { scale: 0.99 } : undefined}
           className={cn(
-            "w-full py-4 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-colors duration-200",
+            "flex min-h-12 w-full items-center justify-center gap-2 rounded-xl text-sm font-semibold transition-colors",
             canStart
-              ? "bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-900/30"
-              : "bg-stone-100 text-stone-400"
+              ? "bg-amber-600 text-white shadow-lg shadow-amber-900/25 hover:bg-amber-500"
+              : "cursor-not-allowed bg-stone-200 text-stone-500"
           )}
         >
-          {room.isPublic ? "답변하기" : "참여하기"}
-          <ArrowRight className="w-4 h-4" />
-        </motion.button>
-      </div>
-    </div>
+          {room.isPublic ? "바로 답하기" : "참여하기"}
+          <ArrowRight className="h-4 w-4" aria-hidden="true" />
+        </button>
+      </motion.div>
+    </main>
   );
 }

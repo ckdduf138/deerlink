@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { hasCompletedAnswers, participantCookieName } from "@/lib/participant-session";
+import { canViewResults, participantCookieName } from "@/lib/participant-session";
 import { serializeResultsRoom } from "@/lib/serialize";
 import { AntlerLogo } from "@/components/landing/AntlerLogo";
 import { ResultsClient } from "./results-client";
@@ -33,7 +33,11 @@ export default async function ResultsPage({
   const participantId = cookieStore.get(participantCookieName(id))?.value;
   const viewer = room.participants.find((p) => p.id === participantId);
 
-  if (!room.isPublic && !hasCompletedAnswers(viewer, room.questions.length)) {
+  if (!canViewResults({
+    isPublic: room.isPublic,
+    participant: viewer,
+    totalQuestions: room.questions.length,
+  })) {
     return (
       <div className="min-h-screen bg-[#fafaf8] flex flex-col items-center justify-center gap-6 px-4">
         <AntlerLogo className="w-10 h-12 text-stone-300" />

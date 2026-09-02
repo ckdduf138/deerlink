@@ -143,3 +143,7 @@ textarea {
   }
 }
 
+:where(a, button, summary):focus-visible {
+  outline: 2px solid #b45309;
+  outline-offset: 3px;
+}

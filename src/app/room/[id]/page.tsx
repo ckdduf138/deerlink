@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { participantCookieName } from "@/lib/participant-session";
+import { hasCompletedAnswers, participantCookieName } from "@/lib/participant-session";
 import { serializeLobbyRoom } from "@/lib/serialize";
 import { AntlerLogo } from "@/components/landing/AntlerLogo";
 import { RoomClient } from "./room-client";
@@ -18,7 +18,10 @@ export default async function RoomPage({
     where: { id },
     include: {
       questions: { orderBy: { order: "asc" } },
-      participants: { orderBy: { createdAt: "asc" } },
+      participants: {
+        include: { answers: { select: { id: true } } },
+        orderBy: { createdAt: "asc" },
+      },
     },
   });
 
@@ -27,7 +30,8 @@ export default async function RoomPage({
   // 이미 참여한 사람은 결과 페이지로
   const cookieStore = await cookies();
   const participantId = cookieStore.get(participantCookieName(id))?.value;
-  if (participantId && room.participants.some((p) => p.id === participantId)) {
+  const viewer = room.participants.find((p) => p.id === participantId);
+  if (hasCompletedAnswers(viewer, room.questions.length)) {
     redirect(`/room/${id}/results`);
   }
 

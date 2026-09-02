@@ -18,13 +18,13 @@ export function LandingNav() {
         <div className="flex items-center gap-2">
           <Link
             href="/popular"
-            className="flex min-h-11 items-center px-3 text-base text-stone-600 transition-colors duration-200 hover:text-stone-900"
+            className="flex min-h-11 items-center px-2 text-sm text-stone-600 transition-colors duration-200 hover:text-stone-900 sm:px-3 sm:text-base"
           >
             인기 질문
           </Link>
           <Link
             href="/create"
-            className="flex min-h-11 items-center rounded-xl bg-amber-700 px-5 text-base font-semibold text-white transition-colors duration-200 hover:bg-amber-600"
+            className="flex min-h-11 items-center rounded-xl bg-amber-700 px-4 text-sm font-semibold text-white transition-colors duration-200 hover:bg-amber-600 sm:px-5 sm:text-base"
           >
             방 만들기
           </Link>
