@@ -28,18 +28,22 @@ export interface QuestionTopic {
   questionIds: string[];
 }
 
+/**
+ * 제목·설명의 "{n}선", "{n}개"는 questionIds 길이로 채운다. 예전엔 "12선"을 손으로 적어서
+ * 문항을 늘리면 제목과 실제 개수가 어긋날 수 있었다.
+ */
 const TOPIC_DEFS: QuestionTopic[] = [
   {
     slug: "couple",
     label: "커플",
     tagline: "연애 취향과 가치관을 나란히 놓고 보는 질문",
     headingTop: "연인과 해보는",
-    headingBottom: "커플 밸런스게임 12선",
+    headingBottom: "커플 밸런스게임 {n}선",
     intro:
       "연애 습관부터 미래 계획까지, 사귀는 사이에서 한 번쯤 물어보고 싶었던 질문을 모았어요. 링크를 보내면 서로 답을 마친 뒤에 상대의 선택이 열려서, 눈치 보고 맞추는 대답이 나오지 않아요.",
-    metaTitle: "커플 밸런스게임 12선 - 연인끼리 하는 가치관 테스트 질문",
+    metaTitle: "커플 밸런스게임 {n}선 - 연인끼리 하는 가치관 테스트 질문",
     metaDescription:
-      "연인과 함께 하는 커플 밸런스게임, 연애 가치관 테스트 질문 12개. 링크 하나로 서로의 답을 비교하고, 내 답을 마쳐야 상대의 선택이 열려요.",
+      "연인과 함께 하는 커플 밸런스게임, 연애 가치관 테스트 질문 {n}개. 링크 하나로 서로의 답을 비교하고, 내 답을 마쳐야 상대의 선택이 열려요.",
     keywords: [
       "커플 밸런스게임",
       "커플 밸런스게임 질문",
@@ -64,6 +68,15 @@ const TOPIC_DEFS: QuestionTopic[] = [
       "s-ten-years",
       "s-anywhere",
       "s-into-lately",
+      "b-yeonrak-jaemi",
+      "b-kkaennip",
+      "b-maeil-juil",
+      "b-cheotnun-chingu",
+      "b-gobaek",
+      "b-sagwa",
+      "m-yeonae-jungyo",
+      "m-date",
+      "s-chueok",
     ],
   },
   {
@@ -71,12 +84,12 @@ const TOPIC_DEFS: QuestionTopic[] = [
     label: "MT와 워크샵",
     tagline: "처음 만난 사람끼리도 바로 도는 아이스브레이커",
     headingTop: "MT에서 바로 도는",
-    headingBottom: "단체 게임 질문 12선",
+    headingBottom: "단체 게임 질문 {n}선",
     intro:
       "MT, 워크샵, 오리엔테이션처럼 사람은 많은데 아직 서먹한 자리를 위한 질문이에요. 한 명씩 돌아가며 말하지 않아도 되고, 링크를 단톡방에 올리면 각자 답한 뒤 결과만 같이 봅니다.",
-    metaTitle: "MT 단체 게임 질문 12선 - 워크샵 아이스브레이킹 밸런스게임",
+    metaTitle: "MT 단체 게임 질문 {n}선 - 워크샵 아이스브레이킹 밸런스게임",
     metaDescription:
-      "MT, 워크샵, 오리엔테이션에서 바로 쓰는 단체 게임 질문 12개. 아이스브레이킹용 밸런스게임과 객관식을 링크 하나로 공유하고 결과를 비교해요.",
+      "MT, 워크샵, 오리엔테이션에서 바로 쓰는 단체 게임 질문 {n}개. 아이스브레이킹용 밸런스게임과 객관식을 링크 하나로 공유하고 결과를 비교해요.",
     keywords: [
       "MT 게임",
       "MT 질문",
@@ -102,6 +115,16 @@ const TOPIC_DEFS: QuestionTopic[] = [
       "s-anywhere",
       "s-gachi-yeohaeng",
       "s-choegeun-utgin",
+      "b-superpower",
+      "b-yori-seolgeoji",
+      "b-sukso-meokgi",
+      "b-bungeoppang",
+      "b-mintcho",
+      "m-yeohaeng-yeokhal",
+      "m-alarm",
+      "m-siheom",
+      "s-cheotinsang",
+      "s-choneungryeok",
     ],
   },
   {
@@ -109,12 +132,12 @@ const TOPIC_DEFS: QuestionTopic[] = [
     label: "술자리",
     tagline: "취기 오를 때쯤 던지면 제일 시끄러워지는 질문",
     headingTop: "술자리에서 던지는",
-    headingBottom: "밸런스게임 질문 12선",
+    headingBottom: "밸런스게임 질문 {n}선",
     intro:
       "벌칙도 준비물도 필요 없는 술자리 게임이에요. 답이 갈릴수록 재밌어지는 질문만 모았고, 모두가 답을 마치면 누가 소수파였는지 한 화면에서 드러납니다.",
-    metaTitle: "술자리 게임 질문 12선 - 회식에서 바로 쓰는 밸런스게임",
+    metaTitle: "술자리 게임 질문 {n}선 - 회식에서 바로 쓰는 밸런스게임",
     metaDescription:
-      "술자리와 회식에서 바로 쓰는 밸런스게임 질문 12개. 벌칙도 준비물도 없이 링크 하나로, 답이 갈리는 질문만 골라 모았어요.",
+      "술자리와 회식에서 바로 쓰는 밸런스게임 질문 {n}개. 벌칙도 준비물도 없이 링크 하나로, 답이 갈리는 질문만 골라 모았어요.",
     keywords: [
       "술자리 게임",
       "술자리 질문",
@@ -138,6 +161,17 @@ const TOPIC_DEFS: QuestionTopic[] = [
       "s-first-married",
       "s-want-to-say",
       "s-choegeun-utgin",
+      "b-kkaennip",
+      "b-lotto",
+      "b-10nyeon-1eok",
+      "b-jjajang",
+      "b-sundae",
+      "b-phone-friend",
+      "m-don-billyeo",
+      "m-hoesik",
+      "m-dantokbang",
+      "s-cheotinsang",
+      "s-gomin",
     ],
   },
   {
@@ -145,12 +179,12 @@ const TOPIC_DEFS: QuestionTopic[] = [
     label: "직장인",
     tagline: "일과 돈 앞에서 팀원들이 뭘 고르는지",
     headingTop: "회사에서 돌려보는",
-    headingBottom: "직장인 밸런스게임 10선",
+    headingBottom: "직장인 밸런스게임 {n}선",
     intro:
       "연봉, 워라밸, 갈등 상황처럼 회사 사람들과 말로 꺼내기는 애매한 주제를 질문으로 바꿨어요. 익명 공개방으로 만들면 이름 없이 집계만 볼 수 있어서 팀 회식이나 워크샵에서 쓰기 편합니다.",
-    metaTitle: "직장인 밸런스게임 10선 - 팀빌딩과 회식 아이스브레이킹 질문",
+    metaTitle: "직장인 밸런스게임 {n}선 - 팀빌딩과 회식 아이스브레이킹 질문",
     metaDescription:
-      "연봉, 워라밸, 갈등 상황까지 직장인 밸런스게임 질문 10개. 팀빌딩과 회식 아이스브레이킹용으로 링크 하나면 되고, 익명 공개방도 만들 수 있어요.",
+      "연봉, 워라밸, 갈등 상황까지 직장인 밸런스게임 질문 {n}개. 팀빌딩과 회식 아이스브레이킹용으로 링크 하나면 되고, 익명 공개방도 만들 수 있어요.",
     keywords: [
       "직장인 밸런스게임",
       "회사 밸런스게임",
@@ -173,6 +207,19 @@ const TOPIC_DEFS: QuestionTopic[] = [
       "m-10eok",
       "s-ten-years",
       "s-into-lately",
+      "b-yeonbong-anjeong",
+      "b-ju4il",
+      "b-jaetaek",
+      "b-dongryo",
+      "b-sangsa",
+      "b-lotto",
+      "b-achim-jeonyeok",
+      "m-toegeun",
+      "m-toesa",
+      "m-hoesik",
+      "m-alarm",
+      "s-don-geokjeong",
+      "s-gomin",
     ],
   },
   {
@@ -180,12 +227,12 @@ const TOPIC_DEFS: QuestionTopic[] = [
     label: "단톡방",
     tagline: "오래 본 사이일수록 답이 갈리는 질문",
     headingTop: "단톡방에 던지는",
-    headingBottom: "친구 질문 12선",
+    headingBottom: "친구 질문 {n}선",
     intro:
       "이미 서로 잘 안다고 생각하는 사이에서 오히려 답이 갈리는 질문을 모았어요. 모두 답을 마치면 누구와 몇 퍼센트 맞았는지 궁합까지 나오니까, 링크 하나 던져놓고 결과를 같이 보면 됩니다.",
-    metaTitle: "단톡방 질문 12선 - 친구끼리 하는 밸런스게임과 궁합 비교",
+    metaTitle: "단톡방 질문 {n}선 - 친구끼리 하는 밸런스게임과 궁합 비교",
     metaDescription:
-      "단톡방에 바로 던지는 친구 질문 12개. 밸런스게임과 객관식으로 답을 비교하고, 누구와 몇 퍼센트 맞는지 그룹 궁합까지 확인해요.",
+      "단톡방에 바로 던지는 친구 질문 {n}개. 밸런스게임과 객관식으로 답을 비교하고, 누구와 몇 퍼센트 맞는지 그룹 궁합까지 확인해요.",
     keywords: [
       "단톡방 질문",
       "단톡방 밸런스게임",
@@ -209,11 +256,31 @@ const TOPIC_DEFS: QuestionTopic[] = [
       "s-first-married",
       "s-want-to-say",
       "s-gachi-yeohaeng",
+      "b-mintcho",
+      "b-ramyeon",
+      "b-ramyeon-chicken",
+      "b-gwageo-mirae",
+      "b-superpower",
+      "b-chuksa-chukga",
+      "m-dantokbang",
+      "m-don-billyeo",
+      "m-yeohaeng-yeokhal",
+      "s-chueok",
+      "s-choneungryeok",
+      "s-han-eumsik",
     ],
   },
 ];
 
-export const QUESTION_TOPICS: QuestionTopic[] = TOPIC_DEFS;
+export const QUESTION_TOPICS: QuestionTopic[] = TOPIC_DEFS.map((topic) => {
+  const fill = (text: string) => text.replaceAll("{n}", String(topic.questionIds.length));
+  return {
+    ...topic,
+    headingBottom: fill(topic.headingBottom),
+    metaTitle: fill(topic.metaTitle),
+    metaDescription: fill(topic.metaDescription),
+  };
+});
 
 export function findTopic(slug: string): QuestionTopic | null {
   return QUESTION_TOPICS.find((topic) => topic.slug === slug) ?? null;
