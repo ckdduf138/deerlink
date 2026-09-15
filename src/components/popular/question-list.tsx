@@ -63,7 +63,7 @@ export function PopularQuestionCard({
           </span>
         )}
       </div>
-      <h3 className="mb-3 text-base font-semibold leading-snug text-stone-900">
+      <h3 className="mb-3 break-keep text-base font-semibold leading-snug text-stone-900">
         {question.title}
       </h3>
       <QuestionBody question={question} />

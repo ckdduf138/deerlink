@@ -63,7 +63,7 @@ src/
 │   ├── ResultBar.tsx       # 밸런스 게임 결과 비율 막대 (아래 "결과 시각화" 참고)
 │   └── ui/                 # shadcn/ui (수정 금지)
 ├── data/
-│   ├── popular-questions.ts   # id 붙은 인기 질문 28개 (단일 출처)
+│   ├── popular-questions.ts   # id 붙은 인기 질문 (단일 출처)
 │   └── question-packs.ts      # 질문팩 — popular-questions를 id로 참조
 └── lib/
     ├── prisma.ts               # Prisma client 싱글턴 (libSQL adapter)
@@ -403,7 +403,7 @@ const room = await prisma.room.findUnique({
 
 ## 인기 질문 · 질문 테마
 
-`popular-questions.ts`의 28문항이 유일한 출처다. 각 문항은 안정적인 `id`(예: `b-tangsuyuk`)를 갖는다.
+`popular-questions.ts`가 인기 질문의 유일한 출처다. `/popular`와 주제 페이지 제목의 "N선"은 배열 길이로 계산하니 숫자를 손으로 적지 말 것 (주제는 `{n}` 자리표시자). 각 문항은 안정적인 `id`(예: `b-tangsuyuk`)를 갖는다.
 
 사용자에게 보이는 명칭은 **테마**다 ("팩"은 2026-08에 "테마"로 바꿨다 — `PackPicker`/`question-packs.ts`/`QuestionPack`/`initialSource="pack"` 같은 코드 식별자는 그대로 두고, 화면에 노출되는 문구만 바꿨다는 뜻. 새 코드에서도 변수명은 `pack` 계열을 그대로 쓰고, 사용자 문구에서만 "테마"라고 쓸 것 — 식별자까지 바꾸는 전면 리네임은 하지 않았다).
 

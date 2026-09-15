@@ -9,15 +9,19 @@ import { QUESTION_TOPICS } from "@/data/question-topics";
 import { QUESTION_META } from "@/lib/question-meta";
 import type { QuestionType } from "@/lib/types";
 
+const balance = POPULAR_QUESTIONS.filter((q) => q.type === "balance");
+const multiple = POPULAR_QUESTIONS.filter((q) => q.type === "multiple");
+const subjective = POPULAR_QUESTIONS.filter((q) => q.type === "subjective");
+const total = POPULAR_QUESTIONS.length;
+
 export const metadata: Metadata = {
-  title: "밸런스게임 질문 모음 28선 - 단톡방과 MT에서 바로 쓰는 인기 질문",
-  description:
-    "친구들과 단톡방, MT, 회식, 술자리에서 바로 쓸 수 있는 인기 밸런스게임 질문 11개, 객관식 10개, 주관식 7개를 모았어요. 내가 답을 마치면 친구들의 선택이 열립니다.",
+  title: `밸런스 게임 질문 모음 ${total}선 - 단톡방과 MT에서 바로 쓰는 인기 질문`,
+  description: `친구들과 단톡방, MT, 회식, 술자리에서 바로 쓸 수 있는 인기 밸런스게임 질문 ${balance.length}개, 객관식 ${multiple.length}개, 주관식 ${subjective.length}개를 모았어요. 내가 답을 마치면 친구들의 선택이 열립니다.`,
   alternates: {
     canonical: "/popular",
   },
   openGraph: {
-    title: "밸런스게임 질문 모음 28선 | Deerlink",
+    title: `밸런스 게임 질문 모음 ${total}선 | Deerlink`,
     description:
       "단톡방과 MT에서 바로 쓰는 인기 밸런스게임, 객관식, 주관식 질문 모음. 링크 하나로 공유.",
     url: "/popular",
@@ -38,14 +42,10 @@ export const metadata: Metadata = {
   ],
 };
 
-const balance = POPULAR_QUESTIONS.filter((q) => q.type === "balance");
-const multiple = POPULAR_QUESTIONS.filter((q) => q.type === "multiple");
-const subjective = POPULAR_QUESTIONS.filter((q) => q.type === "subjective");
-
 const itemListJsonLd = {
   "@context": "https://schema.org",
   "@type": "ItemList",
-  name: "밸런스게임 질문 모음 28선",
+  name: `밸런스 게임 질문 모음 ${total}선`,
   description: "단톡방, MT, 술자리에서 바로 쓰는 인기 질문 모음",
   numberOfItems: POPULAR_QUESTIONS.length,
   itemListElement: POPULAR_QUESTIONS.map((q, i) => ({
@@ -67,10 +67,10 @@ export default function PopularPage() {
 
       <main className="max-w-3xl mx-auto px-6 pt-32 pb-24">
         <header className="mb-14">
-          <h1 className="text-4xl md:text-5xl font-bold text-stone-900 tracking-tight leading-[1.1] mb-6">
+          <h1 className="break-keep text-4xl md:text-5xl font-bold text-stone-900 tracking-tight leading-[1.1] mb-6">
             단톡방에서 바로 쓰는
             <br />
-            <span className="text-stone-500">밸런스게임 질문 28선</span>
+            <span className="text-stone-500">밸런스 게임 질문 {total}선</span>
           </h1>
           <p className="text-base text-stone-600 leading-relaxed mb-8 max-w-xl">
             친구들과 단톡방, MT, 술자리, 회식에서 바로 쓸 수 있는 밸런스게임,

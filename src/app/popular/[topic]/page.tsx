@@ -110,7 +110,7 @@ export default async function TopicPage({
         </Link>
 
         <header className="mt-4 mb-14">
-          <h1 className="text-4xl md:text-5xl font-bold text-stone-900 tracking-tight leading-[1.1] mb-6">
+          <h1 className="break-keep text-4xl md:text-5xl font-bold text-stone-900 tracking-tight leading-[1.1] mb-6">
             {topic.headingTop}
             <br />
             <span className="text-stone-500">{topic.headingBottom}</span>
