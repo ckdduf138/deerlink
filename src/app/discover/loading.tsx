@@ -13,7 +13,7 @@ export default function DiscoverLoading() {
 
       <main className="mx-auto max-w-2xl px-4 pb-20 pt-24" role="status" aria-live="polite">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight text-stone-900">공개방 둘러보기</h1>
+          <p className="text-3xl font-bold tracking-tight text-stone-900">공개방 둘러보기</p>
           <div className="mt-3 flex items-center gap-2 text-sm text-stone-600">
             <Loader2
               className="h-4 w-4 animate-spin text-amber-700 motion-reduce:animate-none"

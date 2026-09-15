@@ -22,14 +22,11 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: "밸런스게임 만들기 - 단톡방 투표 30초 완성 | Deerlink",
+    default: "밸런스 게임 만들기 - 단톡방 투표 30초 완성 | Deerlink",
     template: "%s | Deerlink",
   },
   description:
-    "링크 하나로 만드는 밸런스게임, 투표, 설문. 내 답을 마치기 전까지 친구들의 선택이 잠기는 단톡방 의견 비교 도구입니다.",
-  alternates: {
-    canonical: baseUrl,
-  },
+    "링크 하나로 만드는 밸런스 게임, 투표, 설문. 인기 밸런스게임 질문으로 바로 시작하고, 내 답을 마치기 전까지 친구들의 선택이 잠기는 단톡방 의견 비교 도구입니다.",
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [
@@ -41,7 +38,9 @@ export const metadata: Metadata = {
     shortcut: ["/icon-192.png"],
   },
   keywords: [
+    "밸런스 게임",
     "밸런스게임",
+    "밸런스 게임 만들기",
     "밸런스게임 만들기",
     "밸런스게임 사이트",
     "밸런스게임 질문",
@@ -91,7 +90,6 @@ export const metadata: Metadata = {
     siteName: "Deerlink",
     type: "website",
     locale: "ko_KR",
-    url: baseUrl,
     images: [
       {
         url: "/opengraph-image",

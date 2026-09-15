@@ -4,8 +4,10 @@ import { countArchivedRooms } from "@/lib/room-archive";
 import { DiscoverClient } from "./discover-client";
 
 export const metadata: Metadata = {
-  title: "공개방 둘러보기 - Deerlink",
-  description: "Deerlink에서 공개로 만들어진 방을 둘러보고 참여해보세요.",
+  title: "공개방 둘러보기 - 지금 열린 밸런스 게임과 투표",
+  description:
+    "다른 사람들이 공개로 만든 밸런스 게임과 투표 방을 둘러보고 바로 참여해보세요. 회원가입 없이 익명으로 답하고 결과를 볼 수 있어요.",
+  alternates: { canonical: "/discover" },
 };
 
 export const dynamic = "force-dynamic";

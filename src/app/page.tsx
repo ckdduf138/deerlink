@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { LandingNav } from "@/components/landing/LandingNav";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { PublicRoomsSection } from "@/components/landing/PublicRoomsSection";
@@ -6,6 +7,15 @@ import { CtaSection } from "@/components/landing/CtaSection";
 import { getPublicRooms } from "@/lib/discover-rooms";
 
 export const revalidate = 30;
+
+/**
+ * canonical은 루트 layout이 아니라 여기에만 둔다. layout에 두면 자기 canonical이 없는
+ * 하위 페이지(예: /discover)가 전부 홈을 canonical로 물려받아서, 검색엔진에게 "이 페이지는
+ * 홈의 복사본"이라고 말하게 된다. 실제로 /discover가 그 상태로 배포돼 있었다.
+ */
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 /**
  * 공개방 목록은 서버에서 읽는다. 예전엔 클라이언트가 마운트 후 fetch 했는데,

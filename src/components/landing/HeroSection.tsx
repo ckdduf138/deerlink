@@ -196,15 +196,15 @@ export function HeroSection() {
             className="mb-4 h-12 w-11 text-amber-500 sm:h-14 sm:w-12"
           />
 
-          <h1 className="text-4xl font-bold leading-[1.15] tracking-tight text-stone-900 sm:text-5xl lg:text-6xl">
-            우리,
+          <h1 className="break-keep text-4xl font-bold leading-[1.15] tracking-tight text-stone-900 sm:text-5xl xl:text-6xl">
+            밸런스 게임,
             <br />
-            얼마나 비슷할까?
+            우리 답은 같을까?
           </h1>
 
           <p className="mt-5 max-w-md text-lg leading-relaxed text-stone-600">
-            질문을 만들고 링크를 보내면, 친구들이 답한 결과를 나란히 놓고 볼 수
-            있어요.
+            밸런스 게임이나 투표 질문을 만들고 링크를 보내면, 친구들이 답한 결과를
+            나란히 놓고 볼 수 있어요.
           </p>
 
           <div className="mt-7">
