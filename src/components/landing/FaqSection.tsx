@@ -2,6 +2,11 @@ import { Plus } from "lucide-react";
 
 const FAQS = [
   {
+    question: "밸런스 게임은 어떻게 하나요?",
+    answer:
+      "둘 중 하나만 골라야 하는 질문을 던지고, 각자 고른 답을 비교하는 게임이에요. 질문을 만들어 링크를 단톡방에 올리면 모두 따로 답하고, 내가 답을 마친 뒤에 누가 무엇을 골랐는지 한 번에 열려요. 질문이 떠오르지 않으면 인기 밸런스게임 질문 모음에서 골라 쓰면 돼요.",
+  },
+  {
     question: "친구들의 답은 언제 볼 수 있나요?",
     answer:
       "비공개방에서는 내가 모든 질문에 답한 뒤 열려요. 아직 답하지 않은 질문이 있으면 다른 사람의 선택은 보이지 않아요.",
@@ -22,7 +27,7 @@ const FAQS = [
 ];
 
 /**
- * FAQPage 스키마 — 이 4개 문답이 랜딩의 유일한 본문 텍스트다.
+ * FAQPage 스키마 — 이 문답들이 랜딩의 유일한 본문 텍스트다.
  * 답변 문구를 고치면 화면과 스키마가 같이 움직이도록 FAQS 하나만 본다.
  */
 const faqJsonLd = {
@@ -46,7 +51,7 @@ export function FaqSection() {
         <div>
           <h2 className="text-3xl font-bold tracking-tight text-stone-900">시작하기 전에</h2>
           <p className="mt-4 max-w-sm text-base leading-relaxed text-stone-600">
-            결과 공개 방식과 보관 기간처럼, 방을 만들기 전에 알아야 할 내용을 모았어요.
+            밸런스 게임 하는 방법부터 결과 공개 방식과 보관 기간까지, 방을 만들기 전에 알아야 할 내용을 모았어요.
           </p>
         </div>
 

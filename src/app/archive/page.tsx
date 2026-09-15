@@ -2,14 +2,22 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, ListChecks, Users } from "lucide-react";
 import { AntlerLogo } from "@/components/landing/AntlerLogo";
-import { archivePath, getArchivedRooms } from "@/lib/room-archive";
+import { archivePath, countArchivedRooms, getArchivedRooms } from "@/lib/room-archive";
 
-export const metadata: Metadata = {
-  title: "지난 방 결과 모음 - 사람들이 실제로 답한 집계",
-  description:
-    "Deerlink 공개방에서 실제로 모인 답변 결과를 모아뒀어요. 어떤 질문에 사람들이 어떻게 답했는지 그대로 볼 수 있어요.",
-  alternates: { canonical: "/archive" },
-};
+/**
+ * 보존된 방이 없으면 이 페이지는 "아직 없어요" 한 줄짜리라 색인하지 않는다.
+ * 빈 페이지가 색인되면 사이트 전체가 얇은 콘텐츠로 평가받는다. sitemap도 같은 조건으로 뺀다.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const count = await countArchivedRooms().catch(() => 0);
+  return {
+    title: "지난 방 결과 모음 - 사람들이 실제로 답한 집계",
+    description:
+      "Deerlink 공개방에서 실제로 모인 답변 결과를 모아뒀어요. 어떤 질문에 사람들이 어떻게 답했는지 그대로 볼 수 있어요.",
+    alternates: { canonical: "/archive" },
+    ...(count === 0 && { robots: { index: false, follow: true } }),
+  };
+}
 
 export const revalidate = 300;
 

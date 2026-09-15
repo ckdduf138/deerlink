@@ -394,6 +394,9 @@ const room = await prisma.room.findUnique({
   `robots.ts`의 allow 목록에 `/og/`가 들어 있으니 둘 중 하나만 고치지 말 것.
 - **OG에 답변 데이터를 넣지 말 것.** `getRoomShareInfo()`는 제목·질문 수·참여자 수·첫 질문만 읽는다.
   쿠키 없는 크롤러에게 그대로 나가는 값이라 Answer Lock 바깥이다.
+- **canonical은 루트 layout에 두지 않는다.** layout에 두면 자기 canonical이 없는 하위 페이지가 전부 홈을
+  canonical로 물려받는다 (실제로 `/discover`가 그렇게 배포돼 있었다). 홈은 `page.tsx`에, 색인할 새 페이지는
+  각자 `alternates.canonical`을 넣을 것. www 호스트는 `next.config.ts`에서 apex로 301 한다.
 - **주제 페이지**(`/popular/[topic]`)는 `src/data/question-topics.ts`가 단일 출처다. 테마(question-packs)와
   달리 문항이 겹쳐도 된다 — 검색 의도별 랜딩이라 "탕수육 부먹 찍먹"이 술자리에도 MT에도 들어간다.
   문항은 여기서도 id로만 참조한다. 주제를 추가하면 sitemap은 자동으로 따라온다.
