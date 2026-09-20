@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Gowun_Dodum } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import "./globals.css";
 
 const gowunDodum = Gowun_Dodum({
@@ -144,6 +145,7 @@ export default function RootLayout({
   return (
     <html lang="ko" className={gowunDodum.variable}>
       <head>
+        <GoogleAnalytics />
         <meta name="naver-site-verification" content="e27d20053691ae1e1d1d23a7a14da0d60cccf90d" />
         <script
           type="application/ld+json"
