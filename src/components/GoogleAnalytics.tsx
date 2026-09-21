@@ -1,5 +1,9 @@
-/** deerlink.kr 웹 스트림의 GA4 측정 ID. 측정 ID는 페이지 HTML에 그대로 실리는 공개값이다. */
-export const GA_MEASUREMENT_ID = "G-CHXFFWN2KF";
+/**
+ * deerlink.kr 전용 GA4 속성("디어링크")의 측정 ID. 측정 ID는 페이지 HTML에 그대로 실리는 공개값이다.
+ * 2026-09까지는 두구팝(dugupop.com)과 한 속성("데이터수집")에 스트림만 나눠 들어가 있었다.
+ * 보고서가 섞이고 나중에 AdSense 연결도 속성 단위라 사이트별 속성으로 분리했다. 그 이전 데이터는 옛 속성에 남아 있다.
+ */
+export const GA_MEASUREMENT_ID = "G-DBPXPWTRL1";
 
 /**
  * GA4 gtag.js 태그. 루트 레이아웃의 <head>에서 렌더된다.
