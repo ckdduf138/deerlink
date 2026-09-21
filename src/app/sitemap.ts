@@ -1,4 +1,5 @@
 import { MetadataRoute } from "next";
+import { POPULAR_QUESTIONS, popularQuestionPath } from "@/data/popular-questions";
 import { QUESTION_TOPICS } from "@/data/question-topics";
 import { archivePath, getArchivedRooms } from "@/lib/room-archive";
 
@@ -35,6 +36,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${baseUrl}/popular/${topic.slug}`,
       changeFrequency: "monthly" as const,
       priority: 0.8,
+    })),
+    ...POPULAR_QUESTIONS.map((question) => ({
+      url: `${baseUrl}${popularQuestionPath(question.id)}`,
+      changeFrequency: "weekly" as const,
+      priority: 0.6,
     })),
   ];
 

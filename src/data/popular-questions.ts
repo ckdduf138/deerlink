@@ -497,3 +497,12 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
 export const POPULAR_QUESTION_IDS: ReadonlySet<string> = new Set(
   POPULAR_QUESTIONS.map((question) => question.id)
 );
+
+export function findPopularQuestion(id: string): PopularQuestion | null {
+  return POPULAR_QUESTIONS.find((question) => question.id === id) ?? null;
+}
+
+/** 질문별 페이지(/popular/q/[id]) 경로. 목록 카드·사이트맵·관련 질문이 같이 쓴다. */
+export function popularQuestionPath(id: string): string {
+  return `/popular/q/${encodeURIComponent(id)}`;
+}

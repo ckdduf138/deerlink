@@ -1,6 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import type { PopularQuestion } from "@/data/popular-questions";
+import { popularQuestionPath, type PopularQuestion } from "@/data/popular-questions";
 import { QUESTION_META } from "@/lib/question-meta";
 
 /**
@@ -64,7 +64,12 @@ export function PopularQuestionCard({
         )}
       </div>
       <h3 className="mb-3 break-keep text-base font-semibold leading-snug text-stone-900">
-        {question.title}
+        <Link
+          href={popularQuestionPath(question.id)}
+          className="underline-offset-4 transition-colors hover:text-amber-900 hover:underline"
+        >
+          {question.title}
+        </Link>
       </h3>
       <QuestionBody question={question} />
       <Link

@@ -41,6 +41,8 @@ export async function topUpPublicRooms(): Promise<number> {
             optionB: question.optionB,
             options: question.options ? JSON.stringify(question.options) : null,
             order,
+            // 테마 방은 공개방의 대부분이라, 출처가 빠지면 질문별 집계가 거의 비어 버린다.
+            sourceId: question.id,
           })),
         },
       },
