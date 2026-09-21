@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { ArrowRight, Clock3, Globe, ListChecks, Lock, Users } from "lucide-react";
-import { motion, useReducedMotion } from "framer-motion";
 import { formatEstimatedDuration, formatRemaining } from "@/lib/format";
 import { PUBLIC_ROOM_EXTENSION_LABEL } from "@/lib/room-lifetime";
 import type { LobbyRoom } from "@/lib/types";
@@ -20,7 +19,6 @@ export function Lobby({
   onStart: (nickname: string) => void;
 }) {
   const [nickname, setNickname] = useState(initialNickname);
-  const reduceMotion = useReducedMotion();
   const trimmed = nickname.trim();
   const isDuplicate = !room.isPublic && room.participants.some((p) => p.nickname === trimmed);
   const canStart = room.isPublic || (trimmed.length > 0 && !isDuplicate);
@@ -30,12 +28,11 @@ export function Lobby({
   };
 
   return (
+    // 공유 링크를 받은 사람이 처음 보는 화면이라 등장 애니메이션을 걸지 않는다.
+    // initial opacity 0은 서버 HTML에 그대로 박혀서, 카톡 인앱 브라우저처럼 JS가 늦게 도는
+    // 환경에선 하이드레이션 전까지 제목과 "바로 답하기"가 안 보였다 (HeroSection과 같은 이유).
     <main className="mx-auto max-w-md px-4 pb-12 pt-24">
-      <motion.div
-        initial={reduceMotion ? false : { opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-      >
+      <div>
         <div className="mb-8">
           <div className="mb-4 flex items-center justify-between gap-3">
             <span className="text-sm font-semibold tracking-tight text-stone-700">Deerlink</span>
@@ -156,7 +153,7 @@ export function Lobby({
           {room.isPublic ? "바로 답하기" : "참여하기"}
           <ArrowRight className="h-4 w-4" aria-hidden="true" />
         </button>
-      </motion.div>
+      </div>
     </main>
   );
 }

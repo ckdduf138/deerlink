@@ -56,15 +56,12 @@ export function PackPicker({
           </div>
 
           <div id="all-question-themes" className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {visiblePacks.map((pack, i) => {
+            {visiblePacks.map((pack) => {
               const Icon = PACK_ICON[pack.id] ?? Users;
               return (
                 <motion.button
                   key={pack.id}
                   onClick={() => onPick(pack)}
-                  initial={reduceMotion ? false : { opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.35, delay: i * 0.05 }}
                   whileTap={reduceMotion ? undefined : { scale: 0.98 }}
                   className="rounded-2xl border border-amber-100 bg-white p-5 text-left transition-colors hover:border-amber-300 hover:bg-amber-50/40"
                 >
