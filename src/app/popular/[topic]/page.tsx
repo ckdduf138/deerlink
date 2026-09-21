@@ -12,6 +12,7 @@ import {
   topicQuestions,
   type QuestionTopic,
 } from "@/data/question-topics";
+import { SITE_OPEN_GRAPH } from "@/lib/site-metadata";
 
 export function generateStaticParams() {
   return QUESTION_TOPICS.map((topic) => ({ topic: topic.slug }));
@@ -32,6 +33,7 @@ export async function generateMetadata({
     keywords: topic.keywords,
     alternates: { canonical: `/popular/${topic.slug}` },
     openGraph: {
+      ...SITE_OPEN_GRAPH,
       title: `${topic.metaTitle} | Deerlink`,
       description: topic.metaDescription,
       url: `/popular/${topic.slug}`,

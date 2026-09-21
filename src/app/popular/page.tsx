@@ -7,6 +7,7 @@ import { PopularQuestionList } from "@/components/popular/question-list";
 import { POPULAR_QUESTIONS } from "@/data/popular-questions";
 import { QUESTION_TOPICS } from "@/data/question-topics";
 import { QUESTION_META } from "@/lib/question-meta";
+import { SITE_OPEN_GRAPH } from "@/lib/site-metadata";
 import type { QuestionType } from "@/lib/types";
 
 const balance = POPULAR_QUESTIONS.filter((q) => q.type === "balance");
@@ -21,6 +22,7 @@ export const metadata: Metadata = {
     canonical: "/popular",
   },
   openGraph: {
+    ...SITE_OPEN_GRAPH,
     title: `밸런스 게임 질문 모음 ${total}선 | Deerlink`,
     description:
       "단톡방과 MT에서 바로 쓰는 인기 밸런스게임, 객관식, 주관식 질문 모음. 링크 하나로 공유.",

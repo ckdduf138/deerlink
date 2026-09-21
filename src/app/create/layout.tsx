@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_OPEN_GRAPH } from "@/lib/site-metadata";
 
 export const metadata: Metadata = {
   title: "새 방 만들기 - 밸런스게임, 투표, 설문 질문 작성",
@@ -8,6 +9,7 @@ export const metadata: Metadata = {
     canonical: "/create",
   },
   openGraph: {
+    ...SITE_OPEN_GRAPH,
     title: "새 방 만들기 | Deerlink",
     description:
       "밸런스게임, 객관식, 주관식 질문을 만들고 링크 하나로 공유하세요. 무료, 회원가입 불필요.",

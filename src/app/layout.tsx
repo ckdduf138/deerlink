@@ -3,6 +3,7 @@ import { Gowun_Dodum } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
+import { SITE_OPEN_GRAPH } from "@/lib/site-metadata";
 import "./globals.css";
 
 const gowunDodum = Gowun_Dodum({
@@ -88,23 +89,12 @@ export const metadata: Metadata = {
     title: "우리 답이 얼마나 다를까? 밸런스게임 만들기 | Deerlink",
     description:
       "링크 하나 공유하면 끝. 내 답을 마치면 친구들의 선택과 그룹 리포트가 열리는 단톡방 밸런스게임과 투표.",
-    siteName: "Deerlink",
-    type: "website",
-    locale: "ko_KR",
-    images: [
-      {
-        url: "/opengraph-image",
-        width: 1200,
-        height: 630,
-        alt: "Deerlink - 밸런스게임 만들기, 링크 하나로 의견 비교",
-      },
-    ],
+    ...SITE_OPEN_GRAPH,
   },
   twitter: {
+    // title/description은 두지 않는다. 여기 두면 twitter는 얕게 합쳐지지도 않고 그냥
+    // 물려받아서 모든 하위 페이지가 홈 제목을 달고 나간다. X 크롤러는 og:title로 폴백한다.
     card: "summary_large_image",
-    title: "우리 답이 얼마나 다를까? 밸런스게임 만들기 | Deerlink",
-    description:
-      "링크 하나 공유하면 끝. 내 답을 마치면 친구들의 선택과 그룹 리포트가 열리는 단톡방 밸런스게임과 투표.",
     images: ["/opengraph-image"],
   },
   robots: {
