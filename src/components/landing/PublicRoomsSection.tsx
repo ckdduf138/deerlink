@@ -1,11 +1,12 @@
-"use client";
-
-import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { PublicRoomsFeed } from "@/components/discover/public-rooms-feed";
 import type { DiscoverRoom } from "@/lib/types";
 
+/**
+ * 히어로 바로 아래, 첫 화면에 걸치는 섹션이라 등장 애니메이션을 걸지 않는다.
+ * initial opacity 0이면 서버 HTML에 투명하게 박혀서 JS가 돌기 전까지 안 보인다.
+ */
 export function PublicRoomsSection({
   rooms,
   total,
@@ -17,30 +18,22 @@ export function PublicRoomsSection({
   hasMore: boolean;
   error: string | null;
 }) {
-  const reduceMotion = useReducedMotion();
-
   return (
     <section
       aria-labelledby="public-rooms-title"
-      className="border-y border-amber-100 bg-amber-50 px-6 py-20 md:py-24"
+      className="bg-[#fafaf8] px-6 pb-20 md:pb-24"
     >
-      <motion.div
-        initial={reduceMotion ? false : { opacity: 0, y: 18 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-80px" }}
-        transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-        className="mx-auto max-w-6xl"
-      >
-        <div className="flex flex-wrap items-end justify-between gap-6 border-b border-amber-200 pb-8">
+      <div className="mx-auto max-w-6xl border-t border-amber-100 pt-8">
+        <div className="flex items-center justify-between gap-4">
           <h2
             id="public-rooms-title"
-            className="text-4xl font-bold leading-tight tracking-tight text-stone-900 sm:text-5xl"
+            className="text-2xl font-bold leading-tight tracking-tight text-stone-900 sm:text-3xl"
           >
-            한 번 답해보세요
+            지금 답이 모이는 질문
           </h2>
           <Link
             href="/discover"
-            className="group inline-flex min-h-11 items-center gap-2 text-base font-semibold text-amber-800 transition-colors hover:text-amber-600"
+            className="group inline-flex min-h-11 flex-shrink-0 items-center gap-1.5 text-base font-semibold text-amber-800 transition-colors hover:text-amber-600"
           >
             전체 보기
             <ArrowRight
@@ -49,8 +42,11 @@ export function PublicRoomsSection({
             />
           </Link>
         </div>
+        <p className="mt-1 break-keep text-base text-stone-600">
+          공개방은 누구나 익명으로 답하고 결과를 볼 수 있어요.
+        </p>
 
-        <div className="pt-8">
+        <div className="pt-6">
           <PublicRoomsFeed
             initialRooms={rooms}
             initialTotal={total}
@@ -60,7 +56,7 @@ export function PublicRoomsSection({
             mode="landing"
           />
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 }

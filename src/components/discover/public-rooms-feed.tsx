@@ -12,7 +12,7 @@ import { QUESTION_META } from "@/lib/question-meta";
 import { BalanceRatioBar } from "@/components/ResultBar";
 
 /**
- * /discover 페이지와 히어로 공개방 탭이 공유하는 목록 UI다.
+ * /discover 페이지와 랜딩 공개방 섹션이 공유하는 목록 UI다.
  * 정렬, 오류 복구, 카드 액션을 한곳에서 관리해 두 화면이 같은 동작을 유지한다.
  */
 export function PublicRoomsFeed({
@@ -27,7 +27,7 @@ export function PublicRoomsFeed({
   initialTotal: number;
   initialHasMore: boolean;
   initialSort?: DiscoverSort;
-  mode?: "full" | "hero" | "landing";
+  mode?: "full" | "landing";
   initialError?: string | null;
 }) {
   const [rooms, setRooms] = useState(initialRooms);
@@ -41,7 +41,7 @@ export function PublicRoomsFeed({
     { kind: "sort"; sort: DiscoverSort } | { kind: "more" } | null
   >(initialError ? { kind: "sort", sort: initialSort } : null);
   const reduceMotion = useReducedMotion();
-  const pageSizeQuery = mode === "hero" || mode === "landing" ? "&pageSize=2" : "";
+  const pageSizeQuery = mode === "landing" ? "&pageSize=2" : "";
 
   const requestRooms = async (url: string) => {
     const res = await fetch(url, { cache: "no-store" });
@@ -114,12 +114,12 @@ export function PublicRoomsFeed({
     }
   };
 
-  const visibleRooms = mode === "hero" || mode === "landing" ? rooms.slice(0, 2) : rooms;
+  const visibleRooms = mode === "landing" ? rooms.slice(0, 2) : rooms;
 
   return (
     <div aria-busy={loading}>
       {mode !== "landing" && <div
-        className={cn("mb-6 flex flex-wrap items-center gap-2", mode === "hero" && "mb-4")}
+        className="mb-6 flex flex-wrap items-center gap-2"
         role="group"
         aria-label="공개방 정렬"
       >
@@ -209,7 +209,7 @@ export function PublicRoomsFeed({
             </div>
           </div>
         ) : (
-          <div className={cn("text-center", mode === "hero" ? "py-10" : "py-16")}>
+          <div className="py-16 text-center">
             <Users className="mx-auto mb-5 h-10 w-10 text-stone-300" />
             <p className="text-stone-600 text-sm">아직 공개된 방이 없어요</p>
             <p className="text-stone-600 text-xs mt-1">방을 만들 때 공개로 설정하면 여기 나타나요</p>
@@ -230,7 +230,7 @@ export function PublicRoomsFeed({
             {visibleRooms.map((room, i) => (
               <motion.div
                 key={room.id}
-                initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+                initial={reduceMotion || mode === "landing" ? false : { opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: (i % 12) * 0.04 }}
                 className={cn("min-w-0", mode === "landing" && "h-full")}
@@ -246,9 +246,7 @@ export function PublicRoomsFeed({
                     mode === "landing" && "rounded-2xl"
                   )}>
                     <div className={cn(
-                      "flex min-w-0 flex-1 flex-col",
-                      mode === "hero" ? "p-4" : "p-5",
-                      mode === "landing" && "p-5 sm:p-6",
+                      "flex min-w-0 flex-1 flex-col p-5",
                       mode === "landing" && "sm:p-7"
                     )}>
                       <p className={cn(
