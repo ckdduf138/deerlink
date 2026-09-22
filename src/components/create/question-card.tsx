@@ -158,7 +158,12 @@ export function QuestionCard({
               placeholder={`옵션 ${i + 1}`}
               maxLength={OPTION_MAX}
               aria-label={`질문 ${index + 1} 옵션 ${i + 1}`}
-              className="min-h-11 rounded-xl border border-amber-100 bg-amber-50 px-3 text-xs text-stone-900 placeholder:text-stone-500 transition-colors focus-visible:border-amber-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/70"
+              className={cn(
+                "min-h-11 rounded-xl border px-3 text-xs text-stone-900 placeholder:text-stone-500 transition-colors focus-visible:outline-none focus-visible:ring-2",
+                key === "optionA"
+                  ? "border-amber-100 bg-amber-50 focus-visible:border-amber-400 focus-visible:ring-amber-200/70"
+                  : "border-teal-100 bg-teal-50 focus-visible:border-teal-400 focus-visible:ring-teal-200/70"
+              )}
             />
           ))}
         </div>

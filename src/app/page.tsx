@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { LandingNav } from "@/components/landing/LandingNav";
 import { HeroSection } from "@/components/landing/HeroSection";
-import { PublicRoomsSection } from "@/components/landing/PublicRoomsSection";
+import { LANDING_ROOM_COUNT, PublicRoomsSection } from "@/components/landing/PublicRoomsSection";
 import { FaqSection } from "@/components/landing/FaqSection";
 import { CtaSection } from "@/components/landing/CtaSection";
 import { getPublicRooms } from "@/lib/discover-rooms";
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
  * 서버 함수라 여기서 그냥 await 하면 된다.
  */
 export default async function Home() {
-  const publicRooms = await getPublicRooms({ page: 1, sort: "popular", pageSize: 2 })
+  const publicRooms = await getPublicRooms({ page: 1, sort: "popular", pageSize: LANDING_ROOM_COUNT })
     .then((data) => ({ ...data, error: null as string | null }))
     .catch(() => ({
       rooms: [],

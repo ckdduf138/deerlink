@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowRight, Clock3, Globe, ListChecks, Lock, Users } from "lucide-react";
-import { formatEstimatedDuration, formatRemaining } from "@/lib/format";
+import { ArrowRight, Clock3, Globe, Hourglass, ListChecks, Lock, Users } from "lucide-react";
+import { formatEstimatedDuration, formatRemainingShort } from "@/lib/format";
 import { PUBLIC_ROOM_EXTENSION_LABEL } from "@/lib/room-lifetime";
 import type { LobbyRoom } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -59,7 +59,10 @@ export function Lobby({
               <Clock3 className="h-4 w-4" aria-hidden="true" />
               {formatEstimatedDuration(room.questions.length)}
             </span>
-            <span>{formatRemaining(room.expiresAt)}</span>
+            <span className="inline-flex items-center gap-1.5">
+              <Hourglass className="h-4 w-4" aria-hidden="true" />
+              {formatRemainingShort(room.expiresAt)}
+            </span>
           </div>
         </div>
 

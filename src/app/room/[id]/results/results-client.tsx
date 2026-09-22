@@ -13,11 +13,12 @@ import {
   Share2,
   Sparkles,
   ChevronDown,
+  Hourglass,
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { AntlerLogo } from "@/components/landing/AntlerLogo";
-import { formatRemaining } from "@/lib/format";
+import { formatRemaining, formatRemainingShort } from "@/lib/format";
 import { objectParticle } from "@/lib/korean";
 import { PUBLIC_ROOM_EXTENSION_LABEL } from "@/lib/room-lifetime";
 import { parseOptions, type ResultsRoom, type Participant, type Question } from "@/lib/types";
@@ -364,9 +365,14 @@ export function ResultsClient({
               {room.participants.length}명 참여
             </span>
             <span className="w-px h-3 bg-stone-300" />
-            <span className="font-mono">
-              {archived ? "종료된 방" : formatRemaining(room.expiresAt)}
-            </span>
+            {archived ? (
+              <span className="font-mono">종료된 방</span>
+            ) : (
+              <span className="flex items-center gap-1 font-mono">
+                <Hourglass className="w-3 h-3" aria-hidden="true" />
+                {formatRemainingShort(room.expiresAt)}
+              </span>
+            )}
             {unanimousCount > 0 && (
               <>
                 <span className="w-px h-3 bg-stone-300" />

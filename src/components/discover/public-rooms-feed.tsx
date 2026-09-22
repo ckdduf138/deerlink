@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { AlertCircle, ArrowRight, Flame, ListChecks, Loader2, MessagesSquare, Users } from "lucide-react";
+import { Menu } from "@base-ui/react/menu";
+import { AlertCircle, ArrowRight, Check, ChevronDown, Flame, History, Hourglass, Loader2, MessagesSquare, Users, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { formatRemaining } from "@/lib/format";
+import { formatRemainingShort } from "@/lib/format";
 import type { DiscoverPreviewQuestion, DiscoverRoom } from "@/lib/types";
 import type { DiscoverSort } from "@/lib/discover-rooms";
-import { QUESTION_META } from "@/lib/question-meta";
 import { BalanceRatioBar } from "@/components/ResultBar";
 
 /**
@@ -22,6 +22,7 @@ export function PublicRoomsFeed({
   initialSort = "recent",
   mode = "full",
   initialError = null,
+  pageSize,
 }: {
   initialRooms: DiscoverRoom[];
   initialTotal: number;
@@ -29,6 +30,8 @@ export function PublicRoomsFeed({
   initialSort?: DiscoverSort;
   mode?: "full" | "landing";
   initialError?: string | null;
+  /** landing은 한 화면 분량만 보여준다. 정렬을 바꿔도 같은 개수만 다시 받는다. */
+  pageSize?: number;
 }) {
   const [rooms, setRooms] = useState(initialRooms);
   const [total, setTotal] = useState(initialTotal);
@@ -41,7 +44,7 @@ export function PublicRoomsFeed({
     { kind: "sort"; sort: DiscoverSort } | { kind: "more" } | null
   >(initialError ? { kind: "sort", sort: initialSort } : null);
   const reduceMotion = useReducedMotion();
-  const pageSizeQuery = mode === "landing" ? "&pageSize=2" : "";
+  const pageSizeQuery = pageSize ? `&pageSize=${pageSize}` : "";
 
   const requestRooms = async (url: string) => {
     const res = await fetch(url, { cache: "no-store" });
@@ -114,57 +117,19 @@ export function PublicRoomsFeed({
     }
   };
 
-  const visibleRooms = mode === "landing" ? rooms.slice(0, 2) : rooms;
+  const visibleRooms = pageSize ? rooms.slice(0, pageSize) : rooms;
+  const landing = mode === "landing";
+  const sortOptions = landing ? LANDING_SORTS : FULL_SORTS;
 
   return (
     <div aria-busy={loading}>
-      {mode !== "landing" && <div
-        className="mb-6 flex flex-wrap items-center gap-2"
-        role="group"
-        aria-label="공개방 정렬"
-      >
-        <button
-          onClick={() => changeSort("recent")}
-          disabled={loading}
-          aria-pressed={sort === "recent"}
-          className={cn(
-            "min-h-11 px-3.5 rounded-full text-xs font-medium border transition-colors disabled:cursor-wait disabled:opacity-60",
-            sort === "recent"
-              ? "border-amber-300 bg-amber-50 text-amber-900"
-              : "border-stone-200 text-stone-600 hover:border-stone-300"
-          )}
-        >
-          최신순
-        </button>
-        <button
-          onClick={() => changeSort("popular")}
-          disabled={loading}
-          aria-pressed={sort === "popular"}
-          className={cn(
-            "min-h-11 flex items-center gap-1 px-3.5 rounded-full text-xs font-medium border transition-colors disabled:cursor-wait disabled:opacity-60",
-            sort === "popular"
-              ? "border-amber-300 bg-amber-50 text-amber-900"
-              : "border-stone-200 text-stone-600 hover:border-stone-300"
-          )}
-        >
-          <Flame className="w-3 h-3" />
-          인기순
-        </button>
-        <button
-          onClick={() => changeSort("answers")}
-          disabled={loading}
-          aria-pressed={sort === "answers"}
-          className={cn(
-            "min-h-11 flex items-center gap-1 px-3.5 rounded-full text-xs font-medium border transition-colors disabled:cursor-wait disabled:opacity-60",
-            sort === "answers"
-              ? "border-amber-300 bg-amber-50 text-amber-900"
-              : "border-stone-200 text-stone-600 hover:border-stone-300"
-          )}
-        >
-          <MessagesSquare className="w-3 h-3" />
-          답변 많은순
-        </button>
-      </div>}
+      <SortMenu
+        options={sortOptions}
+        value={sort}
+        onChange={changeSort}
+        disabled={loading}
+        className={landing ? "mb-5" : "mb-6"}
+      />
 
       {error && (
         <div
@@ -222,73 +187,35 @@ export function PublicRoomsFeed({
           {mode === "full" && (
             <p className="mb-3 text-xs text-stone-500 font-mono tabular-nums">{total}개 방</p>
           )}
-          <div className={cn(
-            "min-w-0 space-y-3",
-            mode === "landing" &&
-              "grid gap-4 space-y-0 lg:grid-cols-2"
-          )}>
-            {visibleRooms.map((room, i) => (
-              <motion.div
-                key={room.id}
-                initial={reduceMotion || mode === "landing" ? false : { opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: (i % 12) * 0.04 }}
-                className={cn("min-w-0", mode === "landing" && "h-full")}
-              >
-                <Link
-                  href={`/room/${room.id}?join=1`}
-                  aria-label={`${room.title} 공개방 참여하기`}
-                  className="group block h-full min-w-0 max-w-full rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-600"
+          <div
+            className={cn(
+              "min-w-0",
+              landing
+                ? "grid gap-4 transition-opacity duration-200 sm:grid-cols-2"
+                : "space-y-3",
+              landing && loading && "opacity-60"
+            )}
+          >
+            {visibleRooms.map((room, i) =>
+              landing ? (
+                <RoomCard
+                  key={room.id}
+                  room={room}
+                  size={i === 0 ? "featured" : "standard"}
+                  className={i === 0 ? "sm:row-span-2" : undefined}
+                />
+              ) : (
+                <motion.div
+                  key={room.id}
+                  initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: (i % 12) * 0.04 }}
+                  className="min-w-0"
                 >
-                  <article className={cn(
-                    "flex h-full min-w-0 max-w-full flex-col overflow-hidden rounded-2xl border border-amber-100 bg-white transition-[border-color,box-shadow,transform] duration-200 group-hover:-translate-y-0.5 group-hover:border-amber-300 group-hover:shadow-lg group-hover:shadow-amber-100/50",
-                    mode === "landing" && "min-h-56",
-                    mode === "landing" && "rounded-2xl"
-                  )}>
-                    <div className={cn(
-                      "flex min-w-0 flex-1 flex-col p-5",
-                      mode === "landing" && "sm:p-7"
-                    )}>
-                      <p className={cn(
-                        "min-w-0 font-bold leading-snug text-stone-900",
-                        mode === "landing" ? "truncate" : "line-clamp-2",
-                        mode === "landing" ? "text-xl sm:text-2xl" : "text-base"
-                      )}>
-                        {room.title}
-                      </p>
-                      <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-stone-600">
-                        <span className="flex items-center gap-1.5">
-                          <ListChecks className="h-3.5 w-3.5" aria-hidden="true" />
-                          {room.questionCount}개
-                        </span>
-                        <span className="flex items-center gap-1.5">
-                          <Users className="h-3.5 w-3.5" aria-hidden="true" />
-                          {room.participantCount}명
-                        </span>
-                        {mode === "full" && (
-                          <span className="font-mono tabular-nums text-stone-500">
-                            {formatRemaining(room.expiresAt)}
-                          </span>
-                        )}
-                      </div>
-                      {(mode === "full" || mode === "landing") && room.previewQuestion && (
-                        <QuestionPreview question={room.previewQuestion} />
-                      )}
-                      <div className={cn(
-                        "mt-auto flex min-h-11 items-end justify-between gap-3 pt-6 text-sm font-semibold text-amber-800",
-                        mode === "landing" && "pt-8"
-                      )}>
-                        <span>참여하기</span>
-                        <ArrowRight
-                          className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
-                          aria-hidden="true"
-                        />
-                      </div>
-                    </div>
-                  </article>
-                </Link>
-              </motion.div>
-            ))}
+                  <RoomCard room={room} size="compact" />
+                </motion.div>
+              )
+            )}
           </div>
         </>
       )}
@@ -306,47 +233,271 @@ export function PublicRoomsFeed({
   );
 }
 
+const FULL_SORTS: { value: DiscoverSort; label: string; icon?: LucideIcon }[] = [
+  { value: "recent", label: "최신순", icon: History },
+  { value: "popular", label: "인기순", icon: Flame },
+  { value: "answers", label: "답변 많은순", icon: MessagesSquare },
+];
+
+/** 랜딩 섹션 제목이 "인기"라서 기본값인 인기순을 맨 앞에 둔다. */
+const LANDING_SORTS = [FULL_SORTS[1], FULL_SORTS[0], FULL_SORTS[2]];
+
+type CardSize = "compact" | "standard" | "featured";
+
 /**
- * 카드 안에서 첫 질문을 미리 보여준다 — "링크 하나로 그룹이 답한다"는 게 실제로
- * 어떤 화면인지 클릭 전에 보여줘서 호기심을 끈다. 밸런스 게임은 답변이 있으면
- * 결과 페이지와 같은 BalanceRatioBar로 실시간 비율까지 보여준다.
+ * `/discover`(compact)와 랜딩(standard·featured)이 쓰던 카드는 원래 서로 다른 컴포넌트였다
+ * — 내용 순서(방 제목이 먼저냐 질문이 먼저냐), 유형별 미리보기 유무, 하단 문구가 전부
+ * 달라서 같은 방인데 어디서 보느냐에 따라 다른 카드로 읽혔다. 지금은 하나의 컴포넌트가
+ * 크기만 다르게 그린다 — 항상 질문 제목이 먼저 오고(방 이름이 아니라 질문이 궁금증을
+ * 만든다), 유형별 미리보기가 모든 크기에 있고, 이동 신호는 화살표 아이콘 하나뿐이다
+ * ("참여하기"/"답하기" 같은 문구를 따로 달지 않는다 — 카드 전체가 링크고 화살표가
+ * 이미 그 뜻이다).
+ *
+ * compact만 밸런스 게임에 답이 있으면 실시간 비율 막대(BalanceRatioBar)를 보여준다 —
+ * `/discover`는 둘러보다 답할 방을 고르는 화면이라 결과를 먼저 봐도 된다. featured·
+ * standard(랜딩)는 반드시 두 선택지만 보여준다 — 결과부터 보이면 답할 이유가 없어진다.
  */
-function QuestionPreview({ question }: { question: DiscoverPreviewQuestion }) {
-  const meta = QUESTION_META[question.type];
-  const Icon = meta.icon;
-  const total = question.countA + question.countB;
-
-  if (question.type === "balance" && total > 0) {
-    return (
-      <div className="mt-4 border-t border-stone-100 pt-4">
-        <BalanceRatioBar
-          a={{ label: question.optionA ?? "A", count: question.countA }}
-          b={{ label: question.optionB ?? "B", count: question.countB }}
-        />
-      </div>
-    );
-  }
-
-  if (question.type === "balance") {
-    return (
-      <div className="mt-4 border-t border-stone-100 pt-4">
-        <p className="mb-2 line-clamp-2 text-sm leading-snug text-stone-700">{question.title}</p>
-        <div className="grid grid-cols-2 gap-2">
-          <span className="truncate rounded-lg border border-amber-100 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-900 text-center">
-            {question.optionA}
-          </span>
-          <span className="truncate rounded-lg border border-teal-100 bg-teal-50 px-3 py-1.5 text-xs font-medium text-teal-900 text-center">
-            {question.optionB}
-          </span>
-        </div>
-      </div>
-    );
-  }
+function RoomCard({
+  room,
+  size,
+  className,
+}: {
+  room: DiscoverRoom;
+  size: CardSize;
+  className?: string;
+}) {
+  const q = room.previewQuestion;
+  const headline = q?.title ?? room.title;
 
   return (
-    <div className="mt-4 flex items-start gap-1.5 border-t border-stone-100 pt-4 text-sm text-stone-700">
-      <Icon className={cn("mt-0.5 h-3.5 w-3.5 flex-shrink-0", meta.accent)} />
-      <span className="min-w-0 line-clamp-2 leading-snug">{question.title}</span>
-    </div>
+    <Link
+      href={`/room/${room.id}?join=1`}
+      aria-label={`${room.title} 공개방 참여하기`}
+      className={cn(
+        "group block h-full min-w-0 rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-600",
+        className
+      )}
+    >
+      <article
+        className={cn(
+          "flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border bg-white transition-[border-color,box-shadow,transform] duration-200 group-hover:border-amber-300",
+          size === "featured"
+            ? "gap-5 border-amber-100/80 p-7 shadow-lg shadow-amber-100/60 group-hover:-translate-y-1 group-hover:shadow-xl group-hover:shadow-amber-200/70 sm:p-9"
+            : size === "standard"
+              ? "gap-4 border-amber-100 p-5 group-hover:-translate-y-0.5 group-hover:shadow-lg group-hover:shadow-amber-100/50 sm:p-6"
+              : "gap-3 border-amber-100 p-5 group-hover:-translate-y-0.5 group-hover:shadow-lg group-hover:shadow-amber-100/50"
+        )}
+      >
+        <p
+          className={cn(
+            "break-keep font-bold leading-snug text-stone-900",
+            size === "featured"
+              ? "line-clamp-3 text-2xl sm:text-3xl"
+              : size === "standard"
+                ? "line-clamp-2 text-lg sm:text-xl"
+                : "line-clamp-2 text-base"
+          )}
+        >
+          {headline}
+        </p>
+
+        {q && <TypePreview question={q} size={size} />}
+
+        <div className="mt-auto flex items-end justify-between gap-3">
+          <div
+            className={cn(
+              "flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-stone-500",
+              size === "compact" ? "text-xs" : "text-sm"
+            )}
+          >
+            {q && <span className="truncate text-stone-600">{room.title}</span>}
+            <span className="flex flex-shrink-0 items-center gap-1">
+              <Users className="h-3.5 w-3.5" aria-hidden="true" />
+              <span className="tabular-nums">{room.participantCount}</span>
+            </span>
+            <span className="flex flex-shrink-0 items-center gap-1 font-mono tabular-nums">
+              <Hourglass className="h-3.5 w-3.5" aria-hidden="true" />
+              {formatRemainingShort(room.expiresAt)}
+            </span>
+          </div>
+          <ArrowRight
+            className={cn(
+              "flex-shrink-0 text-amber-700 transition-transform duration-200 group-hover:translate-x-1",
+              size === "compact" ? "h-4 w-4" : "h-5 w-5"
+            )}
+            aria-hidden="true"
+          />
+        </div>
+      </article>
+    </Link>
+  );
+}
+
+/**
+ * 유형별로 미리보기가 다르다 — 세 유형이 전부 카드에 섞여 나오니 하나씩 확인했다.
+ * 밸런스: 선택지 두 개를 amber/teal로 대비해서 보여준다(이지선다라 대비가 그대로 정보다).
+ * 객관식: 선택지가 여러 개라 대비를 안 쓰고 teal 톤 하나로 통일하고, 3개까지만 보여주고
+ * 나머지는 "+N"으로 뭉친다(선택지가 8개인 질문도 있어서 다 펼치면 카드가 깨진다).
+ * 주관식: 미리보여줄 선택지가 없다 — 자유 텍스트라 뭘 보여줘도 답을 대신 보여주는 셈이
+ * 된다. 제목만으로 충분하다고 보고 이 자리는 비워둔다.
+ */
+function TypePreview({ question, size }: { question: DiscoverPreviewQuestion; size: CardSize }) {
+  if (question.type === "balance" && question.optionA && question.optionB) {
+    const total = question.countA + question.countB;
+
+    if (size === "compact" && total > 0) {
+      return (
+        <BalanceRatioBar
+          a={{ label: question.optionA, count: question.countA }}
+          b={{ label: question.optionB, count: question.countB }}
+        />
+      );
+    }
+
+    return (
+      <div
+        className={cn(
+          "grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center",
+          size === "featured" ? "gap-3" : "gap-2"
+        )}
+      >
+        <OptionChip tone="amber" size={size}>
+          {question.optionA}
+        </OptionChip>
+        <span
+          className={cn("font-semibold text-stone-400", size === "featured" ? "text-sm" : "text-xs")}
+          aria-hidden="true"
+        >
+          VS
+        </span>
+        <OptionChip tone="teal" size={size}>
+          {question.optionB}
+        </OptionChip>
+      </div>
+    );
+  }
+
+  if (question.type === "multiple" && question.options.length > 0) {
+    const shown = question.options.slice(0, 3);
+    const extra = question.options.length - shown.length;
+    return (
+      <div className="flex flex-wrap gap-2">
+        {shown.map((option) => (
+          <span
+            key={option}
+            className={cn(
+              "truncate rounded-lg border border-teal-200 bg-teal-50 font-medium text-teal-900",
+              size === "compact" ? "px-2.5 py-1 text-xs" : "px-3 py-1.5 text-sm"
+            )}
+          >
+            {option}
+          </span>
+        ))}
+        {extra > 0 && (
+          <span
+            className={cn(
+              "rounded-lg border border-stone-200 bg-stone-50 font-medium text-stone-500",
+              size === "compact" ? "px-2.5 py-1 text-xs" : "px-3 py-1.5 text-sm"
+            )}
+          >
+            +{extra}
+          </span>
+        )}
+      </div>
+    );
+  }
+
+  return null;
+}
+
+function OptionChip({
+  tone,
+  size,
+  children,
+}: {
+  tone: "amber" | "teal";
+  size: CardSize;
+  children: string;
+}) {
+  return (
+    <span
+      className={cn(
+        "flex items-center justify-center break-keep rounded-xl border text-center font-semibold leading-snug",
+        tone === "amber" ? "border-amber-200 bg-amber-50 text-amber-900" : "border-teal-200 bg-teal-50 text-teal-900",
+        size === "featured"
+          ? "min-h-16 px-4 py-3 text-lg sm:text-xl"
+          : size === "standard"
+            ? "min-h-12 px-3 py-2 text-base"
+            : "min-h-10 px-2.5 py-1.5 text-sm"
+      )}
+    >
+      {children}
+    </span>
+  );
+}
+
+/**
+ * 정렬은 항상 하나만 선택돼 있다 — 그럼 화면에 세 개를 다 늘어놓을 필요가 없다.
+ * 지금 정렬 하나만 보여주는 버튼을 누르면 나머지 옵션이 뜬다(토스·네이버류 앱이
+ * 정렬에 흔히 쓰는 패턴). 칩 3개가 항상 떠 있던 것보다 화면에 남는 텍스트가 훨씬 적다.
+ * 테두리 없는 채워진 배경(bg-stone-100)을 쓴다 — 테두리만 있는 흰 배경은 누를 수
+ * 있는 요소로 잘 안 읽혀서 존재감이 약했다.
+ */
+function SortMenu({
+  options,
+  value,
+  onChange,
+  disabled,
+  className,
+}: {
+  options: { value: DiscoverSort; label: string; icon?: LucideIcon }[];
+  value: DiscoverSort;
+  onChange: (next: DiscoverSort) => void;
+  disabled: boolean;
+  className?: string;
+}) {
+  const active = options.find((option) => option.value === value) ?? options[0];
+  const ActiveIcon = active.icon;
+
+  return (
+    <Menu.Root>
+      <Menu.Trigger
+        disabled={disabled}
+        aria-label={`공개방 정렬: ${active.label}`}
+        className={cn(
+          "flex min-h-11 items-center gap-1.5 rounded-xl bg-stone-100 px-4 text-sm font-semibold text-stone-800 transition-colors hover:bg-stone-200 disabled:cursor-wait disabled:opacity-60",
+          "data-[popup-open]:bg-amber-50 data-[popup-open]:text-amber-900",
+          className
+        )}
+      >
+        {ActiveIcon && <ActiveIcon className="h-3.5 w-3.5" aria-hidden="true" />}
+        {active.label}
+        <ChevronDown className="h-3.5 w-3.5 text-stone-500" aria-hidden="true" />
+      </Menu.Trigger>
+      <Menu.Portal>
+        <Menu.Positioner side="bottom" align="start" sideOffset={6}>
+          <Menu.Popup className="min-w-40 rounded-2xl border border-amber-100 bg-white p-1.5 shadow-lg shadow-amber-100/60 outline-none data-[starting-style]:scale-95 data-[starting-style]:opacity-0 data-[ending-style]:scale-95 data-[ending-style]:opacity-0 transition-[opacity,transform] duration-150">
+            <Menu.RadioGroup value={value} onValueChange={onChange}>
+              {options.map(({ value: optionValue, label, icon: Icon }) => (
+                <Menu.RadioItem
+                  key={optionValue}
+                  value={optionValue}
+                  closeOnClick
+                  className="flex min-h-11 cursor-pointer items-center justify-between gap-4 rounded-xl px-3 text-sm font-medium text-stone-700 outline-none data-[highlighted]:bg-amber-50 data-[highlighted]:text-amber-900"
+                >
+                  <span className="flex items-center gap-2">
+                    {Icon && <Icon className="h-3.5 w-3.5" aria-hidden="true" />}
+                    {label}
+                  </span>
+                  <Menu.RadioItemIndicator>
+                    <Check className="h-3.5 w-3.5 text-amber-700" aria-hidden="true" />
+                  </Menu.RadioItemIndicator>
+                </Menu.RadioItem>
+              ))}
+            </Menu.RadioGroup>
+          </Menu.Popup>
+        </Menu.Positioner>
+      </Menu.Portal>
+    </Menu.Root>
   );
 }

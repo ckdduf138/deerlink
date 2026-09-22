@@ -1,10 +1,9 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 import { AntlerLogo } from "./AntlerLogo";
+import { CreateRoomButton } from "./CreateRoomButton";
 import { FeedbackModal } from "@/components/FeedbackModal";
 
 export function CtaSection() {
@@ -27,13 +26,7 @@ export function CtaSection() {
         <p className="mt-5 text-lg leading-relaxed text-stone-600">
           회원가입 없이, 30초면 돼요.
         </p>
-        <Link
-          href="/create"
-          className="mt-10 inline-flex min-h-14 items-center gap-2 rounded-2xl bg-amber-700 px-8 text-base font-semibold text-white shadow-lg shadow-amber-900/30 transition-colors duration-200 hover:bg-amber-600"
-        >
-          방 만들기
-          <ArrowRight className="h-4 w-4" />
-        </Link>
+        <CreateRoomButton className="mt-10" />
       </motion.div>
 
       <footer className="mx-auto mt-20 flex max-w-xl flex-col items-center gap-3 border-t border-amber-100 pt-8 sm:flex-row sm:justify-between">
