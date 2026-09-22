@@ -54,6 +54,8 @@ export interface AdminRoom extends ResultsRoom {
  * Answer Lock이 없으니(참고: room.isPublic) 카드에 집계 숫자를 노출해도 원칙에 어긋나지 않는다.
  */
 export interface DiscoverPreviewQuestion {
+  /** 방의 첫 질문 id. 랜딩 히어로에서 고른 답을 답변 임시저장에 미리 넣을 때 쓴다. */
+  id: string;
   type: QuestionType;
   title: string;
   optionA: string | null;

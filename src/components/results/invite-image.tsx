@@ -114,7 +114,7 @@ function QuestionCard({ question }: { question: RoomSharePreview }): ReactElemen
 
 /**
  * 초대 링크(단톡방에 붙여넣는 그 링크)의 미리보기 이미지.
- * 결과 공유용 ShareImage와 달리 답변 데이터를 일절 담지 않는다 — 쿠키 없는
+ * 답변 데이터를 일절 담지 않는다 — 쿠키 없는
  * 크롤러가 가져가는 이미지라 Answer Lock 바깥에서 안전해야 한다.
  */
 export function InviteImage({ info }: { info: RoomShareInfo }): ReactElement {

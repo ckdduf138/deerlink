@@ -135,12 +135,12 @@ export function RoomClient({ room }: { room: LobbyRoom }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#fafaf8] text-stone-900">
-      <nav className="fixed inset-x-0 top-0 z-50 flex items-center justify-between border-b border-amber-100 bg-white/90 px-4 py-4 backdrop-blur-md md:px-8">
+    <div className="min-h-screen bg-page text-stone-900">
+      <nav className="fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between border-b border-stone-100 bg-white/85 px-2 backdrop-blur-md sm:px-6">
         <Link
           href="/"
           aria-label="홈으로 돌아가기"
-          className="flex min-h-11 min-w-11 items-center gap-2 text-sm text-stone-600 transition-colors hover:text-stone-900"
+          className="pressable flex min-h-11 min-w-11 items-center gap-2 rounded-xl px-2 text-[15px] font-semibold text-stone-700 hover:text-stone-900"
         >
           <ArrowLeft className="h-4 w-4" />
           <span className="hidden sm:inline">Deerlink</span>
@@ -148,7 +148,7 @@ export function RoomClient({ room }: { room: LobbyRoom }) {
         {mode === "answer" && (
           <button
             onClick={handleExit}
-            className="min-h-11 px-2 text-sm text-stone-600 transition-colors hover:text-stone-900"
+            className="pressable min-h-11 rounded-xl px-3 text-[15px] font-medium text-stone-600 hover:bg-stone-100 hover:text-stone-900"
           >
             나가기
           </button>
@@ -156,24 +156,13 @@ export function RoomClient({ room }: { room: LobbyRoom }) {
       </nav>
 
       {mode === "lobby" ? (
-        <>
-          <Lobby
-            key={draft.nickname ? "restored" : "fresh"}
-            room={room}
-            initialNickname={draft.nickname}
-            onStart={handleStart}
-          />
-          {canResume && (
-            <div className="mx-auto -mt-4 max-w-md px-4 pb-10">
-              <button
-                onClick={() => setMode("answer")}
-                className="min-h-11 w-full rounded-xl border border-amber-200 bg-amber-50 px-4 text-sm text-amber-900 transition-colors hover:bg-amber-100"
-              >
-                이어서 답변하기 ({answeredCount}/{room.questions.length}개 완료)
-              </button>
-            </div>
-          )}
-        </>
+        <Lobby
+          key={draft.nickname ? "restored" : "fresh"}
+          room={room}
+          initialNickname={draft.nickname}
+          onStart={handleStart}
+          resume={canResume ? { answered: answeredCount } : null}
+        />
       ) : (
         <AnswerMode
           room={room}

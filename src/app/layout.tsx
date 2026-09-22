@@ -1,17 +1,18 @@
 import type { Metadata, Viewport } from "next";
-import { Gowun_Dodum } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
+import { FeedbackPrompt } from "@/components/FeedbackPrompt";
 import { SITE_OPEN_GRAPH } from "@/lib/site-metadata";
+// Pretendard 동적 서브셋: 유니코드 범위로 쪼갠 파일 중 페이지에 실제 쓰인 글자 조각만 받는다.
+// 예전 Gowun Dodum은 400 한 굵기뿐이라 font-bold가 전부 브라우저가 가짜로 두껍게 그린 글자였다.
+import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
+import { Jua } from "next/font/google";
 import "./globals.css";
 
-const gowunDodum = Gowun_Dodum({
-  weight: "400",
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-gowun-dodum",
-});
+// 큰 제목·큰 숫자용 둥근 글씨. 굵기가 400 하나뿐이라 globals.css의 font-cute가
+// font-synthesis를 꺼서 브라우저가 가짜 볼드를 그리지 않게 한다. 본문은 Pretendard 그대로.
+const jua = Jua({ weight: "400", subsets: ["latin"], display: "swap", preload: false, variable: "--font-jua" });
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://deerlink.kr";
 
@@ -131,7 +132,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" className={gowunDodum.variable}>
+    <html lang="ko" className={jua.variable}>
       <head>
         <GoogleAnalytics />
         <meta name="naver-site-verification" content="e27d20053691ae1e1d1d23a7a14da0d60cccf90d" />
@@ -142,6 +143,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         {children}
+        <FeedbackPrompt />
         <Analytics />
         <SpeedInsights />
       </body>

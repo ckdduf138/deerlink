@@ -3,7 +3,7 @@ import { AntlerLogo } from "@/components/landing/AntlerLogo";
 
 export function PopularNav() {
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-10 py-5 bg-[#fafaf8]/80 backdrop-blur-md border-b border-amber-100/50">
+    <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-10 py-5 bg-page/80 backdrop-blur-md border-b border-stone-200">
       <Link
         href="/"
         className="flex min-h-11 items-center gap-2 text-sm font-semibold text-stone-900 tracking-tight"

@@ -132,7 +132,7 @@ function Choices({ question }: { question: PopularQuestion }) {
         {question.options?.map((option) => (
           <li
             key={option}
-            className="rounded-xl border border-amber-100 bg-white px-4 py-3 text-base text-stone-800"
+            className="rounded-xl border border-stone-200 bg-white px-4 py-3 text-base text-stone-800"
           >
             {option}
           </li>
@@ -142,7 +142,7 @@ function Choices({ question }: { question: PopularQuestion }) {
   }
 
   return (
-    <p className="rounded-2xl border border-amber-100 bg-white px-5 py-4 text-base leading-relaxed text-stone-600">
+    <p className="rounded-2xl border border-stone-200 bg-white px-5 py-4 text-base leading-relaxed text-stone-600">
       정해진 보기 없이 각자 짧게 적는 질문이에요. 서로 모르던 답이 나오기 좋아서 모임 끝무렵에
       던지면 이야기가 길어져요.
     </p>
@@ -237,7 +237,7 @@ export default async function PopularQuestionPage({
   const startHref = `/create?question=${encodeURIComponent(question.id)}`;
 
   return (
-    <div className="min-h-screen bg-[#fafaf8] text-stone-900">
+    <div className="min-h-screen bg-page text-stone-900">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd(question, baseUrl)) }}
@@ -260,7 +260,7 @@ export default async function PopularQuestionPage({
           >
             {meta.longLabel}
           </span>
-          <h1 className="mt-4 break-keep text-3xl font-bold leading-[1.2] tracking-tight text-stone-900 md:text-4xl">
+          <h1 className="mt-4 break-keep text-3xl font-cute leading-[1.2] text-stone-900 md:text-4xl">
             {question.title}
           </h1>
         </header>
@@ -272,9 +272,9 @@ export default async function PopularQuestionPage({
         {stats && (
           <section
             aria-labelledby="stats-heading"
-            className="mt-12 rounded-2xl border border-amber-100 bg-white p-6"
+            className="mt-12 rounded-2xl border border-stone-200 bg-white p-6"
           >
-            <h2 id="stats-heading" className="text-xl font-bold tracking-tight text-stone-900">
+            <h2 id="stats-heading" className="text-xl font-cute text-stone-900">
               실제로 {stats.total}명이 답했어요
             </h2>
             <p className="mt-1.5 mb-6 text-sm leading-relaxed text-stone-600">
@@ -285,7 +285,7 @@ export default async function PopularQuestionPage({
         )}
 
         <section className="mt-12 rounded-3xl border border-amber-100 bg-amber-50 px-6 py-10 text-center md:px-10">
-          <h2 className="break-keep text-2xl font-bold tracking-tight text-stone-900">
+          <h2 className="break-keep text-2xl font-cute text-stone-900">
             {stats ? "우리 친구들은 다르게 고를까요?" : "친구들은 뭐라고 답할까요?"}
           </h2>
           <p className="mx-auto mt-3 mb-7 max-w-md text-sm leading-relaxed text-stone-600">
@@ -294,7 +294,7 @@ export default async function PopularQuestionPage({
           </p>
           <Link
             href={startHref}
-            className="inline-flex items-center gap-2 rounded-xl bg-amber-600 px-6 py-3 text-sm font-medium text-white shadow-lg shadow-amber-900/30 transition-all duration-200 hover:-translate-y-0.5 hover:bg-amber-500"
+            className="inline-flex items-center gap-2 rounded-xl bg-amber-700 px-6 py-3 text-sm font-medium text-white shadow-lg shadow-amber-900/30 transition-all duration-200 hover:-translate-y-0.5 hover:bg-amber-800"
           >
             이 질문으로 방 만들기
             <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -303,7 +303,7 @@ export default async function PopularQuestionPage({
 
         {topics.length > 0 && (
           <section className="mt-14" aria-labelledby="topics-heading">
-            <h2 id="topics-heading" className="text-lg font-bold tracking-tight text-stone-900">
+            <h2 id="topics-heading" className="text-lg font-cute text-stone-900">
               이 질문이 잘 맞는 자리
             </h2>
             <ul className="mt-4 flex flex-wrap gap-2">
@@ -322,10 +322,10 @@ export default async function PopularQuestionPage({
         )}
 
         <section className="mt-14" aria-labelledby="related-heading">
-          <h2 id="related-heading" className="text-lg font-bold tracking-tight text-stone-900">
+          <h2 id="related-heading" className="text-lg font-cute text-stone-900">
             같이 물어보기 좋은 질문
           </h2>
-          <ul className="mt-4 divide-y divide-amber-100 border-y border-amber-100">
+          <ul className="mt-4 divide-y divide-stone-200 border-y border-stone-200">
             {related.map((item) => (
               <li key={item.id}>
                 <Link

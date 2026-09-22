@@ -6,8 +6,9 @@
 
 /* iOS Safari 포커스 확대 방지 — font-size >= 16px 강제 */
 /* @layer 밖 선언 → Tailwind 유틸리티(text-sm 등)보다 cascade 우선순위 높음 */
-input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
-textarea {
+/* .input-lg: 16px보다 큰 글자를 쓰는 입력칸(방 제목 등)은 이 강제에서 뺀다. 확대는 16px 미만에서만 일어난다. */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(.input-lg),
+textarea:not(.input-lg) {
   font-size: 1rem;
 }
 
@@ -16,10 +17,26 @@ textarea {
   padding-bottom: max(env(safe-area-inset-bottom), 2rem);
 }
 
+/*
+ * 2026-09 아기 사슴 리워크 토큰. 테두리로 면을 가르던 걸 바탕 대비로 바꿨다:
+ * 사슴 털빛 크림 바탕(page) 위 흰 카드. 잠깐 썼던 회색 바탕은 금융 앱처럼 읽힌다는
+ * 피드백으로 걷어냈다. 주 버튼은 브랜드 amber를 채우고 글자는 진한 전경색이다
+ * (흰 글자는 amber 위에서 대비 미달).
+ */
+@theme {
+  --color-page: #fcf5ea;
+  --color-brand-edge: #bf7a22;
+  --color-brand: #e8a038;
+  --color-brand-strong: #d98b1f;
+  --color-brand-ink: #1c1412;
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-gowun-dodum), "Gowun Dodum", -apple-system,
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system,
     BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI",
     "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji",
     "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
@@ -63,7 +80,7 @@ textarea {
 }
 
 :root {
-  --background: #fafaf8;
+  --background: #fcf5ea;
   --foreground: #1c1412;
   --card: #ffffff;
   --card-foreground: #1c1412;
@@ -86,7 +103,7 @@ textarea {
   --chart-3: #f472b6;
   --chart-4: #84cc16;
   --chart-5: #38bdf8;
-  --radius: 1rem;
+  --radius: 0.75rem;
   --sidebar: #ffffff;
   --sidebar-foreground: #1c1412;
   --sidebar-primary: #e8a038;
@@ -98,7 +115,7 @@ textarea {
 }
 
 .dark {
-  --background: #fafaf8;
+  --background: #fcf5ea;
   --foreground: #1c1412;
   --card: #ffffff;
   --card-foreground: #1c1412;
@@ -146,4 +163,133 @@ textarea {
 :where(a, button, summary):focus-visible {
   outline: 2px solid #b45309;
   outline-offset: 3px;
+}
+
+/*
+ * 큰 제목·큰 숫자 전용 둥근 글씨(주아). 굵기가 하나뿐이라 font-bold가 섞여도 가짜 볼드를 그리지 않는다.
+ * 질문 본문·선택지·카드 제목·입력칸·버튼에는 쓰지 않는다: 긴 문장이 읽기 힘들고,
+ * 자음만 입력하면(ㄴㅇㄹ) 영문처럼 보이는 글자 모양이 나온다.
+ */
+@utility font-cute {
+  font-family: var(--font-jua), "Pretendard Variable", Pretendard, sans-serif;
+  font-weight: 400;
+  font-synthesis: none;
+  letter-spacing: -0.005em;
+}
+
+/* 누를 수 있는 모든 면: 누르는 순간 줄어들어야 화면이 입력을 들었다는 게 느껴진다. */
+@utility pressable {
+  transition-property: transform, background-color, border-color, color, box-shadow, opacity;
+  transition-duration: 160ms;
+  transition-timing-function: var(--ease-out-strong);
+  &:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+}
+
+/*
+ * 말랑한 알약 버튼. 아래 테두리(진한 amber)가 두께처럼 보이고, 누르면 그만큼 내려앉는다.
+ * 평평한 채운 버튼은 금융 앱처럼 딱딱하게 읽혔다.
+ */
+@utility btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  min-height: 3.5rem;
+  padding-inline: 1.75rem;
+  border-radius: 9999px;
+  background-color: var(--color-brand);
+  color: var(--color-brand-ink);
+  font-weight: 700;
+  font-size: 1.0625rem;
+  letter-spacing: -0.01em;
+  box-shadow: 0 4px 0 var(--color-brand-edge);
+  transition-property: transform, background-color, color, box-shadow;
+  transition-duration: 140ms;
+  transition-timing-function: var(--ease-out-strong);
+  @media (hover: hover) {
+    &:hover:not(:disabled) {
+      background-color: var(--color-brand-strong);
+    }
+  }
+  &:active:not(:disabled) {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 var(--color-brand-edge);
+  }
+  &:disabled {
+    cursor: not-allowed;
+    background-color: var(--color-stone-200);
+    color: var(--color-stone-500);
+    box-shadow: 0 4px 0 var(--color-stone-300);
+  }
+}
+
+@utility btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  min-height: 3.5rem;
+  padding-inline: 1.75rem;
+  border-radius: 9999px;
+  background-color: #ffffff;
+  color: var(--color-stone-800);
+  font-weight: 700;
+  font-size: 1.0625rem;
+  letter-spacing: -0.01em;
+  box-shadow: inset 0 0 0 2px #f1e4cf, 0 4px 0 #f1e4cf;
+  transition-property: transform, background-color, box-shadow;
+  transition-duration: 140ms;
+  transition-timing-function: var(--ease-out-strong);
+  @media (hover: hover) {
+    &:hover:not(:disabled) {
+      background-color: #fffaf2;
+    }
+  }
+  &:active:not(:disabled) {
+    transform: translateY(3px);
+    box-shadow: inset 0 0 0 2px #f1e4cf, 0 1px 0 #f1e4cf;
+  }
+  &:disabled {
+    cursor: not-allowed;
+    color: var(--color-stone-500);
+  }
+}
+
+/* 흰 카드. 테두리 없이 따뜻한 그림자로만 뜬다. */
+@utility surface {
+  background-color: #ffffff;
+  border-radius: 1.75rem;
+  box-shadow: 0 2px 0 rgb(191 122 34 / 0.07), 0 10px 28px -14px rgb(150 95 30 / 0.22);
+}
+
+/*
+ * 아기 사슴 등의 흰 점무늬. amber·teal 면 위에 얹는 브랜드 패턴이다.
+ * 정적인 배경이라 움직이는 장식 금지 규칙과 부딪히지 않는다.
+ */
+@utility fawn-spots {
+  background-image:
+    radial-gradient(circle at 16% 22%, rgb(255 255 255 / 0.55) 0 5px, transparent 6px),
+    radial-gradient(circle at 30% 12%, rgb(255 255 255 / 0.45) 0 3px, transparent 4px),
+    radial-gradient(circle at 84% 18%, rgb(255 255 255 / 0.5) 0 4px, transparent 5px),
+    radial-gradient(circle at 72% 32%, rgb(255 255 255 / 0.4) 0 2.5px, transparent 3.5px),
+    radial-gradient(circle at 90% 42%, rgb(255 255 255 / 0.45) 0 3px, transparent 4px);
+}
+
+/* 모바일 하단 고정 CTA 받침. 스크롤되는 내용이 버튼 밑에서 자연스럽게 사라진다. */
+@utility bottom-dock {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 40;
+  padding: 0.75rem 1rem max(env(safe-area-inset-bottom), 0.875rem);
+  background-image: linear-gradient(to top, var(--color-page) 72%, transparent);
+  /* 데스크톱은 화면이 길어서 바닥에 붙이면 내용과 멀어진다. 내용 바로 아래 흐름에 둔다. */
+  @media (min-width: 48rem) {
+    position: static;
+    margin-top: 2rem;
+    padding: 0;
+    background-image: none;
+  }
 }

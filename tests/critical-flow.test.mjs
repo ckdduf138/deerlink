@@ -103,17 +103,6 @@ function responseCookie(response) {
   return setCookie.split(";", 1)[0];
 }
 
-async function assertPng(response) {
-  await assertResponseStatus(response, 200);
-  assert.match(response.headers.get("content-type") ?? "", /^image\/png\b/);
-  const png = Buffer.from(await response.arrayBuffer());
-  assert.ok(png.length > 1_000, "PNG must not be empty");
-  assert.deepEqual([...png.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
-  assert.equal(png.readUInt32BE(16), 1080);
-  assert.equal(png.readUInt32BE(20), 1080);
-  return png;
-}
-
 before(async () => {
   const envLocal = await readFile(join(projectRoot, ".env.local"), "utf8");
   assert.match(envLocal, /^TURSO_DATABASE_URL=["']?file:/m);
@@ -228,7 +217,6 @@ test("private flow keeps results locked, retries idempotently, and renders a ful
   assert.equal(lockedBody.locked, true);
   const lockedPage = await (await fetch(`${baseUrl}/room/${room.id}/results`)).text();
   assert.match(lockedPage, /참여 후 결과를 볼 수 있어요/);
-  assert.equal((await fetch(`${baseUrl}/api/rooms/${room.id}/image`)).status, 403);
 
   const firstSubmissionId = randomUUID();
   const firstAnswers = answersFor(room, 0);
@@ -275,10 +263,6 @@ test("private flow keeps results locked, retries idempotently, and renders a ful
   const unlockedBody = await unlocked.json();
   assert.equal(unlockedBody.locked, false);
   assert.equal(unlockedBody.participants.length, 2, "a retry must not create another participant");
-
-  await assertPng(await fetch(`${baseUrl}/api/rooms/${room.id}/image`, {
-    headers: { Cookie: firstCookie },
-  }));
 });
 
 test("public flow opens aggregate results anonymously and does not force answer mode on refresh", async () => {
@@ -296,7 +280,6 @@ test("public flow opens aggregate results anonymously and does not force answer 
   const beforeAnswers = await (await fetch(`${baseUrl}/api/rooms/${room.id}`)).json();
   assert.equal(beforeAnswers.locked, false);
   assert.deepEqual(beforeAnswers.participants, []);
-  await assertPng(await fetch(`${baseUrl}/api/rooms/${room.id}/image`));
 
   for (const variant of [0, 1]) {
     const response = await submitAnswers({
@@ -320,5 +303,4 @@ test("public flow opens aggregate results anonymously and does not force answer 
   assert.doesNotMatch(refreshPage, />나가기</);
   const resultPage = await (await fetch(`${baseUrl}/room/${room.id}/results`)).text();
   assert.doesNotMatch(resultPage, /참여 후 결과를 볼 수 있어요/);
-  await assertPng(await fetch(`${baseUrl}/api/rooms/${room.id}/image`));
 });

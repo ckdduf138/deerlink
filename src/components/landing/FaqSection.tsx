@@ -1,4 +1,6 @@
-import { Plus } from "lucide-react";
+import { ChevronDown } from "lucide-react";
+import { FREEZE_MIN_PARTICIPANTS } from "@/lib/room-archive";
+import { PUBLIC_ROOM_EXTENSION_LABEL, PUBLIC_ROOM_MAX_LABEL, roomLifetimeLabel } from "@/lib/room-lifetime";
 
 const FAQS = [
   {
@@ -18,7 +20,8 @@ const FAQS = [
   },
   {
     question: "만든 방은 얼마나 유지되나요?",
-    answer: "비공개방은 24시간, 공개방은 7일 동안 유지되고 그 뒤에는 자동으로 삭제돼요. 공개방이 더 오래 남는 건 다른 사람들이 둘러보고 답할 시간이 필요해서예요.",
+    // 수명 규칙은 room-lifetime.ts, 보존 기준은 room-archive.ts가 단일 출처다. 숫자를 여기 손으로 적지 않는다.
+    answer: `비공개방은 ${roomLifetimeLabel(false)} 뒤 사라져요. 공개방은 ${roomLifetimeLabel(true)} 동안 열리고, 새로 한 명이 답할 때마다 ${PUBLIC_ROOM_EXTENSION_LABEL}씩 늘어나요 (만든 날부터 최대 ${PUBLIC_ROOM_MAX_LABEL}). 기간이 끝난 공개방 중 ${FREEZE_MIN_PARTICIPANTS}명 이상 답한 방은 지우지 않고 결과를 보관해요.`,
   },
   {
     question: "회원가입이나 결제가 필요한가요?",
@@ -42,26 +45,23 @@ const faqJsonLd = {
 
 export function FaqSection() {
   return (
-    <section className="border-t border-amber-100 bg-white px-6 py-24 md:py-28">
+    <section className="bg-page px-5 py-16 sm:px-6 md:py-24">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
-      <div className="mx-auto grid max-w-5xl gap-10 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:gap-16">
+      <div className="mx-auto grid max-w-6xl gap-8 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:gap-16">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-stone-900">시작하기 전에</h2>
-          <p className="mt-4 max-w-sm text-base leading-relaxed text-stone-600">
-            밸런스 게임 하는 방법부터 결과 공개 방식과 보관 기간까지, 방을 만들기 전에 알아야 할 내용을 모았어요.
-          </p>
+          <h2 className="text-[26px] font-cute text-stone-900 sm:text-4xl">자주 묻는 질문</h2>
         </div>
 
-        <div className="divide-y divide-stone-200 border-y border-stone-200">
+        <div className="surface divide-y divide-stone-100 px-5 sm:px-7">
           {FAQS.map((item) => (
             <details key={item.question} className="group">
-              <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 py-4 text-base font-semibold text-stone-900 marker:hidden">
+              <summary className="flex min-h-16 cursor-pointer list-none items-center justify-between gap-4 py-4 text-[17px] font-semibold text-stone-900 marker:hidden">
                 {item.question}
-                <Plus
-                  className="h-5 w-5 flex-shrink-0 text-amber-700 transition-transform group-open:rotate-45"
+                <ChevronDown
+                  className="h-5 w-5 flex-shrink-0 text-stone-400 transition-transform duration-200 ease-out-strong group-open:rotate-180"
                   aria-hidden="true"
                 />
               </summary>

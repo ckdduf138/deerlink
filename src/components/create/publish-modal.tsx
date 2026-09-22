@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence, useMotionValue, PanInfo } from "framer-motion";
-import { AlertCircle, ArrowRight, Clock3, Globe, Loader2, Lock, X } from "lucide-react";
+import { AlertCircle, Clock3, Globe, Loader2, Lock, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { roomLifetimeLabel } from "@/lib/room-lifetime";
 import { useAccessibleDialog } from "@/lib/use-accessible-dialog";
@@ -66,7 +66,7 @@ export function PublishModal({
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", stiffness: 320, damping: 32, mass: 0.8 }}
-            className="fixed bottom-0 inset-x-0 z-[60] rounded-t-3xl bg-white border-t border-amber-100 overflow-hidden"
+            className="fixed inset-x-0 bottom-0 z-[60] mx-auto max-w-lg overflow-hidden rounded-t-[28px] bg-white pb-safe"
             role="dialog"
             aria-modal="true"
             aria-labelledby="publish-dialog-title"
@@ -77,7 +77,7 @@ export function PublishModal({
             </div>
 
             <div className="flex items-center justify-between px-6 pb-4">
-              <h2 id="publish-dialog-title" className="text-base font-semibold text-stone-900">
+              <h2 id="publish-dialog-title" className="text-xl font-cute text-stone-900">
                 공개 범위를 선택하세요
               </h2>
               <button
@@ -90,7 +90,7 @@ export function PublishModal({
               </button>
             </div>
 
-            <div className="px-6 pb-8 space-y-4">
+            <div className="space-y-4 px-6">
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
@@ -98,18 +98,18 @@ export function PublishModal({
                   aria-pressed={!isPublic}
                   data-dialog-autofocus
                   className={cn(
-                    "rounded-xl border p-4 text-left transition-colors",
+                    "pressable rounded-2xl p-4 text-left ring-2",
                     !isPublic
-                      ? "border-amber-600 bg-amber-50"
-                      : "border-stone-200 bg-white hover:border-stone-300"
+                      ? "bg-amber-50 ring-amber-500"
+                      : "bg-page ring-transparent hover:bg-stone-200/60"
                   )}
                 >
-                  <Lock className={cn("h-4 w-4", !isPublic ? "text-amber-900" : "text-stone-500")} />
-                  <p className={cn("mt-2 text-sm font-semibold", !isPublic ? "text-amber-900" : "text-stone-900")}>
+                  <Lock className={cn("h-5 w-5", !isPublic ? "text-amber-800" : "text-stone-500")} />
+                  <p className={cn("mt-2 text-[17px] font-bold", !isPublic ? "text-amber-950" : "text-stone-900")}>
                     비공개
                   </p>
-                  <p className={cn("mt-1 text-xs leading-relaxed", !isPublic ? "text-amber-900" : "text-stone-500")}>
-                    링크를 받은 사람만 참여할 수 있어요
+                  <p className={cn("mt-1 text-sm leading-relaxed", !isPublic ? "text-amber-900" : "text-stone-600")}>
+                    링크 받은 사람만
                   </p>
                 </button>
                 <button
@@ -117,43 +117,41 @@ export function PublishModal({
                   onClick={() => onPublicChange(true)}
                   aria-pressed={isPublic}
                   className={cn(
-                    "rounded-xl border p-4 text-left transition-colors",
+                    "pressable rounded-2xl p-4 text-left ring-2",
                     isPublic
-                      ? "border-amber-600 bg-amber-50"
-                      : "border-stone-200 bg-white hover:border-stone-300"
+                      ? "bg-teal-50 ring-teal-500"
+                      : "bg-page ring-transparent hover:bg-stone-200/60"
                   )}
                 >
-                  <Globe className={cn("h-4 w-4", isPublic ? "text-amber-900" : "text-stone-500")} />
-                  <p className={cn("mt-2 text-sm font-semibold", isPublic ? "text-amber-900" : "text-stone-900")}>
+                  <Globe className={cn("h-5 w-5", isPublic ? "text-teal-800" : "text-stone-500")} />
+                  <p className={cn("mt-2 text-[17px] font-bold", isPublic ? "text-teal-950" : "text-stone-900")}>
                     공개
                   </p>
-                  <p className={cn("mt-1 text-xs leading-relaxed", isPublic ? "text-amber-900" : "text-stone-500")}>
-                    누구나 발견하고 답할 수 있어요. 닉네임 없이 익명으로 참여해요
+                  <p className={cn("mt-1 text-sm leading-relaxed", isPublic ? "text-teal-900" : "text-stone-600")}>
+                    누구나 익명으로
                   </p>
                 </button>
               </div>
 
-              <div className="flex items-start gap-2 rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-amber-900">
+              <div className="flex items-start gap-2 rounded-2xl bg-page px-4 py-3 text-stone-700">
                 <Clock3 className="mt-0.5 h-4 w-4 flex-shrink-0" aria-hidden="true" />
-                <p className="text-xs leading-relaxed">
+                <p className="text-sm leading-relaxed">
                   {isPublic
-                    ? `공개방과 답변은 생성 후 ${roomLifetimeLabel(true)} 동안 유지돼요. 다른 사람들이 둘러보고 답할 시간이 필요해서 비공개방보다 오래 남아요.`
-                    : `방과 답변은 생성 후 ${roomLifetimeLabel(false)} 동안 유지돼요. 시간이 지나면 자동으로 삭제됩니다.`}
+                    ? `${roomLifetimeLabel(true)} 열리고, 한 명 답할 때마다 하루씩 늘어요`
+                    : `${roomLifetimeLabel(false)} 뒤 사라져요`}
                 </p>
               </div>
 
               {error && (
                 <div
                   role="alert"
-                  className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3"
+                  className="flex items-start gap-2 rounded-2xl bg-red-50 px-4 py-3"
                 >
                   <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
-                  <p className="text-xs text-red-700 leading-relaxed">
+                  <p className="text-sm leading-relaxed text-red-700">
                     {error}
                     <br />
-                    <span className="text-red-600">
-                      작성한 내용은 저장돼 있으니 그대로 다시 시도하면 돼요.
-                    </span>
+                    <span className="text-red-600">작성한 내용은 그대로 있어요.</span>
                   </p>
                 </div>
               )}
@@ -161,20 +159,17 @@ export function PublishModal({
               <button
                 onClick={onConfirm}
                 disabled={loading}
-                className={cn(
-                  "w-full min-h-12 rounded-xl text-sm font-semibold transition-colors duration-200 flex items-center justify-center gap-2",
-                  loading
-                    ? "bg-stone-200 text-stone-500"
-                    : "bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-900/30"
-                )}
+                className="btn-primary w-full"
               >
                 {loading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
                   <>
-                    {error ? "다시 시도" : "링크 만들기"}
-                    <ArrowRight className="w-4 h-4" />
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                    링크 만드는 중
                   </>
+                ) : error ? (
+                  "다시 시도"
+                ) : (
+                  `${isPublic ? "공개방" : "비공개방"}으로 링크 만들기`
                 )}
               </button>
             </div>

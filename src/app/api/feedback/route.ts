@@ -18,9 +18,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "잘못된 요청이에요" }, { status: 400 });
   }
 
-  const { message, contact } = body as { message: unknown; contact?: unknown };
+  const { message, contact, rating } = body as { message?: unknown; contact?: unknown; rating?: unknown };
 
-  if (typeof message !== "string" || !message.trim() || message.length > MESSAGE_MAX) {
+  // 별점만 보내도 된다 (피드백 팝오버는 의견이 선택이다). 둘 다 없으면 받을 게 없다.
+  const hasRating = rating !== undefined;
+  if (hasRating && (typeof rating !== "number" || !Number.isInteger(rating) || rating < 1 || rating > 5)) {
+    return NextResponse.json({ error: "별점을 확인해주세요" }, { status: 400 });
+  }
+  if (message !== undefined && (typeof message !== "string" || message.length > MESSAGE_MAX)) {
+    return NextResponse.json({ error: "내용을 확인해주세요" }, { status: 400 });
+  }
+  const text = typeof message === "string" ? message.trim() : "";
+  if (!hasRating && !text) {
     return NextResponse.json({ error: "내용을 확인해주세요" }, { status: 400 });
   }
   if (contact !== undefined && (typeof contact !== "string" || contact.length > CONTACT_MAX)) {
@@ -32,10 +41,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true });
   }
 
-  const fields: { name: string; value: string; inline?: boolean }[] = [
-    { name: "내용", value: message.trim() },
-  ];
-  if (contact?.trim()) {
+  const fields: { name: string; value: string; inline?: boolean }[] = [];
+  if (typeof rating === "number") {
+    fields.push({ name: "별점", value: `${"★".repeat(rating)}${"☆".repeat(5 - rating)} (${rating}/5)`, inline: true });
+  }
+  if (text) fields.push({ name: "내용", value: text });
+  if (typeof contact === "string" && contact.trim()) {
     fields.push({ name: "연락처", value: contact.trim(), inline: true });
   }
 

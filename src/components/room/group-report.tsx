@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { Sparkles } from "lucide-react";
+import { Fawn } from "@/components/Fawn";
 import {
   computeClosestBalance,
   computeLoneDissenter,
@@ -35,17 +35,10 @@ export function GroupReport({
   if (!showWorst && !dissenter && !showClosest) return null;
 
   return (
-    <motion.details
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: 0.05 }}
-      className="mt-4 border-b border-amber-100"
-    >
-      <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between text-sm font-semibold text-stone-700 marker:hidden">
-        다른 인사이트 더 보기
-        <Sparkles className="h-4 w-4 text-amber-700" aria-hidden="true" />
-      </summary>
-      <div className="space-y-3 pb-5">
+    // 예전엔 "다른 인사이트 더 보기"로 접혀 있었다. 소수파·팽팽한 질문이 이 화면에서 제일 재밌는
+    // 정보인데 누르지 않으면 안 보였다. 펼친 채로 둔다.
+    <section aria-label="더 알아낸 것" className="surface mt-3 p-3 sm:p-4">
+      <div className="space-y-2">
         {showWorst && (
           <ReportRow
             label="제일 다른 조합"
@@ -56,30 +49,31 @@ export function GroupReport({
         )}
 
         {dissenter && (
-          <div className="flex items-center justify-between rounded-xl bg-white/70 px-4 py-3">
-            <div>
-              <p className="text-xs text-stone-500">오늘의 소수파</p>
+          <div className="flex items-center justify-between gap-3 rounded-2xl bg-page px-4 py-3.5">
+            <Fawn mood="curious" className="-my-1 h-10 w-10 flex-shrink-0" />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm text-stone-500">오늘의 소수파</p>
               <p className="text-sm font-semibold text-stone-900">{dissenter.participant.nickname}</p>
             </div>
-            <p className="text-xs text-stone-600">
+            <p className="text-sm text-stone-600">
               {dissenter.count}개 질문에서 <span className="font-medium text-stone-800">혼자 다른 선택</span>
             </p>
           </div>
         )}
 
         {showClosest && (
-          <div className="flex items-center justify-between rounded-xl bg-white/70 px-4 py-3">
+          <div className="flex items-center justify-between rounded-2xl bg-page px-4 py-3.5">
             <div className="min-w-0">
-              <p className="text-xs text-stone-500">가장 팽팽했던 질문</p>
+              <p className="text-sm text-stone-500">가장 팽팽했던 질문</p>
               <p className="truncate text-sm font-semibold text-stone-900">{closest.question.title}</p>
             </div>
-            <p className="flex-shrink-0 text-xs font-mono tabular-nums text-stone-600">
+            <p className="flex-shrink-0 text-sm font-semibold tabular-nums text-stone-700">
               {closest.countA} : {closest.countB}
             </p>
           </div>
         )}
       </div>
-    </motion.details>
+    </section>
   );
 }
 
@@ -97,15 +91,15 @@ function ReportRow({
   note?: string;
 }) {
   return (
-    <div className="flex items-center justify-between rounded-xl bg-white/70 px-4 py-3">
+    <div className="flex items-center justify-between rounded-2xl bg-page px-4 py-3.5">
       <div className="min-w-0">
-        <p className="text-xs text-stone-500">{label}</p>
+        <p className="text-sm text-stone-500">{label}</p>
         <p className="truncate text-sm font-semibold text-stone-900">{value}</p>
-        {note && <p className="text-xs text-stone-500">{note}</p>}
+        {note && <p className="text-sm text-stone-500">{note}</p>}
       </div>
       <div
         className={
-          "flex flex-shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold tabular-nums " +
+          "flex flex-shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-sm font-bold tabular-nums " +
           (tone === "amber" ? "bg-amber-100 text-amber-900" : "bg-teal-100 text-teal-900")
         }
       >

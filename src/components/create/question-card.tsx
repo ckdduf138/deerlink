@@ -87,9 +87,9 @@ export function QuestionCard({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0, scale: 0.97 }}
       transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-      className="rounded-2xl border border-amber-100 bg-white overflow-hidden"
+      className="surface overflow-hidden"
     >
-      <div className="flex items-center gap-2 px-5 py-1.5 border-b border-stone-200">
+      <div className="flex items-center gap-2 px-5 pt-2">
         <button
           onPointerDown={(e) => dragControls.start(e)}
           onKeyDown={(event) => {
@@ -102,16 +102,16 @@ export function QuestionCard({
           aria-label={`질문 ${index + 1} 순서 변경, 위아래 화살표 키 사용`}
           aria-keyshortcuts="ArrowUp ArrowDown"
         >
-          <GripVertical className="w-3.5 h-3.5" />
+          <GripVertical className="h-4 w-4" />
         </button>
 
-        <span className="text-xs font-mono text-stone-500 tabular-nums">
-          {String(index + 1).padStart(2, "0")}
+        <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-stone-100 px-1.5 text-[13px] font-bold tabular-nums text-stone-600">
+          {index + 1}
         </span>
 
-        <div className={cn("flex items-center gap-1 flex-1", accent)}>
-          <Icon className="w-3 h-3 flex-shrink-0" />
-          <span className="text-xs font-medium">
+        <div className={cn("flex flex-1 items-center gap-1.5", accent)}>
+          <Icon className="h-3.5 w-3.5 flex-shrink-0" aria-hidden="true" />
+          <span className="text-sm font-semibold">
             {label}
           </span>
         </div>
@@ -130,11 +130,11 @@ export function QuestionCard({
               : `질문 ${index + 1} 삭제`
           }
         >
-          <Trash2 className="w-3.5 h-3.5" />
+          <Trash2 className="h-4 w-4" />
         </button>
       </div>
 
-      <div className="px-5 pt-3.5 pb-3">
+      <div className="px-3 pb-2 pt-1">
         <input
           ref={titleRef}
           type="text"
@@ -143,12 +143,12 @@ export function QuestionCard({
           placeholder="질문을 입력하세요"
           maxLength={QUESTION_TITLE_MAX}
           aria-label={`질문 ${index + 1} 내용`}
-          className="min-h-11 w-full rounded-lg bg-transparent px-2 text-sm font-medium leading-relaxed text-stone-900 placeholder:text-stone-500 transition-colors focus-visible:bg-amber-50/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-amber-200"
+          className="input-lg min-h-12 w-full rounded-xl bg-transparent px-2 text-lg font-bold leading-relaxed text-stone-900 placeholder:font-semibold placeholder:text-stone-500 transition-colors focus-visible:bg-page focus-visible:outline-none"
         />
       </div>
 
       {question.type === "balance" && (
-        <div className="px-5 pb-4 grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-2 px-5 pb-5">
           {(["optionA", "optionB"] as const).map((key, i) => (
             <input
               key={key}
@@ -159,10 +159,10 @@ export function QuestionCard({
               maxLength={OPTION_MAX}
               aria-label={`질문 ${index + 1} 옵션 ${i + 1}`}
               className={cn(
-                "min-h-11 rounded-xl border px-3 text-xs text-stone-900 placeholder:text-stone-500 transition-colors focus-visible:outline-none focus-visible:ring-2",
+                "min-h-14 rounded-2xl px-4 font-semibold text-stone-900 outline-none ring-2 ring-transparent transition-shadow placeholder:font-medium placeholder:text-stone-500",
                 key === "optionA"
-                  ? "border-amber-100 bg-amber-50 focus-visible:border-amber-400 focus-visible:ring-amber-200/70"
-                  : "border-teal-100 bg-teal-50 focus-visible:border-teal-400 focus-visible:ring-teal-200/70"
+                  ? "bg-amber-50 focus-visible:ring-amber-400"
+                  : "bg-teal-50 focus-visible:ring-teal-400"
               )}
             />
           ))}
@@ -170,10 +170,9 @@ export function QuestionCard({
       )}
 
       {question.type === "multiple" && (
-        <div className="px-5 pb-4 space-y-1.5">
+        <div className="space-y-2 px-5 pb-5">
           {options.map((opt, i) => (
             <div key={i} className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-teal-300 flex-shrink-0" />
               <input
                 type="text"
                 value={opt}
@@ -181,7 +180,7 @@ export function QuestionCard({
                 placeholder={`선택지 ${i + 1}`}
                 maxLength={OPTION_MAX}
                 aria-label={`질문 ${index + 1} 선택지 ${i + 1}`}
-                className="min-h-11 flex-1 rounded-xl border border-teal-100 bg-teal-50 px-3 text-xs text-stone-900 placeholder:text-stone-500 transition-colors focus-visible:border-amber-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/70"
+                className="min-h-12 flex-1 rounded-xl bg-teal-50 px-4 font-medium text-stone-900 outline-none ring-2 ring-transparent transition-shadow placeholder:text-stone-500 focus-visible:ring-teal-400"
               />
               {options.length > MIN_OPTIONS && (
                 <button
@@ -189,7 +188,7 @@ export function QuestionCard({
                   className="min-w-11 min-h-11 flex items-center justify-center text-stone-500 hover:text-red-600 transition-colors flex-shrink-0"
                   aria-label={`선택지 ${i + 1} 삭제`}
                 >
-                  <Trash2 className="w-3 h-3" />
+                  <Trash2 className="h-4 w-4" />
                 </button>
               )}
             </div>
@@ -197,7 +196,7 @@ export function QuestionCard({
           {options.length < MAX_OPTIONS && (
             <button
               onClick={addOption}
-              className="mt-1 flex w-full min-h-11 items-center justify-center gap-1.5 rounded-xl border border-dashed border-teal-200 text-teal-700 hover:border-teal-400 hover:bg-teal-50/60 text-xs transition-colors"
+              className="pressable flex min-h-12 w-full items-center justify-center gap-1.5 rounded-xl bg-stone-100 text-[15px] font-semibold text-stone-700 hover:bg-stone-200"
             >
               <Plus className="w-3.5 h-3.5" />
               선택지 추가
@@ -207,8 +206,8 @@ export function QuestionCard({
       )}
 
       {question.type === "subjective" && (
-        <div className="px-5 pb-3">
-          <p className="text-xs text-stone-500">참여자가 자유롭게 텍스트로 답변해요</p>
+        <div className="px-5 pb-5">
+          <p className="rounded-xl bg-page px-4 py-3 text-[15px] text-stone-600">참여자가 자유롭게 텍스트로 답변해요</p>
         </div>
       )}
     </Reorder.Item>

@@ -1,565 +1,587 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import {
-  ArrowLeft,
-  Scale,
-  ListChecks,
-  PenLine,
-  Users,
-  Copy,
-  Check,
-  Share2,
-  Sparkles,
-  ChevronDown,
-  Hourglass,
-} from "lucide-react";
 import Link from "next/link";
+import { ArrowLeft, Check, ChevronDown, Hourglass, Sparkles, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { AntlerLogo } from "@/components/landing/AntlerLogo";
 import { formatRemaining, formatRemainingShort } from "@/lib/format";
-import { objectParticle } from "@/lib/korean";
 import { PUBLIC_ROOM_EXTENSION_LABEL } from "@/lib/room-lifetime";
-import { parseOptions, type ResultsRoom, type Participant, type Question } from "@/lib/types";
+import { participantPath } from "@/lib/room-url";
+import { parseOptions, type Participant, type Question, type ResultsRoom } from "@/lib/types";
+import { QUESTION_META } from "@/lib/question-meta";
 import { BalanceRatioBar } from "@/components/ResultBar";
 import { GroupReport } from "@/components/room/group-report";
-import { participantUrl } from "@/lib/room-url";
-import { ResultImageActions } from "@/components/results/result-image-actions";
 import { FirstAnswerInsight, PrimaryInsight } from "@/components/results/primary-insight";
 import { ResultsOutro } from "@/components/results/results-outro";
-import { KakaoShareButton } from "@/components/share/kakao-share-button";
+import { InviteActions, InviteNavButton, useInviteLink } from "@/components/share/invite-actions";
 import { roomShareDescription } from "@/lib/room-share-text";
-import { computeUnanimousAggregates, primaryResultInsight } from "@/lib/group-stats";
+import {
+  computeUnanimousAggregates,
+  computeViewerSummary,
+  primaryResultInsight,
+  type ViewerSummary,
+  viewerVerdict,
+} from "@/lib/group-stats";
+import { Fawn } from "@/components/Fawn";
 
+type Picked = { id: string; nickname: string; value: string };
 
-/* ─── Balance Result ─────────────────────── */
+function answersFor(question: Question, participants: Participant[]): Picked[] {
+  return participants.flatMap((p) => {
+    const value = p.answers.find((a) => a.questionId === question.id)?.value;
+    return value ? [{ id: p.id, nickname: p.nickname, value }] : [];
+  });
+}
+
+/**
+ * 비공개방이면 "민준, 하람도 같은 선택"처럼 이름으로, 공개방이면 인원으로 말한다.
+ * 공개방 닉네임은 서버가 붙인 "참여자 N"이라 이름처럼 쓰면 안 된다.
+ */
+function SameAsMe({
+  answers,
+  viewerId,
+  anonymous,
+}: {
+  answers: Picked[];
+  viewerId: string;
+  anonymous: boolean;
+}) {
+  const mine = answers.find((a) => a.id === viewerId);
+  if (!mine || answers.length < 2) return null;
+  const same = answers.filter((a) => a.id !== viewerId && a.value === mine.value);
+
+  // 사슴은 이 질문에서 내 선택이 특별할 때만 표정을 바꾼다: 나 혼자면 놀라고, 모두 같으면 웃는다.
+  const alone = same.length === 0;
+  const everyone = same.length === answers.length - 1;
+  let text: string;
+  if (alone) text = "나만 이 선택을 했어요";
+  else if (anonymous) text = `나 말고 ${same.length}명이 같은 선택을 했어요`;
+  else if (everyone) text = "모두 나와 같은 선택이에요";
+  else text = `${same.map((a) => a.nickname).join(", ")}도 같은 선택`;
+
+  return (
+    <p
+      className={cn(
+        "mt-4 flex items-center gap-2 rounded-2xl py-2 pl-2 pr-4 text-[15px] font-medium",
+        alone ? "bg-teal-50 text-teal-900" : everyone ? "bg-amber-50 text-amber-900" : "bg-page text-stone-700"
+      )}
+    >
+      <Fawn mood={alone ? "wow" : everyone ? "happy" : "default"} className="h-9 w-9 flex-shrink-0" />
+      {text}
+    </p>
+  );
+}
+
+/* ─── Balance ─────────────────────────────── */
 
 function BalanceResult({
   question,
-  participants,
+  answers,
+  viewerId,
   anonymous,
 }: {
   question: Question;
-  participants: Participant[];
+  answers: Picked[];
+  viewerId: string | null;
   anonymous: boolean;
 }) {
-  const answers = participants
-    .map((p) => ({
-      id: p.id,
-      nickname: p.nickname,
-      value: p.answers.find((a) => a.questionId === question.id)?.value,
-    }))
-    .filter((a) => a.value != null);
-
   const countA = answers.filter((a) => a.value === "A").length;
   const countB = answers.filter((a) => a.value === "B").length;
-  const total = countA + countB;
+  const mine = answers.find((a) => a.id === viewerId)?.value;
 
   return (
     <div>
       <BalanceRatioBar
-        className="mb-6"
         a={{ label: question.optionA ?? "A", count: countA }}
         b={{ label: question.optionB ?? "B", count: countB }}
+        mine={mine === "A" ? "a" : mine === "B" ? "b" : null}
       />
-
-      {!anonymous && answers.length > 0 && (
-        <details className="group mt-4 border-t border-stone-100">
-          <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between text-xs font-medium text-stone-600 marker:hidden">
-            참여자별 선택 보기
-            <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" aria-hidden="true" />
-          </summary>
-          <div className="space-y-1.5 pb-1">
-          {answers.map((a, i) => {
+      {viewerId && <SameAsMe answers={answers} viewerId={viewerId} anonymous={anonymous} />}
+      {!anonymous && (
+        <PeopleList
+          answers={answers}
+          viewerId={viewerId}
+          render={(a) => {
             const isA = a.value === "A";
             return (
-              <motion.div
-                key={a.id}
-                initial={{ opacity: 0, x: -8 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.07 + 0.3, duration: 0.3 }}
-                className="flex items-center justify-between py-1"
+              <span
+                className={cn(
+                  "rounded-lg px-2.5 py-1 text-sm font-semibold",
+                  isA ? "bg-amber-50 text-amber-900" : "bg-teal-50 text-teal-900"
+                )}
               >
-                <span className="text-sm text-stone-700">{a.nickname}</span>
-                <span
-                  className={cn(
-                    "rounded-md border px-2 py-0.5 text-xs font-medium",
-                    isA
-                      ? "bg-amber-50 border-amber-100 text-amber-900"
-                      : "bg-teal-50 border-teal-100 text-teal-900"
-                  )}
-                >
-                  {isA ? question.optionA : question.optionB}
-                </span>
-              </motion.div>
+                {isA ? question.optionA : question.optionB}
+              </span>
             );
-          })}
-          </div>
-        </details>
-      )}
-
-      {/* Majority note */}
-      {total >= 2 && countA !== countB && (() => {
-        const winner = (countA > countB ? question.optionA : question.optionB) ?? "";
-        return (
-          <p className="mt-3 text-xs text-stone-600">
-            <span className="font-medium text-stone-700">
-              {countA > countB ? countA : countB}명
-            </span>
-            이{" "}
-            <span className="font-medium text-stone-700">
-              &ldquo;{winner}&rdquo;
-            </span>
-            {objectParticle(winner)} 선택했어요
-          </p>
-        );
-      })()}
-      {total >= 2 && countA === countB && (
-        <p className="mt-3 text-xs text-stone-600">정확히 <span className="font-medium text-stone-700">반반</span>이에요</p>
+          }}
+        />
       )}
     </div>
   );
 }
 
-/* ─── Multiple Choice Result ─────────────── */
+/* ─── Multiple ────────────────────────────── */
 
 function MultipleResult({
   question,
-  participants,
+  answers,
+  viewerId,
   anonymous,
 }: {
   question: Question;
-  participants: Participant[];
+  answers: Picked[];
+  viewerId: string | null;
   anonymous: boolean;
 }) {
   const options = parseOptions(question.options);
-  const answers = participants
-    .map((p) => ({
-      id: p.id,
-      nickname: p.nickname,
-      value: p.answers.find((a) => a.questionId === question.id)?.value,
-    }))
-    .filter((a) => a.value != null);
   const total = answers.length;
-
-  const optionCounts = options.map((_, i) => answers.filter((a) => a.value === String(i)).length);
-  const maxCount = Math.max(...optionCounts, 0);
+  const counts = options.map((_, i) => answers.filter((a) => a.value === String(i)).length);
+  const maxCount = Math.max(...counts, 0);
+  const mine = answers.find((a) => a.id === viewerId)?.value;
 
   return (
-    <div className="space-y-3">
-      {options.map((opt, i) => {
-        const count = optionCounts[i];
-        const pct = total ? Math.round((count / total) * 100) : 0;
-        const isTop = count > 0 && count === maxCount;
-
-        return (
-          <div key={i}>
-            <div className="flex items-center justify-between mb-1.5">
-              <span className={cn("text-sm", isTop ? "text-stone-900 font-semibold" : "text-stone-600")}>
-                {opt}
-              </span>
-              <span className="text-xs text-stone-600 font-mono tabular-nums">
-                {count}명, {pct}%
-              </span>
-            </div>
-            <div className="mb-2 h-1.5 w-full overflow-hidden rounded-full bg-stone-100" aria-hidden="true">
-              <div
-                className={cn("h-full rounded-full", isTop ? "bg-amber-500" : "bg-stone-300")}
-                style={{ width: `${pct}%` }}
-              />
-            </div>
-          </div>
-        );
-      })}
-      {!anonymous && answers.length > 0 && (
-        <details className="group border-t border-stone-100">
-          <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between text-xs font-medium text-stone-600 marker:hidden">
-            참여자별 선택 보기
-            <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" aria-hidden="true" />
-          </summary>
-          <div className="space-y-2 pb-1">
-            {answers.map((answer) => (
-              <div key={answer.id} className="flex items-start justify-between gap-4 text-sm">
-                <span className="min-w-0 break-words text-stone-700">{answer.nickname}</span>
-                <span className="max-w-[55%] break-words text-right font-medium text-stone-900">
-                  {options[Number(answer.value)] ?? "선택 확인 불가"}
+    <div>
+      <ul className="space-y-3.5">
+        {options.map((opt, i) => {
+          const count = counts[i];
+          const pct = total ? Math.round((count / total) * 100) : 0;
+          const isTop = count > 0 && count === maxCount;
+          const isMine = mine === String(i);
+          return (
+            <li key={i}>
+              <div className="mb-1.5 flex items-baseline justify-between gap-4">
+                <span
+                  className={cn(
+                    "flex min-w-0 items-center gap-1.5 text-base",
+                    isTop || isMine ? "font-semibold text-stone-900" : "text-stone-700"
+                  )}
+                >
+                  <span className="min-w-0 break-words">{opt}</span>
+                  {isMine && (
+                    <span className="flex-shrink-0 rounded-md bg-amber-800 px-1.5 py-0.5 text-xs font-bold text-white">
+                      나
+                    </span>
+                  )}
+                </span>
+                <span className="flex-shrink-0 text-sm tabular-nums text-stone-600">
+                  <span className={cn(isTop && "font-semibold text-stone-900")}>{pct}%</span>
+                  <span className="ml-1.5">{count}명</span>
                 </span>
               </div>
+              <div className="h-2.5 w-full overflow-hidden rounded-full bg-stone-100" aria-hidden="true">
+                {count > 0 && (
+                  <div
+                    className={cn("h-full rounded-full", isTop ? "bg-brand" : "bg-stone-300")}
+                    style={{ width: `${pct}%` }}
+                  />
+                )}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+      {viewerId && <SameAsMe answers={answers} viewerId={viewerId} anonymous={anonymous} />}
+      {!anonymous && (
+        <PeopleList
+          answers={answers}
+          viewerId={viewerId}
+          render={(a) => (
+            <span className="max-w-[60%] break-words text-right text-sm font-medium text-stone-900">
+              {options[Number(a.value)] ?? "선택 확인 불가"}
+            </span>
+          )}
+        />
+      )}
+    </div>
+  );
+}
+
+/* ─── Subjective ──────────────────────────── */
+
+function SubjectiveResult({
+  answers,
+  viewerId,
+  anonymous,
+}: {
+  answers: Picked[];
+  viewerId: string | null;
+  anonymous: boolean;
+}) {
+  if (answers.length === 0) {
+    return <p className="text-sm text-stone-600">아직 답변이 없어요</p>;
+  }
+
+  const mine = answers.find((a) => a.id === viewerId);
+  const others = answers.filter((a) => a.id !== viewerId);
+
+  return (
+    <div>
+      {mine && (
+        <div className="rounded-xl bg-amber-50 px-4 py-3.5">
+          <p className="text-sm font-semibold text-amber-900">내 답</p>
+          <p className="mt-1 break-words text-base leading-relaxed text-amber-950">{mine.value}</p>
+        </div>
+      )}
+      {others.length > 0 && (
+        <details className="group mt-3" open={!mine}>
+          <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between text-sm font-medium text-stone-700 marker:hidden hover:text-stone-900">
+            {mine ? `다른 답 ${others.length}개` : `답변 ${others.length}개`}
+            <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" aria-hidden="true" />
+          </summary>
+          <ul className="divide-y divide-stone-200 border-t border-stone-200">
+            {others.map((answer) => (
+              <li key={answer.id} className="py-3">
+                {!anonymous && (
+                  <p className="text-sm font-medium text-stone-600">{answer.nickname}</p>
+                )}
+                <p className="break-words text-base leading-relaxed text-stone-900">{answer.value}</p>
+              </li>
             ))}
-          </div>
+          </ul>
         </details>
       )}
     </div>
   );
 }
 
-/* ─── Subjective Result ──────────────────── */
-
-function SubjectiveResult({
-  question,
-  participants,
-  anonymous,
+function PeopleList({
+  answers,
+  viewerId,
+  render,
 }: {
-  question: Question;
-  participants: Participant[];
-  anonymous: boolean;
+  answers: Picked[];
+  viewerId: string | null;
+  render: (answer: Picked) => ReactNode;
 }) {
-  const answers = participants
-    .map((p) => ({
-      id: p.id,
-      nickname: p.nickname,
-      value: p.answers.find((a) => a.questionId === question.id)?.value,
-    }))
-    .filter((a) => a.value);
-
-  if (answers.length === 0) {
-    return <p className="text-xs text-stone-600">아직 답변이 없습니다</p>;
-  }
-
+  if (answers.length === 0) return null;
   return (
-    <details className="group border-t border-stone-100">
-      <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between text-xs font-medium text-stone-600 marker:hidden">
-        답변 {answers.length}개 보기
+    <details className="group mt-3 border-t border-stone-100 pt-1">
+      <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between text-[15px] font-semibold text-stone-700 marker:hidden hover:text-stone-900">
+        누가 뭘 골랐는지 보기
         <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" aria-hidden="true" />
       </summary>
-      <div className="space-y-2 pb-1">
-        {answers.map((answer, index) => (
-          <motion.div
-            key={answer.id}
-            initial={{ opacity: 0, y: 6 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: index * 0.05, duration: 0.25 }}
-            className="rounded-xl border border-amber-100 bg-amber-50 p-4"
-          >
-            {!anonymous && (
-              <span className="mb-2 block break-words text-xs font-medium text-amber-900">
-                {answer.nickname}
-              </span>
-            )}
-            <p className="break-words text-sm leading-relaxed text-stone-700">{answer.value}</p>
-          </motion.div>
+      <ul className="space-y-2.5 pb-1">
+        {answers.map((a) => (
+          <li key={a.id} className="flex items-center justify-between gap-4">
+            <span className="min-w-0 break-words text-sm text-stone-700">
+              {a.nickname}
+              {a.id === viewerId && <span className="ml-1 text-stone-500">(나)</span>}
+            </span>
+            {render(a)}
+          </li>
         ))}
-      </div>
+      </ul>
     </details>
+  );
+}
+
+/* ─── 나의 결과 ───────────────────────────── */
+
+const VERDICT_MOOD = { majority: "happy", balanced: "default", independent: "wow" } as const;
+
+/**
+ * "4 / 4" 같은 숫자는 읽고 나서 해석해야 했다. 한마디 판정(대세파·균형파·소신파)과
+ * 사슴 표정으로 바로 읽히게 한다. 판정 기준은 group-stats의 viewerVerdict 하나뿐이다.
+ */
+function ViewerVerdictCard({ summary }: { summary: ViewerSummary }) {
+  const verdict = viewerVerdict(summary);
+  const reduceMotion = useReducedMotion();
+  if (!verdict && !summary.closest) return null;
+
+  return (
+    <section aria-label="나의 결과" className="surface mb-8 p-5 sm:p-6">
+      {verdict && (
+        <div className="flex items-center gap-4">
+          {/* 결과가 열리는 순간의 반응. 스프링으로 한 번 톡 튀어나오고 끝난다 (반복 없음) */}
+          <motion.div
+            initial={reduceMotion ? false : { transform: "scale(0.8) rotate(-8deg)" }}
+            animate={{ transform: "scale(1) rotate(0deg)" }}
+            transition={{ type: "spring", duration: 0.5, bounce: 0.35, delay: 0.1 }}
+            className="flex-shrink-0"
+          >
+            <Fawn mood={VERDICT_MOOD[verdict.kind]} className="h-16 w-16" />
+          </motion.div>
+          <div className="min-w-0">
+            <p className="font-cute text-[26px] leading-tight text-stone-900">
+              나는 <span className="text-amber-700">{verdict.label}</span>
+            </p>
+            <p className="mt-1 text-sm text-stone-600">{verdict.detail}</p>
+          </div>
+        </div>
+      )}
+      {summary.closest && (
+        <div
+          className={cn(
+            "flex items-center justify-between gap-4 rounded-2xl bg-page px-4 py-3",
+            verdict && "mt-4"
+          )}
+        >
+          <span className="text-[15px] text-stone-600">나랑 제일 잘 맞는 사람</span>
+          <span className="flex min-w-0 items-baseline gap-2">
+            <span className="truncate text-base font-semibold text-stone-900">{summary.closest.other.nickname}</span>
+            <span className="font-cute text-2xl tabular-nums text-amber-700">{summary.closest.pct}%</span>
+          </span>
+        </div>
+      )}
+    </section>
   );
 }
 
 /* ─── Main ───────────────────────────────── */
 
-const TYPE_LABEL = {
-  balance: "밸런스 게임",
-  multiple: "객관식",
-  subjective: "주관식",
-};
-
-const TYPE_ICON = {
-  balance: Scale,
-  multiple: ListChecks,
-  subjective: PenLine,
-};
-
-function isShareCanceled(error: unknown): boolean {
-  return error instanceof DOMException && error.name === "AbortError";
+/**
+ * 하단 초대 패널이 화면에 들어왔거나 지나갔으면 떠 있는 초대 버튼을 숨긴다.
+ * 같은 기능이 이미 보이는데 주 버튼이 두 개 겹치면 아웃트로의 "내 방 만들기"와 경쟁한다.
+ */
+function useReachedInvitePanel(id: string) {
+  const [reached, setReached] = useState(false);
+  useEffect(() => {
+    const target = document.getElementById(id);
+    if (!target) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      setReached(entry.isIntersecting || entry.boundingClientRect.top < 0);
+    });
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [id]);
+  return reached;
 }
-
-const neverChanges = () => () => {};
-const noUrl = () => "";
 
 export function ResultsClient({
   room,
+  viewerId = null,
   archived = false,
 }: {
   room: ResultsRoom;
+  viewerId?: string | null;
   archived?: boolean;
 }) {
-  const inviteUrl = useSyncExternalStore(
-    neverChanges,
-    () => participantUrl(window.location.origin, room.id),
-    noUrl
-  );
+  const invite = useInviteLink({ roomId: room.id, roomTitle: room.title });
+  const reachedInvitePanel = useReachedInvitePanel("invite-panel");
   const shareDescription = roomShareDescription({
     expired: false,
     isPublic: room.isPublic,
     questionCount: room.questions.length,
     participantCount: room.participants.length,
   });
-  const [copied, setCopied] = useState(false);
-  const [inviteError, setInviteError] = useState<string | null>(null);
-  const reduceMotion = useReducedMotion();
 
-  const unanimousQuestionIds = new Set(
-    computeUnanimousAggregates(room).map((aggregate) => aggregate.question.id)
-  );
-  const unanimousCount = unanimousQuestionIds.size;
+  const count = room.participants.length;
+  const viewer = viewerId ? room.participants.find((p) => p.id === viewerId) ?? null : null;
+  const me = viewer?.id ?? null;
   const primaryInsight = primaryResultInsight(room);
+  const rawSummary = me && count >= 2 ? computeViewerSummary(room, me) : null;
+  // 최고 궁합에 내가 들어 있으면 바로 아래 인사이트가 같은 사람·같은 숫자를 다시 말한다.
+  const meInBestPair =
+    primaryInsight?.kind === "best-pair" &&
+    (primaryInsight.pair.a.id === me || primaryInsight.pair.b.id === me);
+  const summary =
+    rawSummary && meInBestPair ? { ...rawSummary, closest: null } : rawSummary;
+  const unanimousIds = new Set(computeUnanimousAggregates(room).map((a) => a.question.id));
+  const canInvite = !archived;
 
-  const copyInviteLink = async () => {
-    try {
-      const url = participantUrl(window.location.origin, room.id);
-      await navigator.clipboard.writeText(url);
-      setInviteError(null);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      setInviteError("링크를 복사하지 못했어요. 브라우저의 클립보드 권한을 확인해 주세요.");
-    }
-  };
-
-  const shareInviteLink = async () => {
-    const url = participantUrl(window.location.origin, room.id);
-    const text = `${room.title} - Deerlink에서 같이 답해봐요`;
-    setInviteError(null);
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: room.title, text, url });
-      } else {
-        await copyInviteLink();
-      }
-    } catch (error) {
-      if (!isShareCanceled(error)) {
-        setInviteError("공유 창을 열지 못했어요. 링크 복사를 이용해 주세요.");
-      }
-    }
-  };
+  const inviteHeading = room.isPublic ? "친구 부르고 하루 더 열기" : "친구 더 부르기";
+  // 공개방 문장은 수명 연장(유일한 유포 동기)을 설명하는 자리라 줄이더라도 남은 시간은 문장 안에 둔다.
+  const inviteBody = room.isPublic
+    ? `한 명 답할 때마다 ${PUBLIC_ROOM_EXTENSION_LABEL} 더 열려요, 지금 ${formatRemaining(room.expiresAt)}`
+    : "많이 모일수록 궁합이 정확해져요";
 
   return (
-    <div className="min-h-screen bg-[#fafaf8] text-stone-900">
-      {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center px-4 md:px-8 py-4 border-b border-amber-100 bg-white/90 backdrop-blur-md">
-        <Link
-          href="/"
-          aria-label="홈으로 돌아가기"
-          className="flex min-h-11 min-w-11 items-center gap-2 text-sm text-stone-600 hover:text-stone-900 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span className="hidden sm:inline">Deerlink</span>
-        </Link>
+    <div className="min-h-[100dvh] bg-page text-stone-900">
+      <nav className="fixed inset-x-0 top-0 z-50 border-b border-stone-100 bg-white/85 backdrop-blur-md">
+        <div className="mx-auto flex h-14 max-w-2xl items-center justify-between px-3 sm:px-4 lg:max-w-6xl">
+          <Link
+            href="/"
+            aria-label="홈으로 돌아가기"
+            className="-ml-2 flex min-h-11 min-w-11 items-center gap-2 px-2 text-sm text-stone-700 transition-colors hover:text-stone-900"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            <span className="font-semibold tracking-tight">Deerlink</span>
+          </Link>
+          {canInvite && count > 0 && <InviteNavButton invite={invite} />}
+        </div>
       </nav>
 
-      <div className="max-w-2xl mx-auto px-4 pt-20 pb-16">
-        {/* Header */}
-        <motion.div
-          initial={reduceMotion ? false : { opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-10"
-        >
-          <div className="flex items-center gap-2 mb-4">
-            <AntlerLogo
-              animated
-              className="w-4 h-5 text-amber-500"
-            />
-            <div className="text-xs text-stone-600">
-              결과 비교
-            </div>
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-stone-900 mb-3 leading-[1.15] tracking-tight">
+      <main className="mx-auto max-w-2xl px-4 pb-32 pt-20 sm:pt-24 md:pb-16 lg:max-w-6xl">
+        {/* 데스크톱(lg)은 2단: 왼쪽 위 제목·판정, 왼쪽 아래 인사이트·초대,
+            오른쪽 질문별 결과. 모바일은 DOM 순서 그대로 한 줄이다. 순서를 바꾸면 모바일이 깨진다. */}
+        <div className="lg:grid lg:grid-cols-[minmax(0,25rem)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-10">
+          <div className="lg:col-start-1 lg:row-start-1">
+        {/* 진입 애니메이션을 두지 않는다. opacity 0에서 시작하면 서버 HTML의 제목이
+            하이드레이션이 끝날 때까지 흐리게 박혀 있다 (로비에서 이미 한 번 고친 문제). */}
+        <header className="mb-8 px-1">
+          <h1 className="break-words text-[30px] font-cute leading-tight text-stone-900 sm:text-4xl">
             {room.title}
           </h1>
-          <div className="flex items-center gap-3 text-xs text-stone-600 flex-wrap">
-            <span className="flex items-center gap-1">
-              <Users className="w-3 h-3" />
-              {room.participants.length}명 참여
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[15px] text-stone-600">
+            <span className="flex items-center gap-1.5">
+              <Users className="h-4 w-4" aria-hidden="true" />
+              {count}명 참여
             </span>
-            <span className="w-px h-3 bg-stone-300" />
             {archived ? (
-              <span className="font-mono">종료된 방</span>
+              <span>종료된 방</span>
             ) : (
-              <span className="flex items-center gap-1 font-mono">
-                <Hourglass className="w-3 h-3" aria-hidden="true" />
+              <span className="flex items-center gap-1.5">
+                <Hourglass className="h-4 w-4" aria-hidden="true" />
                 {formatRemainingShort(room.expiresAt)}
               </span>
             )}
-            {unanimousCount > 0 && (
-              <>
-                <span className="w-px h-3 bg-stone-300" />
-                <span className="flex items-center gap-1 text-amber-700">
-                  <Sparkles className="w-3 h-3" />
-                  <span className="font-medium">
-                    같은 답 {unanimousCount}개
-                  </span>
-                </span>
-              </>
+            {unanimousIds.size > 0 && (
+              <span className="flex items-center gap-1.5 font-medium text-amber-800">
+                <Sparkles className="h-4 w-4" aria-hidden="true" />
+                만장일치 {unanimousIds.size}개
+              </span>
             )}
           </div>
-        </motion.div>
+        </header>
 
-        {room.participants.length === 0 && !archived && (
-          <section className="border-y border-amber-200 py-10 text-center" aria-labelledby="empty-results-heading">
-            <Users className="mx-auto mb-5 h-9 w-9 text-amber-700" aria-hidden="true" />
-            <h2 id="empty-results-heading" className="text-2xl font-bold text-stone-900">
-              친구를 초대하세요
+        {/* 공개방은 답하지 않고도 결과를 볼 수 있다. 그 사람에게 가장 필요한 건 "나도 답하기"다. */}
+        {room.isPublic && !viewer && !archived && (
+          <div className="surface mb-8 flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+            <div>
+              <p className="font-cute text-xl text-stone-900">나는 뭘 고를까?</p>
+            </div>
+            <Link href={participantPath(room.id)} className="btn-primary flex-shrink-0">
+              나도 답하기
+            </Link>
+          </div>
+        )}
+
+        {count === 0 && canInvite && (
+          <section aria-labelledby="empty-results-heading" className="surface p-6">
+            <h2 id="empty-results-heading" className="text-xl font-cute text-stone-900">
+              아직 아무도 답하지 않았어요
             </h2>
-            <p className="mt-2 text-sm leading-relaxed text-stone-600">
+            <p className="mt-2 text-base leading-relaxed text-stone-600">
               첫 답변이 도착하면 비교가 시작돼요.
-              {room.isPublic &&
-                ` 한 명 답할 때마다 이 방이 ${PUBLIC_ROOM_EXTENSION_LABEL} 더 열려요.`}
+              {room.isPublic && ` 한 명 답할 때마다 이 방이 ${PUBLIC_ROOM_EXTENSION_LABEL} 더 열려요.`}
             </p>
-            <KakaoShareButton
-              className="mx-auto mt-6 max-w-sm"
+            <InviteActions
+              className="mt-5"
+              invite={invite}
               roomId={room.id}
               roomTitle={room.title}
               description={shareDescription}
-              roomUrl={inviteUrl}
             />
-            <div className="mx-auto mt-2 grid max-w-sm grid-cols-2 gap-2">
-              <button
-                onClick={copyInviteLink}
-                className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-amber-600 px-4 text-sm font-semibold text-white shadow-lg shadow-amber-900/25 transition-colors hover:bg-amber-500"
-              >
-                <Copy className="h-4 w-4" />
-                링크 복사
-              </button>
-              <button
-                onClick={shareInviteLink}
-                className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-amber-200 bg-white px-4 text-sm font-semibold text-stone-800 transition-colors hover:border-amber-300"
-              >
-                <Share2 className="h-4 w-4" />
-                공유하기
-              </button>
-            </div>
-            {inviteError && (
-              <p className="mx-auto mt-3 max-w-sm text-xs leading-relaxed text-red-600" role="alert">
-                {inviteError}
-              </p>
-            )}
           </section>
         )}
 
-        {room.participants.length === 1 && <FirstAnswerInsight />}
-        {room.participants.length >= 2 && <PrimaryInsight room={room} />}
-        {!room.isPublic && room.participants.length >= 2 && (
-          <GroupReport room={room} primaryKind={primaryInsight?.kind ?? null} />
-        )}
+        {summary && <ViewerVerdictCard summary={summary} />}
 
-        {room.participants.length > 0 && !archived && (
-          <div className="mx-auto mt-10 max-w-lg">
-            <ResultImageActions room={room} />
+        {count === 1 && <FirstAnswerInsight />}
+
           </div>
-        )}
 
-        {room.participants.length > 0 && (
-          <section className="mt-14" aria-labelledby="question-results-heading">
-            <h2 id="question-results-heading" className="mb-3 text-xl font-bold tracking-tight text-stone-900">
+          <div className="lg:col-start-2 lg:row-span-2 lg:row-start-1">
+        {count > 0 && (
+          <section aria-labelledby="question-results-heading">
+            <h2 id="question-results-heading" className="mb-3 px-1 text-xl font-cute text-stone-900">
               질문별 결과
             </h2>
-            <div className="divide-y divide-amber-100 border-y border-amber-100">
+            <ol className="space-y-3">
               {room.questions.map((q, idx) => {
-                const Icon = TYPE_ICON[q.type];
+                const answers = answersFor(q, room.participants);
+                const Icon = QUESTION_META[q.type].icon;
                 return (
-                  <motion.article
-                    key={q.id}
-                    initial={reduceMotion ? false : { opacity: 0, y: 12 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-40px" }}
-                    transition={{ duration: 0.35, delay: Math.min(idx, 4) * 0.05, ease: [0.16, 1, 0.3, 1] }}
-                    className="py-6"
-                  >
-                    <h3 className="mb-5 flex items-start gap-2 text-base font-semibold leading-snug tracking-tight text-stone-900 sm:text-lg">
-                      <span className="mt-0.5 font-mono text-xs tabular-nums text-stone-500">
+                  <li key={q.id} className="surface p-5 sm:p-6">
+                    <h3 className="mb-5 flex items-start gap-2.5 text-lg font-bold leading-snug tracking-tight text-stone-900">
+                      <span className="mt-0.5 flex h-6 min-w-6 items-center justify-center rounded-full bg-stone-100 px-1.5 text-[13px] font-bold tabular-nums text-stone-600">
                         {idx + 1}
                       </span>
-                      <Icon className="mt-0.5 h-4 w-4 flex-shrink-0 text-stone-500" aria-hidden="true" />
-                      <span className="sr-only">{TYPE_LABEL[q.type]}</span>
                       <span className="min-w-0 flex-1 break-words">{q.title}</span>
-                      {unanimousQuestionIds.has(q.id) && (
-                        <span className="flex-shrink-0 rounded-full bg-amber-50 px-2 py-1 text-xs font-medium text-amber-900">
+                      <Icon className="mt-1 h-4 w-4 flex-shrink-0 text-stone-500" aria-hidden="true" />
+                      <span className="sr-only">{QUESTION_META[q.type].label}</span>
+                      {unanimousIds.has(q.id) && (
+                        <span className="flex flex-shrink-0 items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-sm font-medium text-amber-900">
+                          <Check className="h-3.5 w-3.5" aria-hidden="true" />
                           만장일치
                         </span>
                       )}
                     </h3>
 
                     {q.type === "balance" && (
-                      <BalanceResult question={q} participants={room.participants} anonymous={room.isPublic} />
+                      <BalanceResult question={q} answers={answers} viewerId={me} anonymous={room.isPublic} />
                     )}
                     {q.type === "multiple" && (
-                      <MultipleResult question={q} participants={room.participants} anonymous={room.isPublic} />
+                      <MultipleResult question={q} answers={answers} viewerId={me} anonymous={room.isPublic} />
                     )}
                     {q.type === "subjective" && (
-                      <SubjectiveResult question={q} participants={room.participants} anonymous={room.isPublic} />
+                      <SubjectiveResult answers={answers} viewerId={me} anonymous={room.isPublic} />
                     )}
-                  </motion.article>
+                  </li>
                 );
               })}
-            </div>
+            </ol>
           </section>
         )}
 
-        {/* 마무리 블록 — 참여자 요약·결과 공유·초대를 하나의 흐름으로 묶는다.
-            예전엔 이 셋이 거의 똑같이 생긴 흰 카드로 세 번 반복돼서 리포트 템플릿처럼 보였다. */}
-        {room.participants.length > 0 && !archived && (
-          <motion.div
-            initial={reduceMotion ? false : { opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: 0.2 }}
-            className="mt-10 divide-y divide-stone-100 border-y border-amber-100"
-          >
-            {/* 참여자 — 공개방은 익명이라 닉네임 목록이 의미가 없다. 헤더의 참여자 수로 충분하다. */}
-            {!room.isPublic && (
-              <details className="group px-1">
-                <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between text-sm font-medium text-stone-700 marker:hidden">
-                  참여자 {room.participants.length}명 보기
-                  <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" aria-hidden="true" />
-                </summary>
-                <div className="flex flex-wrap gap-1.5 pb-4">
-                  {room.participants.map((p) => (
-                    <motion.span
-                      key={p.id}
-                      whileHover={{ y: -2 }}
-                      transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
-                      className="px-2.5 py-1 rounded-full text-xs border border-amber-100 bg-amber-50 text-amber-900 cursor-default"
-                    >
-                      {p.nickname}
-                    </motion.span>
-                  ))}
-                </div>
-              </details>
-            )}
+          </div>
 
-            {/* 초대 + 새 방 */}
-            <div className="px-1 py-5">
-              <p className="mb-3 text-xs text-stone-600">
-                {room.isPublic
-                  ? `한 명 답할 때마다 이 방이 ${PUBLIC_ROOM_EXTENSION_LABEL} 더 열려요. 지금 ${formatRemaining(room.expiresAt)}.`
-                  : "친구를 더 초대할까요?"}
-              </p>
-              <div className="flex gap-2">
-                <button
-                  onClick={copyInviteLink}
-                  className={cn(
-                    "flex-1 min-h-11 flex items-center justify-center gap-1.5 rounded-xl border text-xs transition-colors",
-                    copied
-                      ? "border-amber-200 bg-amber-50 text-amber-700"
-                      : "border-amber-100 text-stone-700 hover:text-stone-900 hover:border-amber-200"
-                  )}
-                >
-                  {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  {copied ? "복사됨" : "방 링크 복사"}
-                </button>
-                <button
-                  onClick={shareInviteLink}
-                  className="flex-1 min-h-11 flex items-center justify-center gap-1.5 rounded-xl border border-amber-100 text-xs text-stone-700 hover:text-stone-900 hover:border-amber-200 transition-colors"
-                >
-                  <Share2 className="w-3.5 h-3.5" />
-                  방 공유하기
-                </button>
-              </div>
-              {inviteError && (
-                <p className="mt-3 text-xs leading-relaxed text-red-600" role="alert">
-                  {inviteError}
-                </p>
-              )}
-            </div>
-          </motion.div>
+          <div className="lg:col-start-1 lg:row-start-2 lg:[&>*:first-child]:mt-0">
+        {/* 사람들이 결과에 오는 이유는 "누가 뭘 골랐나"다. 질문별 결과를 먼저 두고,
+            궁합·소수파 같은 인사이트는 그 아래에 접지 않고 펼쳐 둔다. */}
+        {count >= 2 && (
+          <div className="mt-10">
+            <PrimaryInsight room={room} viewerId={me} />
+            {!room.isPublic && <GroupReport room={room} primaryKind={primaryInsight?.kind ?? null} />}
+          </div>
         )}
 
-        <ResultsOutro isPublic={room.isPublic} />
-      </div>
+        {count > 0 && canInvite && (
+          <section id="invite-panel" aria-labelledby="invite-heading" className="surface mt-10 p-5 sm:p-6">
+            <h2 id="invite-heading" className="text-xl font-cute text-stone-900">
+              {inviteHeading}
+            </h2>
+            <p className="mt-1.5 text-[15px] leading-relaxed text-stone-600">{inviteBody}</p>
+            <InviteActions
+              className="mt-5"
+              invite={invite}
+              roomId={room.id}
+              roomTitle={room.title}
+              description={shareDescription}
+            />
+            {!room.isPublic && (
+              <details className="group -mb-2 mt-3 border-t border-stone-100">
+                <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between text-sm font-medium text-stone-700 marker:hidden hover:text-stone-900">
+                  지금까지 참여한 {count}명
+                  <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" aria-hidden="true" />
+                </summary>
+                <ul className="flex flex-wrap gap-1.5 pb-4">
+                  {room.participants.map((p) => (
+                    <li
+                      key={p.id}
+                      className="rounded-full bg-amber-50 px-3 py-1 text-sm font-medium text-amber-900"
+                    >
+                      {p.nickname}
+                      {p.id === me && " (나)"}
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            )}
+          </section>
+        )}
 
+          </div>
+        </div>
+
+        <ResultsOutro isPublic={room.isPublic} />
+      </main>
+
+      {/* 초대는 이 제품이 퍼지는 유일한 경로라 결과를 보는 내내 손 닿는 곳에 둔다.
+          데스크톱은 상단 네비 버튼이 같은 일을 하니 모바일에서만 띄운다. */}
+      {canInvite && count > 0 && !reachedInvitePanel && (
+        <div className="bottom-dock md:hidden">
+          <button
+            type="button"
+            onClick={invite.canShare ? invite.share : invite.copy}
+            disabled={!invite.url}
+            className="btn-primary w-full"
+          >
+            {invite.copied ? "링크 복사했어요" : room.isPublic ? "친구 부르고 하루 더 열기" : "친구 초대하기"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

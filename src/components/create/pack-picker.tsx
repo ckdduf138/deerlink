@@ -31,8 +31,8 @@ export function PackPicker({
   const reduceMotion = useReducedMotion();
 
   return (
-    <div className="min-h-screen bg-[#fafaf8]">
-      <nav className="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-4 md:px-8 py-4 border-b border-amber-100 bg-white/90 backdrop-blur-md">
+    <div className="min-h-screen bg-page">
+      <nav className="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-4 md:px-8 py-4 border-b border-stone-200 bg-white/90 backdrop-blur-md">
         <Link
           href="/"
           aria-label="홈으로 돌아가기"
@@ -49,7 +49,7 @@ export function PackPicker({
       <div className="px-4 pt-28 pb-16">
         <div className="mx-auto max-w-xl">
           <div className="mb-8 text-center">
-            <h1 className="text-2xl font-bold text-stone-900">뭐부터 물어볼까요?</h1>
+            <h1 className="text-2xl font-cute text-stone-900">뭐부터 물어볼까요?</h1>
             <p className="mt-2 text-sm text-stone-600">
               테마를 고르면 질문이 채워진 채로 바로 시작해요
             </p>
@@ -63,7 +63,7 @@ export function PackPicker({
                   key={pack.id}
                   onClick={() => onPick(pack)}
                   whileTap={reduceMotion ? undefined : { scale: 0.98 }}
-                  className="rounded-2xl border border-amber-100 bg-white p-5 text-left transition-colors hover:border-amber-300 hover:bg-amber-50/40"
+                  className="rounded-2xl border border-stone-200 bg-white p-5 text-left transition-colors hover:border-amber-300 hover:bg-amber-50/40"
                 >
                   <Icon className="h-5 w-5 text-amber-600" />
                   <p className="mt-3 text-base font-bold text-stone-900">{pack.title}</p>

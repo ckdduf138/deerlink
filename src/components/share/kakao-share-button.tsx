@@ -43,7 +43,7 @@ export function KakaoShareButton({
       <button
         type="button"
         onClick={handleClick}
-        className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#fee500] px-5 text-sm font-semibold text-[#191600] transition-opacity hover:opacity-90"
+        className="pressable flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#fee500] px-5 text-[15px] font-bold text-[#191600] hover:bg-[#f5dc00]"
       >
         <MessageCircle className="h-4 w-4" aria-hidden="true" />
         카카오톡으로 공유

@@ -3,8 +3,8 @@ import { AntlerLogo } from "@/components/landing/AntlerLogo";
 
 export default function DiscoverLoading() {
   return (
-    <div className="min-h-screen bg-[#fafaf8] text-stone-900" aria-busy="true">
-      <nav className="fixed inset-x-0 top-0 z-50 flex items-center border-b border-amber-100 bg-white/90 px-4 py-4 backdrop-blur-md md:px-8">
+    <div className="min-h-screen bg-page text-stone-900" aria-busy="true">
+      <nav className="fixed inset-x-0 top-0 z-50 flex items-center border-b border-stone-200 bg-white/90 px-4 py-4 backdrop-blur-md md:px-8">
         <span className="flex min-h-11 items-center gap-1.5 text-sm font-semibold tracking-tight text-stone-900">
           <AntlerLogo className="h-[15px] w-3 text-amber-500" />
           Deerlink
@@ -31,7 +31,7 @@ export default function DiscoverLoading() {
 
         <div className="space-y-3" aria-hidden="true">
           {[0, 1, 2].map((item) => (
-            <div key={item} className="rounded-2xl border border-amber-100 bg-white p-5">
+            <div key={item} className="rounded-2xl border border-stone-200 bg-white p-5">
               <div className="h-5 w-3/4 animate-pulse rounded bg-stone-200 motion-reduce:animate-none" />
               <div className="mt-4 h-3 w-1/2 animate-pulse rounded bg-stone-100 motion-reduce:animate-none" />
               <div className="mt-6 h-11 w-full animate-pulse rounded-xl bg-amber-100 motion-reduce:animate-none" />

@@ -1,21 +1,20 @@
-import { Sparkles, Users } from "lucide-react";
 import { BalanceRatioBar } from "@/components/ResultBar";
+import { Fawn } from "@/components/Fawn";
 import { primaryResultInsight, type PrimaryResultInsight } from "@/lib/group-stats";
 import type { ResultsRoom } from "@/lib/types";
 
-export function PrimaryInsight({ room }: { room: ResultsRoom }) {
+export function PrimaryInsight({ room, viewerId = null }: { room: ResultsRoom; viewerId?: string | null }) {
   const insight = primaryResultInsight(room);
 
   return (
-    <section aria-labelledby="primary-insight-heading" className="border-y border-amber-200 py-7">
-      <div className="mb-5 flex items-center gap-2 text-amber-800">
-        <Sparkles className="h-5 w-5" aria-hidden="true" />
-        <h2 id="primary-insight-heading" className="text-xl font-bold tracking-tight text-stone-900">
-          우리에게서 발견한 것
-        </h2>
-      </div>
+    <section aria-labelledby="primary-insight-heading">
+      <h2 id="primary-insight-heading" className="mb-3 px-1 text-xl font-cute text-stone-900">
+        {room.isPublic ? "모두의 선택에서 보인 것" : "우리에게서 발견한 것"}
+      </h2>
+      <div className="surface relative p-5 sm:p-7">
+      <Fawn mood="wow" className="absolute -top-9 right-4 h-16 w-16 sm:right-6" />
       {insight ? (
-        <InsightBody insight={insight} />
+        <InsightBody insight={insight} viewerId={viewerId} />
       ) : (
         <div>
           <p className="text-2xl font-bold leading-snug text-stone-900">
@@ -26,24 +25,34 @@ export function PrimaryInsight({ room }: { room: ResultsRoom }) {
           </p>
         </div>
       )}
+      </div>
     </section>
   );
 }
 
-function InsightBody({ insight }: { insight: PrimaryResultInsight }) {
+function InsightBody({
+  insight,
+  viewerId,
+}: {
+  insight: PrimaryResultInsight;
+  viewerId: string | null;
+}) {
+  const name = (p: { id: string; nickname: string }) =>
+    p.id === viewerId ? `${p.nickname}(나)` : p.nickname;
+
   if (insight.kind === "best-pair") {
     return (
       <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
           <p className="text-sm font-semibold text-amber-800">최고 궁합</p>
-          <p className="mt-2 break-words text-2xl font-bold leading-snug text-stone-900 sm:text-3xl">
-            {insight.pair.a.nickname}, {insight.pair.b.nickname}
+          <p className="font-cute mt-1.5 break-words text-[26px] leading-snug text-stone-900">
+            {name(insight.pair.a)}, {name(insight.pair.b)}
           </p>
           <p className="mt-2 text-sm text-stone-600">
-            비교 가능한 질문 {insight.pair.comparable}개를 기준으로 계산했어요.
+            질문 {insight.pair.comparable}개 기준
           </p>
         </div>
-        <p className="flex-shrink-0 font-mono text-5xl font-bold leading-none tabular-nums text-amber-700">
+        <p className="font-cute flex-shrink-0 text-6xl leading-none tabular-nums text-amber-700">
           {insight.pair.pct}%
         </p>
       </div>
@@ -55,7 +64,7 @@ function InsightBody({ insight }: { insight: PrimaryResultInsight }) {
     return (
       <div>
         <p className="text-sm font-semibold text-amber-800">가장 팽팽한 질문</p>
-        <p className="mt-2 break-words text-2xl font-bold leading-snug text-stone-900">
+        <p className="mt-1.5 break-words text-xl font-bold leading-snug text-stone-900">
           {question.title}
         </p>
         <BalanceRatioBar
@@ -82,7 +91,7 @@ function InsightBody({ insight }: { insight: PrimaryResultInsight }) {
       </p>
       <div className="mt-5 flex flex-col gap-2 rounded-xl bg-amber-50 px-4 py-4 text-amber-900 sm:flex-row sm:items-end sm:justify-between">
         <p className="break-words text-lg font-semibold leading-snug">{topLabel}</p>
-        <p className="flex-shrink-0 font-mono text-3xl font-bold tabular-nums">{topPct}%</p>
+        <p className="flex-shrink-0 text-3xl font-bold tracking-tight tabular-nums">{topPct}%</p>
       </div>
     </div>
   );
@@ -90,9 +99,9 @@ function InsightBody({ insight }: { insight: PrimaryResultInsight }) {
 
 export function FirstAnswerInsight() {
   return (
-    <section className="border-y border-amber-200 py-7" aria-labelledby="first-answer-heading">
-      <Users className="mb-4 h-6 w-6 text-amber-700" aria-hidden="true" />
-      <h2 id="first-answer-heading" className="text-2xl font-bold leading-snug text-stone-900">
+    <section className="surface p-5 sm:p-7" aria-labelledby="first-answer-heading">
+      <Fawn mood="happy" className="mb-2 h-16 w-16" />
+      <h2 id="first-answer-heading" className="text-xl font-cute leading-snug text-stone-900">
         첫 답변이 도착했어요.
       </h2>
       <p className="mt-2 text-base leading-relaxed text-stone-600">

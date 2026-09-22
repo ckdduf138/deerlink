@@ -30,12 +30,12 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fafaf8] flex items-center justify-center px-4">
+    <div className="min-h-screen bg-page flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="flex justify-center mb-8">
           <AntlerLogo className="w-8 h-10 text-amber-500" />
         </div>
-        <h1 className="text-center text-lg font-semibold text-stone-900 mb-6">관리자</h1>
+        <h1 className="text-center text-lg font-cute text-stone-900 mb-6">관리자</h1>
         <form onSubmit={handleSubmit} className="space-y-3">
           <input
             type="password"
@@ -49,7 +49,7 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={!password || loading}
-            className="w-full py-3 rounded-xl bg-amber-600 hover:bg-amber-500 disabled:bg-stone-200 disabled:text-stone-500 text-white text-sm font-medium transition-colors"
+            className="w-full py-3 rounded-xl bg-amber-700 hover:bg-amber-800 disabled:bg-stone-200 disabled:text-stone-500 text-white text-sm font-medium transition-colors"
           >
             {loading ? "확인 중..." : "입장"}
           </button>
