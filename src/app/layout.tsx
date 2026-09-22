@@ -101,7 +101,15 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
-    googleBot: { index: true, follow: true },
+    // 검색 결과에 큰 썸네일과 긴 스니펫을 허용한다. 지시어가 없으면 구글이 보수적인
+    // 기본값(작은 미리보기)으로 잘라서 보여준다.
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
   },
   verification: {
     google: "P6K0w_olXohe-HY7SjqzGxOT4_Pvtx97_7FIXKicZkM",
