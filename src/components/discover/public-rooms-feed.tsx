@@ -191,19 +191,14 @@ export function PublicRoomsFeed({
             className={cn(
               "min-w-0",
               landing
-                ? "grid gap-4 transition-opacity duration-200 sm:grid-cols-2"
+                ? "divide-y divide-amber-100 transition-opacity duration-200"
                 : "space-y-3",
               landing && loading && "opacity-60"
             )}
           >
             {visibleRooms.map((room, i) =>
               landing ? (
-                <RoomCard
-                  key={room.id}
-                  room={room}
-                  size={i === 0 ? "featured" : "standard"}
-                  className={i === 0 ? "sm:row-span-2" : undefined}
-                />
+                <RoomCard key={room.id} room={room} size="list" />
               ) : (
                 <motion.div
                   key={room.id}
@@ -242,20 +237,23 @@ const FULL_SORTS: { value: DiscoverSort; label: string; icon?: LucideIcon }[] = 
 /** 랜딩 섹션 제목이 "인기"라서 기본값인 인기순을 맨 앞에 둔다. */
 const LANDING_SORTS = [FULL_SORTS[1], FULL_SORTS[0], FULL_SORTS[2]];
 
-type CardSize = "compact" | "standard" | "featured";
+type CardSize = "compact" | "list";
 
 /**
- * `/discover`(compact)와 랜딩(standard·featured)이 쓰던 카드는 원래 서로 다른 컴포넌트였다
- * — 내용 순서(방 제목이 먼저냐 질문이 먼저냐), 유형별 미리보기 유무, 하단 문구가 전부
- * 달라서 같은 방인데 어디서 보느냐에 따라 다른 카드로 읽혔다. 지금은 하나의 컴포넌트가
- * 크기만 다르게 그린다 — 항상 질문 제목이 먼저 오고(방 이름이 아니라 질문이 궁금증을
- * 만든다), 유형별 미리보기가 모든 크기에 있고, 이동 신호는 화살표 아이콘 하나뿐이다
- * ("참여하기"/"답하기" 같은 문구를 따로 달지 않는다 — 카드 전체가 링크고 화살표가
- * 이미 그 뜻이다).
+ * `/discover`(compact)와 랜딩(list)이 쓰던 카드는 원래 서로 다른 컴포넌트였다 — 내용
+ * 순서(방 제목이 먼저냐 질문이 먼저냐), 유형별 미리보기 유무, 하단 문구가 전부 달라서
+ * 같은 방인데 어디서 보느냐에 따라 다른 카드로 읽혔다. 지금은 하나의 컴포넌트가 크기만
+ * 다르게 그린다 — 항상 질문 제목이 먼저 오고(방 이름이 아니라 질문이 궁금증을 만든다),
+ * 유형별 미리보기가 모든 크기에 있고, 이동 신호는 화살표 아이콘 하나뿐이다.
+ *
+ * 랜딩(`list`)은 2026-09에 1위를 크게 띄우는 벤토(1+2)에서 세 항목이 같은 크기인
+ * 리스트로 바꿨다 — 벤토는 "왜 이게 1등인지" 라벨 없이 카드 크기로만 순위를 말했는데
+ * 실제로 보면 카드 세 개 크기가 제각각이라 산만했다. 리스트는 카드 박스(테두리·그림자)
+ * 없이 구분선(부모의 `divide-y`)만으로 항목을 나눈다.
  *
  * compact만 밸런스 게임에 답이 있으면 실시간 비율 막대(BalanceRatioBar)를 보여준다 —
- * `/discover`는 둘러보다 답할 방을 고르는 화면이라 결과를 먼저 봐도 된다. featured·
- * standard(랜딩)는 반드시 두 선택지만 보여준다 — 결과부터 보이면 답할 이유가 없어진다.
+ * `/discover`는 둘러보다 답할 방을 고르는 화면이라 결과를 먼저 봐도 된다. list(랜딩)는
+ * 반드시 두 선택지만 보여준다 — 결과부터 보이면 답할 이유가 없어진다.
  */
 function RoomCard({
   room,
@@ -274,28 +272,23 @@ function RoomCard({
       href={`/room/${room.id}?join=1`}
       aria-label={`${room.title} 공개방 참여하기`}
       className={cn(
-        "group block h-full min-w-0 rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-600",
+        "group block min-w-0 rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-600",
+        size === "list" && "rounded-xl",
         className
       )}
     >
       <article
         className={cn(
-          "flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border bg-white transition-[border-color,box-shadow,transform] duration-200 group-hover:border-amber-300",
-          size === "featured"
-            ? "gap-5 border-amber-100/80 p-7 shadow-lg shadow-amber-100/60 group-hover:-translate-y-1 group-hover:shadow-xl group-hover:shadow-amber-200/70 sm:p-9"
-            : size === "standard"
-              ? "gap-4 border-amber-100 p-5 group-hover:-translate-y-0.5 group-hover:shadow-lg group-hover:shadow-amber-100/50 sm:p-6"
-              : "gap-3 border-amber-100 p-5 group-hover:-translate-y-0.5 group-hover:shadow-lg group-hover:shadow-amber-100/50"
+          "flex min-w-0 flex-col transition-[background-color,transform] duration-200",
+          size === "list"
+            ? "-mx-2 gap-4 rounded-xl px-2 py-6 group-hover:bg-amber-50/60 sm:-mx-4 sm:px-4"
+            : "h-full gap-3 overflow-hidden rounded-2xl border border-amber-100 bg-white p-5 transition-[border-color,box-shadow,transform] duration-200 group-hover:-translate-y-0.5 group-hover:border-amber-300 group-hover:shadow-lg group-hover:shadow-amber-100/50"
         )}
       >
         <p
           className={cn(
             "break-keep font-bold leading-snug text-stone-900",
-            size === "featured"
-              ? "line-clamp-3 text-2xl sm:text-3xl"
-              : size === "standard"
-                ? "line-clamp-2 text-lg sm:text-xl"
-                : "line-clamp-2 text-base"
+            size === "list" ? "line-clamp-2 text-lg sm:text-xl" : "line-clamp-2 text-base"
           )}
         >
           {headline}
@@ -355,17 +348,12 @@ function TypePreview({ question, size }: { question: DiscoverPreviewQuestion; si
     }
 
     return (
-      <div
-        className={cn(
-          "grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center",
-          size === "featured" ? "gap-3" : "gap-2"
-        )}
-      >
+      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 sm:gap-3">
         <OptionChip tone="amber" size={size}>
           {question.optionA}
         </OptionChip>
         <span
-          className={cn("font-semibold text-stone-400", size === "featured" ? "text-sm" : "text-xs")}
+          className={cn("font-semibold text-stone-400", size === "list" ? "text-sm" : "text-xs")}
           aria-hidden="true"
         >
           VS
@@ -424,11 +412,9 @@ function OptionChip({
       className={cn(
         "flex items-center justify-center break-keep rounded-xl border text-center font-semibold leading-snug",
         tone === "amber" ? "border-amber-200 bg-amber-50 text-amber-900" : "border-teal-200 bg-teal-50 text-teal-900",
-        size === "featured"
-          ? "min-h-16 px-4 py-3 text-lg sm:text-xl"
-          : size === "standard"
-            ? "min-h-12 px-3 py-2 text-base"
-            : "min-h-10 px-2.5 py-1.5 text-sm"
+        size === "list"
+          ? "min-h-12 px-3 py-2 text-base"
+          : "min-h-10 px-2.5 py-1.5 text-sm"
       )}
     >
       {children}

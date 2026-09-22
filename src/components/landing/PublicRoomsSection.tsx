@@ -4,8 +4,8 @@ import { PublicRoomsFeed } from "@/components/discover/public-rooms-feed";
 import type { DiscoverRoom } from "@/lib/types";
 
 /**
- * 1위(featured) + 2개. 모바일은 세로로 쌓고, sm 이상은 1위 카드가 왼쪽에서 두 칸을
- * 세로로 차지하는 벤토(1 큰 셀 + 2)다 — CLAUDE.md 랜딩 규칙의 벤토 계열과 같은 비율.
+ * 세 항목을 같은 크기 리스트로 보여준다 (`PublicRoomsFeed`의 `RoomCard` size="list").
+ * 카드 박스 없이 구분선(`divide-y`)만으로 항목을 나눈다.
  */
 export const LANDING_ROOM_COUNT = 3;
 
