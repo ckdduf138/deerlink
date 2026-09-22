@@ -9,6 +9,7 @@ import type {
   QuestionType,
   ResultsRoom,
 } from "./types";
+import { parseOptions } from "./types";
 
 /**
  * Prisma 레코드를 클라이언트 컴포넌트로 넘길 수 있는 평범한 객체로 바꾼다.
@@ -120,6 +121,7 @@ export function serializeDiscoverRoom(room: {
         optionB: first.optionB,
         countA: first.answers.filter((a) => a.value === "A").length,
         countB: first.answers.filter((a) => a.value === "B").length,
+        options: parseOptions(first.options),
       }
     : null;
 

@@ -202,8 +202,8 @@ export function AnswerMode({
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { label: question.optionA ?? "", value: "A" },
-                  { label: question.optionB ?? "", value: "B" },
+                  { label: question.optionA ?? "", value: "A" as const, tone: "amber" as const },
+                  { label: question.optionB ?? "", value: "B" as const, tone: "teal" as const },
                 ].map((opt) => {
                   const isSelected = currentAnswer === opt.value;
                   return (
@@ -215,16 +215,20 @@ export function AnswerMode({
                       transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
                       aria-pressed={isSelected}
                       className={cn(
-                        "py-7 px-4 rounded-2xl border text-center text-sm font-medium transition-colors duration-200",
-                        isSelected
-                          ? "border-amber-500 bg-amber-50 text-amber-900 shadow-lg shadow-amber-900/20"
-                          : "border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:bg-stone-50 hover:text-stone-900"
+                        "py-7 px-4 rounded-2xl border-2 text-center text-sm font-medium transition-colors duration-200",
+                        opt.tone === "amber"
+                          ? isSelected
+                            ? "border-amber-500 bg-amber-50 text-amber-900 shadow-lg shadow-amber-900/20"
+                            : "border-amber-100 bg-amber-50/50 text-amber-900 hover:border-amber-300 hover:bg-amber-50"
+                          : isSelected
+                            ? "border-teal-500 bg-teal-50 text-teal-900 shadow-lg shadow-teal-900/20"
+                            : "border-teal-100 bg-teal-50/50 text-teal-900 hover:border-teal-300 hover:bg-teal-50"
                       )}
                     >
                       <span
                         className={cn(
                           "mb-2 block text-xs font-mono",
-                          isSelected ? "text-amber-700" : "text-stone-500"
+                          opt.tone === "amber" ? "text-amber-700" : "text-teal-700"
                         )}
                       >
                         {opt.value}
@@ -237,7 +241,9 @@ export function AnswerMode({
                           className="mx-auto mt-3 flex items-center justify-center"
                           aria-hidden="true"
                         >
-                          <Check className="h-4 w-4 text-amber-700" />
+                          <Check
+                            className={cn("h-4 w-4", opt.tone === "amber" ? "text-amber-700" : "text-teal-700")}
+                          />
                         </motion.span>
                       )}
                     </motion.button>

@@ -60,6 +60,8 @@ export interface DiscoverPreviewQuestion {
   optionB: string | null;
   countA: number;
   countB: number;
+  /** 객관식 선택지 — parseOptions()로 이미 파싱된 배열. balance/subjective는 항상 빈 배열. */
+  options: string[];
 }
 
 /** 공개방 발견 피드 카드 — 참여자 닉네임·개별 답변은 담지 않는다. Answer Lock과 무관한 디렉터리다. */

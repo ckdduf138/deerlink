@@ -1,6 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { prisma } from "./prisma";
-import type { ArchivedRoom, DiscoverPreviewQuestion, QuestionType } from "./types";
+import { parseOptions, type ArchivedRoom, type DiscoverPreviewQuestion, type QuestionType } from "./types";
 
 /**
  * 동결 보존.
@@ -21,6 +21,7 @@ function toPreview(
         title: string;
         optionA: string | null;
         optionB: string | null;
+        options: string | null;
         answers: { value: string }[];
       }
     | undefined
@@ -33,6 +34,7 @@ function toPreview(
     optionB: question.optionB,
     countA: question.answers.filter((answer) => answer.value === "A").length,
     countB: question.answers.filter((answer) => answer.value === "B").length,
+    options: parseOptions(question.options),
   };
 }
 
@@ -87,6 +89,7 @@ export async function getArchivedRooms({
           title: true,
           optionA: true,
           optionB: true,
+          options: true,
           answers: { select: { value: true } },
         },
       },
