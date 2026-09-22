@@ -50,7 +50,7 @@ export function PopularQuestionCard({
   const meta = QUESTION_META[question.type];
 
   return (
-    <li className="rounded-2xl border border-amber-100 bg-white p-5">
+    <li className="rounded-2xl border border-stone-200 bg-white p-5">
       <div className="mb-2 flex items-center gap-2">
         <span className="font-mono text-xs tabular-nums text-amber-700">
           {String(index + 1).padStart(2, "0")}
@@ -63,7 +63,7 @@ export function PopularQuestionCard({
           </span>
         )}
       </div>
-      <h3 className="mb-3 break-keep text-base font-semibold leading-snug text-stone-900">
+      <h3 className="mb-3 break-keep text-base font-bold leading-snug text-stone-900">
         <Link
           href={popularQuestionPath(question.id)}
           className="underline-offset-4 transition-colors hover:text-amber-900 hover:underline"
@@ -74,7 +74,7 @@ export function PopularQuestionCard({
       <QuestionBody question={question} />
       <Link
         href={`/create?question=${encodeURIComponent(question.id)}`}
-        className="mt-4 flex min-h-11 items-center justify-end gap-1.5 border-t border-amber-100 pt-3 text-sm font-semibold text-amber-800 transition-colors hover:text-amber-950"
+        className="mt-4 flex min-h-11 items-center justify-end gap-1.5 border-t border-stone-200 pt-3 text-sm font-semibold text-amber-800 transition-colors hover:text-amber-950"
       >
         이 질문으로 시작
         <ArrowRight className="h-4 w-4" aria-hidden="true" />

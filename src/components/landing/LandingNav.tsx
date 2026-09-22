@@ -34,8 +34,8 @@ export function LandingNav() {
   const reduce = useReducedMotion();
 
   return (
-    <nav className="fixed inset-x-0 top-0 z-50 border-b border-amber-100 bg-[#fafaf8]/90 backdrop-blur-md">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
+    <nav className="fixed inset-x-0 top-0 z-50 border-b border-stone-100 bg-white/85 backdrop-blur-md">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 sm:px-6">
         <Link
           href="/"
           className="flex min-h-11 items-center gap-2 text-base font-semibold tracking-tight text-stone-900"
@@ -47,17 +47,17 @@ export function LandingNav() {
         <div className="flex items-center gap-2">
           <Link
             href="/popular"
-            className="flex min-h-11 items-center px-2 text-base font-semibold text-stone-800 underline-offset-4 transition-colors duration-200 hover:text-amber-800 hover:underline sm:px-3"
+            className="pressable flex min-h-10 items-center rounded-xl px-3 text-[15px] font-semibold text-stone-700 hover:bg-stone-100 hover:text-stone-900"
           >
             인기 질문
           </Link>
           <AnimatePresence initial={false}>
             {showCta && (
               <motion.div
-                initial={reduce ? false : { opacity: 0, x: 8 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={reduce ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, x: 8 }}
-                transition={{ duration: 0.2 }}
+                initial={reduce ? false : { opacity: 0, transform: "scale(0.95)" }}
+                animate={{ opacity: 1, transform: "scale(1)" }}
+                exit={reduce ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, transform: "scale(0.95)", transition: { duration: 0.12 } }}
+                transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
               >
                 <CreateRoomButton size="md" />
               </motion.div>

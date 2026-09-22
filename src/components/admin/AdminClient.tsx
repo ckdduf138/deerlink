@@ -195,11 +195,11 @@ export function AdminClient({ initialRooms }: { initialRooms: AdminRoom[] }) {
   const activeRooms = rooms.filter((r) => !isExpired(r.expiresAt)).length;
 
   return (
-    <div className="min-h-screen bg-[#fafaf8]">
+    <div className="min-h-screen bg-page">
       <div className="max-w-2xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-lg font-bold text-stone-900">관리자</h1>
+            <h1 className="text-lg font-cute text-stone-900">관리자</h1>
             <p className="text-xs text-stone-400 mt-0.5">
               방 {rooms.length}개 · 활성 {activeRooms}개 · 참여자 {totalParticipants}명
             </p>

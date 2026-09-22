@@ -1,12 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AlertCircle, ArrowLeft, ArrowRight, Check, Loader2 } from "lucide-react";
+import { AlertCircle, ArrowLeft, Check, Loader2 } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { QUESTION_META } from "@/lib/question-meta";
 import { parseOptions, type LobbyRoom } from "@/lib/types";
-import { DeerHoofMark } from "@/components/DeerHoofMark";
+import { Fawn } from "@/components/Fawn";
 
 const SUBJECTIVE_MAX = 500;
 
@@ -45,7 +45,6 @@ export function AnswerMode({
   const [direction, setDirection] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const progressRef = useRef<HTMLDivElement>(null);
   const advanceTimer = useRef<number | null>(null);
   const reduceMotion = useReducedMotion();
 
@@ -62,20 +61,15 @@ export function AnswerMode({
     onAnswersChange(answers, currentQ);
   }, [answers, currentQ, onAnswersChange]);
 
-  useEffect(() => {
-    const current = progressRef.current?.querySelector<HTMLElement>('[aria-current="step"]');
-    current?.scrollIntoView({
-      behavior: reduceMotion ? "auto" : "smooth",
-      block: "nearest",
-      inline: "center",
-    });
-  }, [currentQ, reduceMotion]);
-
   const question = room.questions[currentQ];
   const parsedOptions = parseOptions(question?.options ?? null);
   const currentAnswer = answers[question?.id ?? ""];
   const answered = !!currentAnswer?.trim();
   const allAnswered = room.questions.every((q) => !!answers[q.id]?.trim());
+  // 지금 보고 있는 문항은 빼고 센다. 그 문항만 남았으면 이동할 곳이 없다.
+  const otherUnanswered = room.questions.flatMap((q, i) =>
+    i !== currentQ && !answers[q.id]?.trim() ? [i] : []
+  );
   const progress = ((currentQ + 1) / room.questions.length) * 100;
   const meta = QUESTION_META[question?.type ?? "balance"];
   const IconComponent = meta.icon;
@@ -125,131 +119,105 @@ export function AnswerMode({
   };
 
   return (
-    <div className="max-w-md mx-auto px-4 pt-20 pb-8">
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-stone-600 font-mono tabular-nums">
-            {currentQ + 1} / {room.questions.length}
+    <div className="mx-auto max-w-lg overflow-x-clip px-4 pb-40 pt-16 md:pb-20 md:pt-20">
+      <div className="mb-6">
+        <div className="mb-2.5 flex items-center justify-between px-1">
+          <span className="font-cute text-lg tabular-nums text-stone-900">
+            {currentQ + 1}
+            <span className="font-medium text-stone-500"> / {room.questions.length}</span>
           </span>
-          {nickname && <span className="text-xs text-stone-600">{nickname}</span>}
+          {nickname && <span className="text-sm font-medium text-stone-600">{nickname}</span>}
         </div>
-        <div
-          className="h-0.5 bg-stone-200 rounded-full overflow-hidden"
-          role="progressbar"
-          aria-valuenow={currentQ + 1}
-          aria-valuemin={1}
-          aria-valuemax={room.questions.length}
-        >
-          <motion.div
-            className="h-full bg-amber-500 rounded-full"
-            initial={false}
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.3 }}
-          />
-        </div>
-        <div
-          ref={progressRef}
-          className="-mx-4 mt-1 flex snap-x items-center overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          role="navigation"
-          aria-label="질문 이동"
-        >
-          {room.questions.map((q, i) => (
-            <button
-              key={q.id}
-              onClick={() => goTo(i)}
-              className="group flex h-11 w-11 flex-shrink-0 snap-center items-center justify-center"
-              aria-label={`질문 ${i + 1}${answers[q.id] ? " (답변함)" : " (아직 답변 안 함)"}`}
-              aria-current={i === currentQ ? "step" : undefined}
+        {/* 아기 사슴이 진행 막대 위에 겹쳐 앉아 채워진 끝을 따라간다.
+            사슴이 막대 양 끝에서 잘리지 않게 레일을 사슴 반 폭(22px)씩 안쪽으로 줄였다.
+            채움 끝과 사슴 중심이 몇 px 어긋나지만 사슴이 그 자리를 덮는다.
+            예전 발굽 줄(DeerHoofMark)은 막대와 같은 정보를 한 줄 더 그릴 뿐이라 걷어냈다.
+            "안 푼 질문으로 이동"은 마지막 문항의 버튼이 맡는다. */}
+        <div className="relative flex h-11 items-center">
+          <div
+            className="h-3 w-full overflow-hidden rounded-full bg-[#f1e4cf]"
+            role="progressbar"
+            aria-valuenow={currentQ + 1}
+            aria-valuemin={1}
+            aria-valuemax={room.questions.length}
+            aria-label="진행"
+          >
+            <div
+              className="h-full origin-left rounded-full bg-brand transition-transform duration-300 ease-out-strong"
+              style={{ transform: `scaleX(${progress / 100})` }}
+            />
+          </div>
+          <div className="pointer-events-none absolute inset-y-0 left-[22px] right-[22px]" aria-hidden="true">
+            <div
+              className="flex h-full w-full items-center justify-end transition-transform duration-300 ease-out-strong"
+              style={{ transform: `translateX(${progress - 100}%)` }}
             >
-              <DeerHoofMark
-                className={cn(
-                  "transition-all duration-200",
-                  i % 2 === 0 ? "-rotate-[9deg]" : "rotate-[9deg]",
-                  i === currentQ
-                    ? "h-4 w-3 text-amber-600"
-                    : answers[q.id]
-                    ? "h-3.5 w-2.5 text-amber-600 group-hover:text-amber-700"
-                    : "h-3 w-2 text-stone-500 group-hover:text-stone-700"
-                )}
+              <Fawn
+                mood={submitting ? "wow" : answered ? "happy" : "default"}
+                className="h-11 w-11 flex-shrink-0 translate-x-1/2 -translate-y-1.5 drop-shadow-[0_2px_2px_rgb(150_95_30/0.25)]"
               />
-            </button>
-          ))}
+            </div>
+          </div>
         </div>
       </div>
 
-      <AnimatePresence mode="wait" custom={direction}>
+      <AnimatePresence mode="wait" custom={direction} initial={false}>
         <motion.div
           key={currentQ}
           custom={direction}
-          initial={reduceMotion ? false : { opacity: 0, x: direction * 24 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: direction * -24 }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
+          initial={reduceMotion ? false : { opacity: 0, transform: `translateX(${direction * 20}px)` }}
+          animate={{ opacity: 1, transform: "translateX(0px)" }}
+          exit={reduceMotion ? { opacity: 0 } : { opacity: 0, transform: `translateX(${direction * -20}px)` }}
+          transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
         >
-          <div className="mb-6">
-            <div className={cn("flex items-center gap-2 mb-3", meta.accent)}>
-              <IconComponent className="w-3.5 h-3.5" />
-              <span className="text-xs font-medium">
-                {meta.longLabel}
-              </span>
+          <div className="mb-6 px-1">
+            <div className={cn("mb-2.5 flex items-center gap-1.5", meta.accent)}>
+              <IconComponent className="h-4 w-4" aria-hidden="true" />
+              <span className="text-sm font-semibold">{meta.longLabel}</span>
             </div>
-            <h1 className="text-xl font-bold text-stone-900 leading-snug">
+            <h1 className="break-keep text-2xl font-bold leading-snug tracking-tight text-stone-900 sm:text-[26px]">
               {question?.title}
             </h1>
           </div>
 
           {question?.type === "balance" && (
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { label: question.optionA ?? "", value: "A" as const, tone: "amber" as const },
-                  { label: question.optionB ?? "", value: "B" as const, tone: "teal" as const },
-                ].map((opt) => {
-                  const isSelected = currentAnswer === opt.value;
-                  return (
-                    <motion.button
-                      key={opt.value}
-                      onClick={() => selectAndAdvance(opt.value)}
-                      animate={reduceMotion ? undefined : { scale: isSelected ? 1.03 : 1 }}
-                      whileTap={reduceMotion ? undefined : { scale: 0.97 }}
-                      transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                      aria-pressed={isSelected}
-                      className={cn(
-                        "py-7 px-4 rounded-2xl border-2 text-center text-sm font-medium transition-colors duration-200",
-                        opt.tone === "amber"
-                          ? isSelected
-                            ? "border-amber-500 bg-amber-50 text-amber-900 shadow-lg shadow-amber-900/20"
-                            : "border-amber-100 bg-amber-50/50 text-amber-900 hover:border-amber-300 hover:bg-amber-50"
-                          : isSelected
-                            ? "border-teal-500 bg-teal-50 text-teal-900 shadow-lg shadow-teal-900/20"
-                            : "border-teal-100 bg-teal-50/50 text-teal-900 hover:border-teal-300 hover:bg-teal-50"
-                      )}
-                    >
-                      <span
-                        className={cn(
-                          "mb-2 block text-xs font-mono",
-                          opt.tone === "amber" ? "text-amber-700" : "text-teal-700"
-                        )}
-                      >
-                        {opt.value}
-                      </span>
-                      <span className="leading-snug">{opt.label}</span>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { label: question.optionA ?? "", value: "A" as const, tone: "amber" as const },
+                { label: question.optionB ?? "", value: "B" as const, tone: "teal" as const },
+              ].map((opt) => {
+                const isSelected = currentAnswer === opt.value;
+                const otherSelected = !!currentAnswer && !isSelected;
+                return (
+                  <button
+                    key={opt.value}
+                    onClick={() => selectAndAdvance(opt.value)}
+                    aria-pressed={isSelected}
+                    className={cn(
+                      "pressable fawn-spots relative flex min-h-48 flex-col items-start justify-between rounded-[28px] p-5 text-left sm:min-h-56",
+                      "transition-[transform,background-color,opacity] duration-200",
+                      otherSelected && "opacity-50",
+                      opt.tone === "amber"
+                        ? isSelected
+                          ? "bg-brand text-brand-ink"
+                          : "bg-amber-100 text-amber-950 hover:bg-amber-200"
+                        : isSelected
+                          ? "bg-teal-500 text-brand-ink"
+                          : "bg-teal-100 text-teal-950 hover:bg-teal-200"
+                    )}
+                  >
+                    <span className="flex w-full items-center justify-between">
+                      <span className="font-cute text-lg opacity-70">{opt.value}</span>
                       {isSelected && (
-                        <motion.span
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          className="mx-auto mt-3 flex items-center justify-center"
-                          aria-hidden="true"
-                        >
-                          <Check
-                            className={cn("h-4 w-4", opt.tone === "amber" ? "text-amber-700" : "text-teal-700")}
-                          />
-                        </motion.span>
+                        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-ink/90 text-white">
+                          <Check className="h-4 w-4" strokeWidth={3} aria-hidden="true" />
+                        </span>
                       )}
-                    </motion.button>
-                  );
-                })}
-              </div>
+                    </span>
+                    <span className="break-keep text-xl font-bold leading-snug">{opt.label}</span>
+                  </button>
+                );
+              })}
             </div>
           )}
 
@@ -258,29 +226,27 @@ export function AnswerMode({
               {parsedOptions.map((opt, i) => {
                 const isSelected = currentAnswer === String(i);
                 return (
-                  <motion.button
+                  <button
                     key={i}
                     onClick={() => selectAndAdvance(String(i))}
-                    whileTap={{ scale: 0.99 }}
-                    transition={{ duration: 0.1 }}
                     aria-pressed={isSelected}
                     className={cn(
-                      "w-full min-h-11 py-3.5 px-4 rounded-xl border text-left text-sm flex items-center gap-3 transition-colors duration-150",
+                      "pressable flex min-h-16 w-full items-center gap-3 rounded-[22px] px-5 py-4 text-left text-[17px] font-semibold ring-2",
                       isSelected
-                        ? "border-amber-500 bg-amber-50 text-amber-900"
-                        : "border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:bg-stone-50 hover:text-stone-900"
+                        ? "bg-amber-50 text-amber-950 ring-brand"
+                        : "bg-white text-stone-800 ring-transparent hover:bg-stone-50"
                     )}
                   >
                     <span
                       className={cn(
-                        "w-4 h-4 rounded-full border flex items-center justify-center flex-shrink-0 transition-colors",
-                        isSelected ? "border-amber-600 bg-amber-600" : "border-stone-300"
+                        "flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full transition-colors duration-150",
+                        isSelected ? "bg-brand text-brand-ink" : "bg-stone-100"
                       )}
                     >
-                      {isSelected && <Check className="w-2.5 h-2.5 text-white" />}
+                      {isSelected && <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden="true" />}
                     </span>
-                    {opt}
-                  </motion.button>
+                    <span className="min-w-0 break-words">{opt}</span>
+                  </button>
                 );
               })}
             </div>
@@ -295,9 +261,9 @@ export function AnswerMode({
                 rows={5}
                 maxLength={SUBJECTIVE_MAX}
                 aria-label={question.title}
-                className="w-full py-3.5 px-4 rounded-xl border border-amber-100 bg-amber-50 text-sm text-stone-900 placeholder:text-stone-500 focus:border-amber-300 transition-colors resize-none leading-relaxed"
+                className="w-full resize-none rounded-2xl bg-white px-5 py-4 text-stone-900 outline-none ring-2 ring-transparent transition-shadow placeholder:text-stone-500 focus:ring-amber-400 leading-relaxed"
               />
-              <p className="mt-2 text-right text-xs text-stone-500 font-mono tabular-nums">
+              <p className="mt-2 px-1 text-right text-sm tabular-nums text-stone-500">
                 {(currentAnswer ?? "").length}/{SUBJECTIVE_MAX}
               </p>
             </div>
@@ -306,75 +272,57 @@ export function AnswerMode({
       </AnimatePresence>
 
       {error && (
-        <div
-          role="alert"
-          className="mt-6 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3"
-        >
-          <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
-          <div className="text-xs text-red-700 leading-relaxed">
-            <p>{error}</p>
-            <p className="text-red-600 mt-1">
-              적어둔 답변은 그대로 있어요. 다시 제출을 눌러주세요.
-            </p>
+        <div role="alert" className="mt-6 flex items-start gap-2 rounded-2xl bg-red-50 px-4 py-3">
+          <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-600" aria-hidden="true" />
+          <div className="text-sm leading-relaxed text-red-700">
+            <p className="font-semibold">{error}</p>
+            <p className="mt-0.5">적어둔 답변은 그대로 있어요. 다시 제출을 눌러주세요.</p>
           </div>
         </div>
       )}
 
-      <div className="flex items-center justify-between mt-8">
-        <button
-          onClick={() => goTo(Math.max(currentQ - 1, 0))}
-          disabled={currentQ === 0}
-          className="flex items-center gap-1.5 px-4 min-h-11 rounded-xl text-sm text-stone-600 hover:text-stone-900 disabled:text-stone-300 transition-colors"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          이전
-        </button>
+      <div className="bottom-dock">
+        <div className="mx-auto max-w-lg">
+          {isLastQuestion && otherUnanswered.length > 0 && (
+            <button
+              type="button"
+              onClick={() => goTo(otherUnanswered[0])}
+              className="pressable mb-2 flex min-h-11 w-full items-center justify-center rounded-full text-[15px] font-semibold text-amber-900 hover:bg-amber-50"
+            >
+              남은 질문 {otherUnanswered.length}개 답하러 가기
+            </button>
+          )}
+          <div className="flex gap-2">
+            <button
+              onClick={() => goTo(Math.max(currentQ - 1, 0))}
+              disabled={currentQ === 0}
+              aria-label="이전 질문"
+              className="btn-secondary w-14 flex-shrink-0 bg-white px-0 hover:bg-stone-50 disabled:bg-white disabled:opacity-60"
+            >
+              <ArrowLeft className="h-5 w-5" aria-hidden="true" />
+            </button>
 
-        {currentQ < room.questions.length - 1 ? (
-          <button
-            onClick={() => goTo(currentQ + 1)}
-            disabled={!answered}
-            className={cn(
-              "flex items-center gap-1.5 px-5 min-h-11 rounded-xl text-sm font-medium transition-colors duration-200",
-              answered
-                ? "bg-amber-600 hover:bg-amber-500 text-white"
-                : "bg-stone-200 text-stone-500"
-            )}
-          >
-            다음
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        ) : (
-          <button
-            onClick={handleSubmit}
-            disabled={!allAnswered || submitting}
-            className={cn(
-              "flex items-center gap-1.5 px-5 min-h-11 rounded-xl text-sm font-medium transition-colors duration-200",
-              allAnswered && !submitting
-                ? "bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-900/30"
-                : "bg-stone-200 text-stone-500"
-            )}
-          >
-            {submitting ? (
-              <>
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                제출 중
-              </>
+            {!isLastQuestion ? (
+              <button onClick={() => goTo(currentQ + 1)} disabled={!answered} className="btn-primary flex-1">
+                {answered ? "다음" : question?.type === "subjective" ? "답을 적어주세요" : "하나를 골라주세요"}
+              </button>
             ) : (
-              <>
-                {error ? "다시 제출" : "제출하기"}
-                <Check className="w-3.5 h-3.5" />
-              </>
+              <button onClick={handleSubmit} disabled={!allAnswered || submitting} className="btn-primary flex-1">
+                {submitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                    제출 중
+                  </>
+                ) : error ? (
+                  "다시 제출"
+                ) : (
+                  "제출하고 결과 보기"
+                )}
+              </button>
             )}
-          </button>
-        )}
+          </div>
+        </div>
       </div>
-
-      {!allAnswered && currentQ === room.questions.length - 1 && (
-        <p className="mt-3 text-center text-xs text-stone-500">
-          아직 답하지 않은 질문이 있어요. 위 발굽을 눌러 이동할 수 있어요.
-        </p>
-      )}
     </div>
   );
 }

@@ -35,7 +35,7 @@ export function DiscardConfirmModal({ open, onClose, onConfirm }: DiscardConfirm
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", stiffness: 320, damping: 32, mass: 0.8 }}
-            className="fixed bottom-0 inset-x-0 z-[60] rounded-t-3xl bg-white border-t border-amber-100 overflow-hidden"
+            className="fixed bottom-0 inset-x-0 z-[60] rounded-t-3xl bg-white border-t border-stone-200 overflow-hidden"
             role="alertdialog"
             aria-modal="true"
             aria-labelledby="discard-dialog-title"
@@ -43,7 +43,7 @@ export function DiscardConfirmModal({ open, onClose, onConfirm }: DiscardConfirm
             tabIndex={-1}
           >
             <div className="flex items-center justify-between px-6 pt-6 pb-4">
-              <h2 id="discard-dialog-title" className="text-base font-semibold text-stone-900">
+              <h2 id="discard-dialog-title" className="text-base font-bold text-stone-900">
                 새로 쓸까요?
               </h2>
               <button

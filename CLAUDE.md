@@ -34,7 +34,7 @@
 src/
 ├── middleware.ts           # /admin, /api/admin 세션 가드
 ├── app/
-│   ├── layout.tsx          # Root layout (라이트, Gowun Dodum 폰트)
+│   ├── layout.tsx          # Root layout (라이트, Pretendard Variable 폰트)
 │   ├── globals.css         # Tailwind + CSS 변수 정의
 │   ├── page.tsx            # 랜딩 (Server Component)
 │   ├── not-found.tsx       # 404
@@ -46,8 +46,7 @@ src/
 │   │   ├── page.tsx        # 방 입장 (Server) → room-client.tsx
 │   │   └── results/
 │   │       ├── page.tsx    # Answer Lock 게이트 (Server)
-│   │       ├── results-client.tsx
-│   │       └── share-card.tsx
+│   │       └── results-client.tsx  # 나의 결과 + 질문별 결과 + 초대
 │   └── api/
 │       ├── rooms/                      # POST / , GET·[id] , POST·[id]/answers
 │       ├── admin/                      # auth, rooms (미들웨어가 보호)
@@ -70,7 +69,7 @@ src/
     ├── admin-session.ts        # 어드민 HMAC 서명 세션 토큰
     ├── participant-session.ts  # participant 쿠키명 + Answer Lock 판정
     ├── rate-limit.ts           # 메모리 슬라이딩 윈도우 레이트리밋
-    ├── group-stats.ts          # 궁합·소수파 계산 (결과 페이지 + 공유 카드 공용)
+    ├── group-stats.ts          # 궁합·소수파·나의 결과 계산 (결과 페이지 단일 출처)
     ├── types.ts                # Room/Question/Participant/Answer + parseOptions()
     ├── serialize.ts            # Prisma 레코드 → 클라이언트 props
     ├── question-meta.ts        # 질문 유형별 아이콘·라벨·색 (단일 출처)
@@ -84,17 +83,76 @@ src/
 
 ## 디자인 시스템
 
+### 2026-09 아기 사슴 리워크 (이 절이 아래 옛 규칙보다 우선한다)
+
+사용자 피드백 두 번으로 방향이 정해졌다: ① "디자인이 부족하다" → 토스·당근 수준의 정석 만듦새로 재구성,
+② 그 결과가 "토스·금융 앱 같다, 디어링크답게 귀엽게" → **아기 사슴 IP + 둥근 글씨 + 말랑한 버튼**.
+아래 옛 절과 부딪히면 이 절을 따른다.
+
+- **바탕은 크림 `bg-page`(#fcf5ea), 카드는 테두리 없는 흰 `surface`.** 면은 테두리가 아니라 바탕 대비와
+  따뜻한 그림자로 가른다. 잠깐 썼던 회색 바탕(#f3f2ef)은 금융 앱처럼 읽혀서 걷어냈다 — 되돌리지 말 것.
+- **공용 유틸리티는 `globals.css`의 `@utility`에 있다**: `btn-primary`(brand amber 채움 + 진한 글자 +
+  알약 + 아래 4px 진한 테두리, 누르면 3px 내려앉음), `btn-secondary`(흰 알약 + 크림 테두리), `surface`,
+  `pressable`(누르면 scale 0.97), `fawn-spots`(사슴 흰 점무늬, amber/teal 면 위에만), `bottom-dock`
+  (모바일 하단 고정 CTA, 768px 이상은 내용 아래 흐름), `font-cute`. 버튼·카드를 새로 만들 때 클래스를
+  다시 조합하지 말고 이걸 쓴다. 옛 "amber-700 버튼 + 흰 글자" 레시피는 폐기.
+- **글씨: 큰 제목·큰 숫자는 주아(Jua, `font-cute`), 나머지는 Pretendard** (범위는 아래 항목 참고). 주아는 `next/font/google`로
+  layout에서 `--font-jua`에 싣는다 (한글도 글자 범위별 조각이라 쓰인 글자만 받는다). 굵기가 400
+  하나라서 `font-cute`가 `font-synthesis: none`으로 가짜 볼드를 막는다. 본문까지 둥근 글꼴
+  (나눔스퀘어라운드 등)로 바꾸지 말 것 — 서브셋이 없어 굵기마다 ~220KB라 카톡 인앱 첫 로딩이 무거워진다.
+- **캐릭터는 `src/components/Fawn.tsx`의 아기 사슴이다** (표정 `default`·`happy`·`curious`·`wow`,
+  카드 모서리를 잡는 앞발 `FawnPaws`). 옛 `DeerMascot` 금지 규칙은 사용자 요청으로 뒤집었다. 대신
+  **도형 몇 개로만 짓는 단순한 벡터**로 유지한다 — 세밀한 손그림이 품질 격차를 만들었던 게 옛 실패
+  원인이다. 더 다듬은 버전으로 바꿀 땐 이 파일만 교체하고 `mood` prop은 유지할 것.
+  현재 자리: 히어로 공개방 카드 뒤 빼꼼(고르면 happy), 로비 카드 위 빼꼼, 답변 진행 막대 끝을 따라 걷기
+  (막대 위에 겹쳐 세로 가운데, 답하면 happy), 결과 인사이트(wow)·아웃트로(happy), 빈 상태·404(curious),
+  공개/비공개 패널, 맨 아래 CTA. 표정은 상황을 말할 때만 바꾼다.
+- **히어로(`HeroSection`)는 제목 + 한 줄 설명 + 버튼 둘(방 만들기 / 공개 게임 둘러보기) + `HeroPick`.**
+  `HeroPick`은 가짜 데모가 아니라 **지금 1위 공개방의 첫 질문**이다. 고르면 그 답이 그 방의 답변
+  임시저장에 들어간 채 `/room/[id]?join=1`로 들어가서 2번 문항부터 이어진다 (`DiscoverPreviewQuestion.id`가
+  이 용도로 추가됐다). 목록 섹션은 `excludeId`로 이 방을 빼고 하나 더 받는다.
+- **`CreateRoomButton`은 두 크기 모두 `btn-primary`다.** 텍스트+밑줄 링크 버전은 주 행동이 본문 링크처럼
+  약해서 걷어냈다.
+- **랜딩 공개방은 흰 카드 그리드**(`LANDING_ROOM_COUNT = 6`, sm 2열·lg 3열). 섹션 순서: 히어로(크림) →
+  지금 뜨는 밸런스 게임(크림, 카드) → 친구끼리도, 모르는 사람과도(`RoomKindsSection`, 흰 바탕,
+  비공개 amber / 공개 teal 두 패널) → 자주 묻는 질문 → CTA(흰 바탕).
+- **iOS 확대 방지 `font-size: 1rem` 강제는 `.input-lg`만 예외다.** 16px보다 큰 글자 입력칸(방 제목,
+  질문 제목)에 `input-lg`를 붙인다. 16px 미만 입력칸에는 절대 붙이지 말 것.
+- **주아(`font-cute`)는 큰 제목(h1·h2)과 큰 숫자(퍼센트·판정·로비 수치), A/B 글자에만 쓴다.** 질문 본문·선택지·
+  카드 제목·작은 모달 제목·라벨·입력칸·버튼은 Pretendard다. 긴 문장이 주아로는 읽기 힘들었고, 입력칸에
+  자음만 치면(ㄴㅇㄹ) 영문처럼 보이는 글자 모양이 나왔다.
+- **사슴은 결과의 순간에 반응한다**: 질문마다 "나만 이 선택"(wow, teal 면) / "모두 나와 같은 선택"(happy,
+  amber 면), 오늘의 소수파(curious), 판정 카드는 스프링으로 한 번 톡 튀어나온다(반복 없음), 제출 중엔 wow.
+- **히어로 `HeroPick`은 인기 1위라도 글자 수 기준(`isShowcaseable`, page.tsx: 질문 6자·선택지 2자 이상,
+  두 선택지가 다름)을 못 넘으면 건너뛴다.** 참여자 0명이면 인원 표시를 숨긴다.
+- **결과 화면 데스크톱(lg)은 2단이다**: 왼쪽 위 제목·판정, 왼쪽 아래 인사이트·초대, 오른쪽 질문별 결과.
+  CSS 그리드 배치만 바꾸고 DOM 순서는 모바일 순서 그대로라, 블록 순서를 옮기면 모바일이 깨진다.
+  왼쪽 아래를 sticky로 만들지 말 것 (비공개방은 화면보다 길어져 초대 패널이 가려진다).
+- **질문 추가는 밸런스 게임이 한 줄 전체 타일**(amber + 점무늬), 객관식·주관식은 그 아래 작은 두 칸이다.
+  세 유형을 같은 크기로 두지 말 것 — 이 제품의 주력이 안 보인다.
+- 랜딩 FAQ의 보관 기간 답은 `room-lifetime.ts`·`room-archive.ts` 상수로 만든다. 숫자를 손으로 적지 말 것.
+- **피드백은 버튼을 눌러 여는 모달이 아니라, 머문 지 30초 뒤 우측 하단에 뜨는 카드다** (`FeedbackPrompt`,
+  refresh.cv 방식, 루트 layout에 상주). 별점 한 번이면 보낼 수 있고 의견은 선택이다. 별점에 따라 사슴
+  표정과 묻는 말이 바뀌고, 보내면 웃으며 고맙다고 한 뒤 저절로 닫힌다. 닫으면 30일, 보내면 영구히 다시
+  뜨지 않는다 (localStorage `deerlink:feedback-prompt`, 읽기·쓰기 모두 try/catch).
+  **답변 화면과 방 만들기에서는 뜨지 않는다** — 입력 중에 끼어들지 않는다. 모바일 결과 화면은 하단
+  "친구 초대하기" 위로 올린다. 푸터의 "피드백 보내기"는 `OPEN_FEEDBACK_EVENT`로 같은 카드를 바로 연다.
+  `POST /api/feedback`은 `rating`(1~5 정수)만으로도 받는다.
+- 모션은 Emil Kowalski 원칙(`~/.claude/skills/emil-design-eng`)을 따른다: UI 모션 300ms 이하, 강한 ease-out
+  (`ease-out-strong`), Framer Motion은 `x`/`y` 대신 `transform` 문자열, 진행 막대는 width 대신 `scaleX`.
+
+
 **라이트 테마다.** 예전 다크 팔레트(`#0d0a07` 계열)는 폐기됐다. 새 화면을 다크로 만들지 말 것.
 
 ### 색상 팔레트
 
 ```
-배경:        #fafaf8   (따뜻한 오프화이트)
+배경:        #fcf5ea   (bg-page, 사슴 털빛 크림. 2026-09 이전엔 #fafaf8)
 카드 배경:   #ffffff
 전경/제목:   #1c1412   ≈ text-stone-900
-border:      border-amber-100 (기본) / border-stone-200 (중립)
+border:      border-stone-200 (구조선·카드 기본) / border-amber-100 (amber-50 면 위에서만)
 Accent:      #e8a038   (amber-500, 사슴 털 색)
-Accent 버튼: amber-600 → hover amber-500
+Accent 버튼: btn-primary (brand #e8a038 채움 + #1c1412 글자, 대비 8:1). 흰 글자를 amber 위에 올리지 말 것
 Accent 배경: bg-amber-50 (연한 강조 면)
 대비 색상:   teal — amber와 대비 목적으로만 (balance game B 옵션)
 ```
@@ -128,9 +186,9 @@ text-stone-300   장식용 대형 숫자, 비활성 로고
 ### 타이포그래피
 
 ```
-폰트:    Gowun Dodum (next/font/google, --font-gowun-dodum → --font-sans)
+폰트:    Pretendard Variable (npm `pretendard`, 동적 서브셋 CSS를 layout.tsx에서 import → --font-sans)
 영문:    tracking-tight
-숫자:    font-mono tabular-nums
+숫자:    tabular-nums (font-mono는 쓰지 않는다. 숫자를 "기술적으로" 보이게 하는 장식일 뿐이다)
 
 히어로:  text-5xl ~ text-[82px]  font-bold  tracking-tight  leading-[1.05]
 섹션:    text-3xl ~ text-4xl     font-bold  tracking-tight
@@ -145,25 +203,25 @@ text-stone-300   장식용 대형 숫자, 비활성 로고
 
 ```tsx
 // 카드 — 기본
-className="rounded-2xl border border-amber-100 bg-white p-5"
+className="rounded-2xl border border-stone-200 bg-white p-5"
 
 // 카드 — 떠 있는 강조
-className="rounded-2xl border border-amber-100/80 bg-white shadow-lg shadow-amber-100/60 overflow-hidden"
+className="rounded-2xl border border-stone-200 bg-white shadow-lg shadow-stone-200/60 overflow-hidden"
 
 // 카드 — selected/active
 className="border-amber-300 bg-amber-50"
 
 // 버튼 — 주요 CTA
-className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-sm font-medium transition-all duration-200 shadow-lg shadow-amber-900/30 hover:-translate-y-0.5"
+className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-amber-700 hover:bg-amber-800 text-white text-sm font-medium transition-all duration-200 shadow-lg shadow-amber-900/30 hover:-translate-y-0.5"
 
 // 버튼 — 주요 CTA (disabled 포함)
-className="bg-amber-600 hover:bg-amber-500 disabled:bg-stone-200 disabled:text-stone-500 text-white text-sm font-medium transition-colors"
+className="bg-amber-700 hover:bg-amber-800 disabled:bg-stone-200 disabled:text-stone-500 text-white text-sm font-medium transition-colors"
 
 // 버튼 — 보조
 className="text-sm text-stone-600 hover:text-stone-900 transition-colors duration-200"
 
 // 고정 상단 네비
-className="fixed top-0 inset-x-0 z-50 border-b border-amber-100 bg-white/90 backdrop-blur-md"
+className="fixed top-0 inset-x-0 z-50 border-b border-stone-200 bg-white/90 backdrop-blur-md"
 
 // 태그/뱃지 — amber 면 위에서는 amber 계열 전경
 className="px-3 py-1 rounded-full text-xs border border-amber-100 bg-amber-50 text-amber-900"
@@ -187,7 +245,7 @@ text-amber-400 / text-teal-400      # 흰 배경 위 텍스트로 2:1 미만 →
 - 탭 가능한 요소는 최소 44px를 확보한다. 시각 요소가 작으면 `min-h-11`이나 패딩으로 히트 영역만 키운다 (예: 답변 화면 진행 점).
 - 폼 오류는 필드 바로 아래에 `role="alert"`로 붙인다.
 
-### 결과 시각화 (`ResultBar`) · 발굽
+### 결과 시각화 (`ResultBar`)
 
 결과 그래프는 amber/teal 비율 막대다. **뿔 모양 SVG로 결과를 그리던 `AntlerTally`/`AntlerSpread`는 2026-08에 걷어냈다 — 되살리지 말 것.** 굵기를 `sqrt(share)`로 완만하게 죽이는 공식 때문에 0명도 `MIN_WIDTH`만큼 두께가 남아 "0명인데 왜 가지가 있지?"로 읽혔고, 객관식의 곡선 다지(多枝) 뿔은 각도·길이가 제각각이라 굵기만으로 비중을 비교하기 어려웠다. 게다가 객관식은 뿔 그림 아래 이미 숫자·퍼센트·참여자 칩이 있어서 뿔이 같은 정보를 다시 그리는 순수 장식이었다 — 심지어 공유 카드는 애초에 객관식에 뿔을 쓰지 않고 막대를 썼다, 즉 뿔이 정말 필요했으면 거기부터 깨졌어야 했다. 데이터 시각화는 그림과 숫자가 항상 같은 값을 말해야 신뢰가 생긴다. 폭 = 비율인 막대가 그 조건을 가장 단순하게 만족한다.
 
@@ -201,17 +259,18 @@ text-amber-400 / text-teal-400      # 흰 배경 위 텍스트로 2:1 미만 →
 - 세그먼트 폭은 `Math.round(count/total*100)`의 **선형 퍼센트**다. sqrt 완화 공식은 폐기했다 — 막대는 폭이 왜곡되면 바로 눈에 띄어서 애초에 죽일 필요가 없다.
 - 0명은 그 색 세그먼트를 아예 렌더링하지 않는다 (`count > 0 &&`). 조작 없이 자연스럽게 폭 0이 된다.
 - 시각적으로만 값을 나타내는 막대 div는 `aria-hidden="true"`를 단다 — 바로 옆에 실제 텍스트(라벨·인원·%)가 항상 같이 있으니 스크린리더가 두 번 읽을 필요가 없다.
-- 공유 카드(`share-card.tsx`)도 같은 퍼센트로 계산한 막대를 인라인 스타일로 그린다. `BalanceRatioBar`와 `share-card`가 다른 공식을 쓰면 안 된다 — 페이지 결과와 공유 이미지가 다른 숫자를 말하면 안 된다는 원칙은 그대로다.
+- `mine` prop을 넘기면 내가 고른 쪽 라벨 옆에 채운 "나" 배지(amber-700/teal-700 + 흰 글자)가 붙는다. 객관식 행도 같은 배지를 쓴다.
+- **결과 이미지(1080x1080 PNG, `/api/rooms/[id]/image`, `share-image.tsx`, `result-image-actions.tsx`)는 2026-09에 걷어냈다 — 되살리지 말 것.** 결과 페이지 한가운데 빈 정사각 자리를 차지했고, 공유 동선은 링크 하나로 충분하다. 링크 미리보기용 `InviteImage`(`/og/room/[id]`)는 답변을 담지 않는 별개 물건이라 그대로 둔다.
 - 헤더의 작은 `AntlerLogo`(뿔 모양 브랜드 마크)는 데이터가 아니라 로고이므로 이 정리와 무관하다. 계속 쓴다.
-- `DeerHoofMark`는 답변 화면 진행 표시다. 지나온 질문을 발자국으로 남기고, 좌우로 번갈아 기울여 걸어간 느낌을 준다. 순수 장식으로만 쓰지 말 것.
+- 답변 화면 진행 표시는 진행 막대 + 막대 위에 겹친 아기 사슴 하나다. **`DeerHoofMark`(발굽 줄)는 2026-09에 걷어냈다** — 막대와 같은 진행 정보를 정렬도 안 맞는 한 줄로 또 그렸다. 발굽이 하던 "안 푼 질문으로 이동"은 마지막 문항의 "남은 질문 N개 답하러 가기" 버튼이 맡는다 (지금 보고 있는 문항은 세지 않는다). 사슴은 막대 양 끝에서 잘리지 않게 레일을 사슴 반 폭씩 안쪽으로 줄여 움직인다.
 
-**일러스트 캐릭터(`DeerMascot`)는 2026-08에 걷어냈다 — 되살리지 말 것.** 로딩·빈 상태·404·완료 같은 상태 표시는 이제 lucide 아이콘(예: `Loader2`, `Sparkles`, `Users`)과 기존 텍스트만으로 처리한다. 손으로 그린 SVG 캐릭터는 참고 일러스트와 나란히 렌더링해서 비교해보니 품질 격차가 커서 유지보수 대상에서 제외했다 — 새 캐릭터 자산을 다시 만들 필요가 생기면 AI 이미지 생성(예: Gemini API, 결제 연동 필요) 없이는 이 프로젝트 수준에서 벡터로 재현하기 어렵다는 점을 먼저 감안할 것.
+**(2026-09 뒤집힘, 위 "아기 사슴 리워크" 참고)** 일러스트 캐릭터(`DeerMascot`)는 2026-08에 걷어냈었다. 로딩·빈 상태·404·완료 같은 상태 표시는 이제 lucide 아이콘(예: `Loader2`, `Sparkles`, `Users`)과 기존 텍스트만으로 처리한다. 손으로 그린 SVG 캐릭터는 참고 일러스트와 나란히 렌더링해서 비교해보니 품질 격차가 커서 유지보수 대상에서 제외했다 — 새 캐릭터 자산을 다시 만들 필요가 생기면 AI 이미지 생성(예: Gemini API, 결제 연동 필요) 없이는 이 프로젝트 수준에서 벡터로 재현하기 어렵다는 점을 먼저 감안할 것.
 
 ### 그룹 리포트 (`lib/group-stats.ts`)
 
 "지우와 87% 일치" 같은 숫자 — 익명 통계 서비스(푸슝·PIKU류)는 구조적으로 못 만든다. 이름 붙은 유한 그룹의 답변만 있으면 계산되고, 스키마 변경이 없다. 이게 이 제품의 실질적 차별점이니 신중하게 다룰 것.
 
-- `computePairScores` / `bestPair` / `computeLoneDissenter` / `computeClosestBalance`는 순수 함수다. **결과 페이지(`GroupReport`)와 공유 카드가 반드시 이 파일 하나만 참조한다** — 계산을 각자 다시 짜면 두 화면이 다른 숫자를 말하게 된다.
+- `computePairScores` / `bestPair` / `computeLoneDissenter` / `computeClosestBalance`는 순수 함수다. **결과 페이지의 인사이트·`GroupReport`·"나의 결과"(`computeViewerSummary`)가 반드시 이 파일 하나만 참조한다** — 계산을 각자 다시 짜면 같은 화면 안에서 숫자가 어긋난다.
 - 데이터가 부족하면 그 통계는 **숨긴다** (예: 비교 가능한 질문이 1개 이하인 쌍은 계산에서 제외, 참여자 3명 미만이면 "최악 궁합" 미표시). 가짜 정밀도보다 침묵이 낫다.
 - 주관식은 궁합 계산에서 제외한다 — 자유 텍스트 일치는 의미가 없다.
 
@@ -233,7 +292,7 @@ text-amber-400 / text-teal-400      # 흰 배경 위 텍스트로 2:1 미만 →
 - 마지막 문항에서는 넘어갈 곳이 없으니 예약하지 않는다. 제출 버튼이 그 자리다.
 - `prefers-reduced-motion`이면 자동 진행을 끈다. 예고 없는 화면 전환을 원하지 않는
   사용자에게 굳이 만들지 않는다. "다음" 버튼은 언제나 그대로 동작한다.
-- 예약된 이동은 `goTo`(발굽·이전·다음)와 제출에서 반드시 취소한다. 안 그러면 직접
+- 예약된 이동은 `goTo`(남은 질문 이동·이전·다음)와 제출에서 반드시 취소한다. 안 그러면 직접
   이동한 뒤에 예약분이 뒤늦게 실행돼서 화면이 혼자 튄다.
 
 ## 애니메이션 원칙
@@ -362,6 +421,18 @@ const room = await prisma.room.findUnique({
 
 ---
 
+## 결과 페이지 (`results-client.tsx`)
+
+2026-09에 "내 선택 · 결과 · 초대" 세 가지로 다시 짰다.
+
+- `page.tsx`가 쿠키로 찾은 참여자 id를 `viewerId`로 넘긴다. 이게 있어야 "나"를 표시할 수 있다 — 예전엔 결과 페이지가 보는 사람이 누구인지 몰라서 내 선택을 하나도 표시하지 못했다.
+- 순서 (2026-09 재구성): 제목 → (공개방에서 아직 안 답한 사람에게) "나도 답하기" → 나의 판정 → **질문별 결과**(각 질문에 "나" 배지 + "민준, 하람도 같은 선택") → 인사이트(`PrimaryInsight` + `GroupReport`, 접지 않고 펼침) → 초대 패널 → 아웃트로. 사람들이 결과에 오는 이유가 "누가 뭘 골랐나"라서 질문별 결과를 인사이트보다 위로 올렸다. 되돌리지 말 것.
+- "나의 결과"는 숫자(4/4)가 아니라 한마디 판정(대세파·균형파·소신파, `viewerVerdict()` in group-stats)과 사슴 표정이다. 비교 가능한 질문이 2개 미만이면 판정을 숨긴다.
+- 모바일은 결과를 보는 내내 하단에 "친구 초대하기"가 떠 있고(초대가 유일한 유포 경로), 아래 초대 패널이 화면에 들어오면 사라진다 — 아웃트로의 "내 방 만들기"와 주 버튼 두 개가 겹치지 않게.
+- 초대(링크 복사·카카오·시스템 공유)는 `components/share/invite-actions.tsx` 하나다. 결과 페이지와 `/room/[id]/share`가 같이 쓴다. 상단 네비의 버튼과 하단 패널은 같은 `useInviteLink` 상태를 공유해서 "복사됨"이 양쪽에 같이 뜬다.
+- `navigator.share`가 없는 브라우저에서는 "다른 앱으로 공유" 버튼을 그리지 않는다 (누르면 결국 복사라 같은 버튼 두 개일 뿐이다). 클립보드 API가 막히면 `execCommand` 폴백, 그것도 실패하면 선택 가능한 입력칸으로 주소를 보여준다 — 카카오 인앱 브라우저 대비.
+- 결과 페이지 제목·그룹 리포트에 진입 애니메이션(opacity 0 시작)을 두지 않는다. 서버 HTML이 하이드레이션 전까지 흐리게 박힌다.
+
 ## 동결 보존 (아카이브)
 
 공개방은 만료되면 지워지고 방 페이지는 전부 noindex다. 즉 사람들이 실제로 답을 채운
@@ -375,8 +446,7 @@ const room = await prisma.room.findUnique({
 - 정본 URL은 `/archive/[id]` 하나다. `/room/[id]`와 `/room/[id]/results`는 동결 방이면
   거기로 리다이렉트한다. `/room/*`이 robots.txt에서 막혀 있어서 `/room/` 밑에 두면
   색인 자체가 안 된다 - 그래서 경로를 분리했다.
-- 화면은 `ResultsClient`에 `archived` prop을 넘겨 재사용한다. 초대·공유 버튼과 결과
-  이미지 섹션은 숨긴다 (이미지 라우트는 만료 방에 410을 준다).
+- 화면은 `ResultsClient`에 `archived` prop을 넘겨 재사용한다. 초대·공유 버튼은 숨긴다.
 - 동결 방은 만료 시각이 지났으므로 `POST /api/rooms/[id]/answers`가 이미 410으로 막는다.
   별도 가드를 넣지 않았다.
 
@@ -407,7 +477,7 @@ const room = await prisma.room.findUnique({
 - 선택지가 원본과 똑같은 문항만 센다. 방을 만들 때 선택지를 고쳐도 `sourceId`는 남아서, 그대로
   세면 "1번"의 의미가 섞인다. `sourceId`가 없는 옛 방은 제목까지 같을 때만 인정한다.
 - 막대는 서버에서 그린다 (`BalanceRatioBar`는 폭 0에서 늘어나는 애니메이션이라 서버 HTML에 빈 막대로 박힌다).
-  퍼센트는 `percentOf()` — 결과 페이지·공유 카드와 같은 반올림이다.
+  퍼센트는 `percentOf()` — 결과 페이지와 같은 반올림이다.
 - 테마 방 시딩(`topUpPublicRooms`)도 `sourceId`를 남긴다. 공개방 대부분이 테마 방이라 빠지면 집계가 비어 버린다.
 
 ## 공유·검색 유입
@@ -487,7 +557,7 @@ if (!room.isPublic && !hasCompletedAnswers(viewer, room.questions.length)) {
 - `participant_<roomId>` 쿠키는 **`POST /api/rooms/[id]/answers` 응답에서 서버가 httpOnly로 굽는다.** 클라이언트에서 `document.cookie`로 심지 말 것.
 - 답변 데이터를 반환하는 새 엔드포인트를 만들면 반드시 같은 게이트를 통과시킬 것 (단 위의 공개방 예외는 지킬 것).
 - `GroupReport`(궁합·소수파 통계)는 공개방에서 **숨긴다** (`!room.isPublic && ...`). "지우와 87% 일치"는 이름 붙은 우리 그룹 전제인데, 공개방은 서로 모르는 사람들이 보는 결과라 그 전제가 깨진다. 참여자별 `ResultBar` 집계는 공개방에서도 그대로 보여준다 — 숨기는 건 궁합 계산뿐이다.
-- **공개방은 익명이다** (2026-08 추가). `POST /api/rooms/[id]/answers`는 `room.isPublic`이면 클라이언트가 보낸 닉네임을 무시하고 서버가 `참여자 N`을 자동으로 붙인다. `Participant.nickname`은 공개방에서는 실명이 아니라 서버가 만든 placeholder다 — **새 화면에서 닉네임을 신원처럼 쓰기 전에 반드시 `room.isPublic`을 확인할 것.** 결과 화면의 참여자별 롤스터·투표자 칩·참여자 목록 카드는 공개방에서 전부 숨기고 집계 막대·숫자만 보여준다 (`results-client.tsx`의 `anonymous` prop). `share-card.tsx`의 궁합 칩도 같은 이유로 `!room.isPublic`일 때만 계산한다 — 예전엔 이 게이트가 빠져 있었다.
+- **공개방은 익명이다** (2026-08 추가). `POST /api/rooms/[id]/answers`는 `room.isPublic`이면 클라이언트가 보낸 닉네임을 무시하고 서버가 `참여자 N`을 자동으로 붙인다. `Participant.nickname`은 공개방에서는 실명이 아니라 서버가 만든 placeholder다 — **새 화면에서 닉네임을 신원처럼 쓰기 전에 반드시 `room.isPublic`을 확인할 것.** 결과 화면의 참여자별 롤스터·투표자 칩·참여자 목록 카드는 공개방에서 전부 숨기고 집계 막대·숫자만 보여준다 (`results-client.tsx`의 `anonymous` prop). "나의 결과"의 "나와 가장 잘 맞는 사람"도 같은 이유로 비공개방에서만 계산한다 (`computeViewerSummary`).
 - **공개방 발견 피드**(`/discover`, 랜딩의 `DiscoverTeaserSection`, `PackPicker`의 링크)도 2026-08에 붙었다. `GET /api/rooms/discover`가 페이지네이션(최신순/인기순/답변 많은순)을 맡고, `src/lib/discover-rooms.ts`의 `getPublicRooms()` 하나만 랜딩·피드 페이지·API 라우트가 공유한다 — 목록 쿼리를 각자 다시 짜지 말 것. **신고·숨김 같은 모더레이션은 아직 없다** — 낯선 방문자에게 노출되는 표면인데도 사용자 요청으로 이번 범위에서 의도적으로 뺐다. 나중에 붙일 때 숨김 처리는 **어드민 페이지에서만** 하기로 이미 정했다 (공개 피드에 신고 버튼 같은 걸 노출하지 말 것).
 
 ### 어드민
@@ -509,7 +579,7 @@ if (!room.isPublic && !hasCompletedAnswers(viewer, room.questions.length)) {
 랜딩은 2026-08 전면 재작업했다. 예전 버전은 "AI가 만든 SaaS 랜딩" 특징을 거의 다 갖고 있었고, 아래는 그때 걷어낸 것들이다. **되살리지 말 것.**
 
 - **체험은 가짜 데모가 아니라 실제 공개방이 맡는다.** 2026-09에 히어로 오른쪽의 데모 질문(코드에 박힌 가짜 친구 넷)을 걷어내고, 바로 아래 `PublicRoomsSection`(인기 밸런스 게임)을 붙였다. 데모는 눌러도 데이터가 안 남고 바로 아래 공개방과 같은 체험을 두 번 시켰다. 데모나 div로 만든 가짜 제품 스크린샷을 되살리지 말 것.
-- **히어로는 로고, 제목, CTA뿐이다.** 설명 문장도 뺐다 — 난잡해 보였고, 공개방은 Answer Lock을 건너뛰어서 그 문장이 말하던 차별점(친구 답은 내가 답해야 열린다)을 보여주지도 못했다. 그 설명은 FAQ("친구들의 답은 언제 볼 수 있나요?")가 맡는다. FAQ에서 이 항목을 지우지 말 것. 데스크톱 타이포는 문서 상한(`text-[82px]`)까지 키워서 히어로가 비어 보이지 않게 한다.
+- **(2026-09 뒤집힘: 히어로는 제목·설명·버튼 둘·HeroPick. 위 리워크 절 참고)** 예전 규칙: 히어로는 로고, 제목, CTA뿐이다. 설명 문장도 뺐다 — 난잡해 보였고, 공개방은 Answer Lock을 건너뛰어서 그 문장이 말하던 차별점(친구 답은 내가 답해야 열린다)을 보여주지도 못했다. 그 설명은 FAQ("친구들의 답은 언제 볼 수 있나요?")가 맡는다. FAQ에서 이 항목을 지우지 말 것. 데스크톱 타이포는 문서 상한(`text-[82px]`)까지 키워서 히어로가 비어 보이지 않게 한다.
 - **히어로 제목은 모바일에서 별도로 작다** (`text-4xl`, 데스크톱은 `sm:text-6xl`부터). 상한(`text-[82px]`)은 데스크톱 전용이다 — 모바일 화면에서 `text-5xl` 두 줄이 화면의 3분의 1을 넘게 차지한다는 피드백으로 낮췄다. 데스크톱 사이즈를 모바일에도 그대로 쓰지 말 것.
 - **공개방 카드는 `/discover`와 랜딩이 크기만 다른 `RoomCard` 컴포넌트 하나를 공유한다** (`size: "compact" | "list"`). 예전엔 두 화면이 서로 다른 컴포넌트라 내용 순서·유형별 미리보기·하단 문구가 다 달라서 같은 방인데 다른 카드로 보였다 — 따로 만들지 말 것. 항상 질문 제목이 먼저 오고(방 이름이 아니라 질문이 궁금증을 만든다), 이동 신호는 화살표 아이콘 하나뿐이다. "참여하기"/"답하기" 같은 문구를 다시 달지 말 것 — 카드 전체가 링크고 화살표가 이미 그 뜻이다.
 - **카드 유형별 미리보기는 `TypePreview`가 세 유형을 다 다룬다.** 밸런스는 두 선택지를 amber/teal 대비로, 객관식은 선택지를 teal 톤 하나로 통일해 3개까지 보여주고 나머지는 "+N"으로 뭉친다, 주관식은 미리보여줄 선택지가 없으니 제목만 두고 비워둔다. 새 질문 유형이 생기면 `TypePreview`에 분기를 추가할 것 — 지금처럼 밸런스만 처리하고 나머지는 방치하면 카드가 유형마다 다른 완성도로 보인다.
@@ -522,7 +592,7 @@ if (!room.isPublic && !hasCompletedAnswers(viewer, room.questions.length)) {
 - **shadcn/ui, Magic UI, React Bits 같은 오픈소스 라이브러리에서 가져올 건 "만듦새"지 그 라이브러리들의 시그니처 이펙트가 아니다.** Magic UI의 shimmer 버튼·파티클 배경·마퀴 같은 건 전부 반복 재생되는 장식 애니메이션이라 "장식용 bounce/infinite 남용 금지" 규칙과 정면으로 부딪힌다 — 그대로 가져오면 안 된다. 대신 실제로 가져온 것들: ① 히어로 배경에 `radial-gradient`로 은은한 빛 번짐 한 겹(정적이라 무한 애니메이션이 아니다, `from-amber-50 to-amber-100/40` 허용 범위 안), ② `CreateRoomButton`에 위쪽 안쪽 흰 하이라이트(`shadow-[inset_0_1px_0_0_...]`)로 광원이 있는 표면처럼 보이게 하는 처리(shadcn·Linear·Stripe 버튼이 흔히 쓰는 조명 신호, 새 색은 아님).
 - **히어로 제목은 `tracking-tighter`를 쓴다** (`tracking-tight`가 아니다). 큰 디스플레이 타이포는 자간을 더 좁게 눌러야 눌러 짠 느낌이 나고, 기본 자간 그대로면 헐렁해 보인다.
 - **방 만료까지 남은 시간은 아이콘(`Hourglass`) + 값만 쓰고 "남음"은 생략한다** (`formatRemainingShort()`). 아이콘이 이미 "남음"이라는 뜻을 전달하니 같은 뜻을 텍스트로 반복하지 않는다. 단, 로비·결과 페이지의 "한 명 답할 때마다 하루 더 열려요, 지금 6일 남음" 같은 **문장 속에 박아 쓰는 자리는 그대로 `formatRemaining()`을 쓴다** — 이 문장은 공개방 수명 연장이라는 이 제품의 핵심 유포 동기를 설명하는 자리라 아이콘으로 줄이면 안 된다.
-- **`CreateRoomButton`의 두 크기는 서로 다른 물건이다** (히어로·네비·CTA 세 곳이 공유). `lg`(히어로, 맨 아래 CTA)는 2026-09 후반부터 배경도 그림자도 없는 **텍스트 + 밑줄 + 화살표**다 — "전체 보기"·`RoomCard`가 이미 쓰던 목록 이동 링크 문법을 그대로 가져왔다. 채운 버튼에 유리질 inset 하이라이트·큰 그림자를 얹었던 이전 버전은 화살표+hover 슬라이드까지 겹쳐서 오히려 생성형 SaaS 버튼 신호를 키웠다 — 되살리지 말 것. `md`(네비, 스크롤 후에만 뜬다)는 얇은 네비 바 안에서 로고·"인기 질문"과 구분돼야 하니 여전히 `bg-amber-700`로 채우지만, 그림자·하이라이트 없이 평평하게 채운다. **`md`에는 화살표를 달지 않는다** — 네비의 좁은 공간에서 필 버튼과 화살표가 같이 있으면 다시 SaaS 버튼처럼 보인다.
+- **(2026-09 뒤집힘: 두 크기 모두 btn-primary)** 예전 규칙: `CreateRoomButton`의 두 크기는 서로 다른 물건이다 (히어로·네비·CTA 세 곳이 공유). `lg`(히어로, 맨 아래 CTA)는 2026-09 후반부터 배경도 그림자도 없는 **텍스트 + 밑줄 + 화살표**다 — "전체 보기"·`RoomCard`가 이미 쓰던 목록 이동 링크 문법을 그대로 가져왔다. 채운 버튼에 유리질 inset 하이라이트·큰 그림자를 얹었던 이전 버전은 화살표+hover 슬라이드까지 겹쳐서 오히려 생성형 SaaS 버튼 신호를 키웠다 — 되살리지 말 것. `md`(네비, 스크롤 후에만 뜬다)는 얇은 네비 바 안에서 로고·"인기 질문"과 구분돼야 하니 여전히 `bg-amber-700`로 채우지만, 그림자·하이라이트 없이 평평하게 채운다. **`md`에는 화살표를 달지 않는다** — 네비의 좁은 공간에서 필 버튼과 화살표가 같이 있으면 다시 SaaS 버튼처럼 보인다.
 - 이 landing 전용 규칙은 `/create` 제출 버튼처럼 실제 폼을 제출하는 버튼에는 적용하지 않는다. 거기는 CLAUDE.md 위쪽 "컴포넌트 스타일 패턴"의 채운 버튼 레시피를 그대로 쓴다 — 폼 제출은 텍스트 링크로 약화시키면 안 되는 동작이다.
 - 네비의 "방 만들기"는 히어로 CTA가 화면 밖으로 나갔을 때만 보인다. 첫 화면에 같은 버튼 두 개를 띄우지 않는다.
 - **eyebrow 금지.** 섹션 제목 위 작은 대문자 라벨(`text-[10px] uppercase tracking-widest`)은 랜딩에 하나도 없다. 특히 라벨 양옆에 짧은 선을 두는 형태는 가장 알아보기 쉬운 생성형 시그니처다.
@@ -560,6 +630,11 @@ yarn build        # prisma generate + 프로덕션 빌드
 yarn lint         # ESLint
 npx prisma studio # DB 관리 UI
 ```
+
+**`globals.css`를 고쳤는데 화면에 반영이 안 되면** Turbopack 개발 캐시가 옛 CSS를 계속 내보내는 것이다
+(TSX 변경은 반영되는데 `@utility`·`@theme` 수정만 안 먹는다. 2026-09에 여러 번 겪었다). 개발 서버를 끄고
+`rm -rf .next/dev/cache` 후 다시 `yarn dev`.
+
 
 **주의**: `.env`가 프로덕션 Turso를 가리킨다. `src/lib/prisma.ts`는 `TURSO_DATABASE_URL`을 `DATABASE_URL`보다 먼저 본다 — 즉 아무 설정 없이 `yarn dev`를 돌리면 로컬 실험이 그대로 프로덕션 DB에 씁니다.
 

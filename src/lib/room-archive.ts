@@ -17,6 +17,7 @@ export const FREEZE_MIN_PARTICIPANTS = 5;
 function toPreview(
   question:
     | {
+        id: string;
         type: string;
         title: string;
         optionA: string | null;
@@ -28,6 +29,7 @@ function toPreview(
 ): DiscoverPreviewQuestion | null {
   if (!question) return null;
   return {
+    id: question.id,
     type: question.type as QuestionType,
     title: question.title,
     optionA: question.optionA,
@@ -85,6 +87,7 @@ export async function getArchivedRooms({
         orderBy: { order: "asc" },
         take: 1,
         select: {
+          id: true,
           type: true,
           title: true,
           optionA: true,

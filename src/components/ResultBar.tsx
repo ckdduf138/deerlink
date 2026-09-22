@@ -33,45 +33,76 @@ export function BalanceRatioBar({
 
   return (
     <div className={cn("w-full", className)}>
-      <div className="mb-2 flex items-baseline justify-between gap-4">
-        <p className="min-w-0 flex-1 truncate text-base font-semibold text-amber-800">{a.label}</p>
-        <p className="min-w-0 flex-1 truncate text-right text-base font-semibold text-teal-800">
-          {b.label}
-        </p>
+      <div className="mb-2.5 flex items-end justify-between gap-4">
+        <SideLabel label={a.label} pct={pctA} count={a.count} tone="amber" mine={mine === "a"} />
+        <SideLabel label={b.label} pct={pctB} count={b.count} tone="teal" mine={mine === "b"} align="right" />
       </div>
 
       <div
-        className="flex h-3 w-full overflow-hidden rounded-full bg-stone-100"
+        className="flex h-3.5 w-full gap-1 overflow-hidden rounded-full bg-[#f5ecdd]"
         aria-hidden="true"
       >
         {a.count > 0 && (
           <motion.div
-            className="h-full bg-amber-500"
+            className="h-full rounded-full bg-brand"
             initial={reduce ? false : { width: 0 }}
             animate={{ width: `${pctA}%` }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
           />
         )}
         {b.count > 0 && (
           <motion.div
-            className="h-full bg-teal-500"
+            className="h-full rounded-full bg-teal-500"
             initial={reduce ? false : { width: 0 }}
             animate={{ width: `${pctB}%` }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
           />
         )}
       </div>
+    </div>
+  );
+}
 
-      <div className="mt-1.5 flex items-center justify-between text-sm text-stone-600">
-        <span className="font-mono tabular-nums">
-          {a.count}명 · {pctA}%
-          {mine === "a" && <span className="ml-1.5 text-stone-500">나 포함</span>}
-        </span>
-        <span className="font-mono tabular-nums">
-          {mine === "b" && <span className="mr-1.5 text-stone-500">나 포함</span>}
-          {pctB}% · {b.count}명
-        </span>
-      </div>
+function SideLabel({
+  label,
+  pct,
+  count,
+  tone,
+  mine,
+  align = "left",
+}: {
+  label: string;
+  pct: number;
+  count: number;
+  tone: "amber" | "teal";
+  mine: boolean;
+  align?: "left" | "right";
+}) {
+  return (
+    <div className={cn("min-w-0 flex-1", align === "right" && "text-right")}>
+      <p
+        className={cn(
+          "flex items-center gap-1.5 text-[17px] font-bold",
+          align === "right" && "flex-row-reverse",
+          tone === "amber" ? "text-amber-800" : "text-teal-800"
+        )}
+      >
+        <span className="min-w-0 truncate">{label}</span>
+        {mine && (
+          <span
+            className={cn(
+              "flex-shrink-0 rounded-md px-1.5 py-0.5 text-xs font-bold text-white",
+              tone === "amber" ? "bg-amber-800" : "bg-teal-700"
+            )}
+          >
+            나
+          </span>
+        )}
+      </p>
+      <p className="mt-0.5 text-[15px] tabular-nums text-stone-600">
+        <span className="font-cute text-2xl text-stone-900">{pct}%</span>
+        <span className="ml-1.5">{count}명</span>
+      </p>
     </div>
   );
 }

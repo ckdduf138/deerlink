@@ -33,10 +33,10 @@ export default async function ResultsPage({
     totalQuestions: room.questions.length,
   })) {
     return (
-      <div className="min-h-screen bg-[#fafaf8] flex flex-col items-center justify-center gap-6 px-4">
+      <div className="min-h-screen bg-page flex flex-col items-center justify-center gap-6 px-4">
         <AntlerLogo className="w-10 h-12 text-stone-300" />
         <div className="text-center">
-          <h1 className="text-xl font-bold text-stone-800 mb-2">
+          <h1 className="text-xl font-cute text-stone-800 mb-2">
             참여 후 결과를 볼 수 있어요
           </h1>
           <p className="text-sm text-stone-500">
@@ -45,7 +45,7 @@ export default async function ResultsPage({
         </div>
         <Link
           href={`/room/${id}`}
-          className="px-5 py-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-sm font-medium transition-colors"
+          className="px-5 py-3 rounded-xl bg-amber-700 hover:bg-amber-800 text-white text-sm font-medium transition-colors"
         >
           답변하러 가기
         </Link>
@@ -55,10 +55,10 @@ export default async function ResultsPage({
 
   if (new Date(room.expiresAt) < new Date()) {
     return (
-      <div className="min-h-screen bg-[#fafaf8] flex flex-col items-center justify-center gap-6 px-4">
+      <div className="min-h-screen bg-page flex flex-col items-center justify-center gap-6 px-4">
         <AntlerLogo className="w-10 h-12 text-stone-300" />
         <div className="text-center">
-          <h1 className="text-xl font-bold text-stone-800 mb-2">
+          <h1 className="text-xl font-cute text-stone-800 mb-2">
             방이 만료됐어요
           </h1>
           <p className="text-sm text-stone-500">
@@ -67,7 +67,7 @@ export default async function ResultsPage({
         </div>
         <Link
           href="/create"
-          className="px-5 py-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-sm font-medium transition-colors"
+          className="px-5 py-3 rounded-xl bg-amber-700 hover:bg-amber-800 text-white text-sm font-medium transition-colors"
         >
           새 방 만들기
         </Link>
@@ -77,5 +77,5 @@ export default async function ResultsPage({
 
   const serializedRoom = serializeResultsRoom(room);
 
-  return <ResultsClient room={serializedRoom} />;
+  return <ResultsClient room={serializedRoom} viewerId={viewer?.id ?? null} />;
 }

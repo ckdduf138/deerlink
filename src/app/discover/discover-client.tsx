@@ -20,8 +20,8 @@ export function DiscoverClient({
   archivedCount: number;
 }) {
   return (
-    <div className="min-h-screen bg-[#fafaf8] text-stone-900">
-      <nav className="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-4 md:px-8 py-4 border-b border-amber-100 bg-white/90 backdrop-blur-md">
+    <div className="min-h-screen bg-page text-stone-900">
+      <nav className="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-4 md:px-8 py-4 border-b border-stone-200 bg-white/90 backdrop-blur-md">
         <Link
           href="/"
           aria-label="홈으로 돌아가기"
@@ -37,7 +37,7 @@ export function DiscoverClient({
 
       <div className="max-w-2xl mx-auto px-4 pt-24 pb-20">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-stone-900 tracking-tight mb-2">
+          <h1 className="text-3xl font-cute text-stone-900 mb-2">
             공개방 둘러보기
           </h1>
           <p className="text-sm text-stone-600 leading-relaxed">
@@ -56,7 +56,7 @@ export function DiscoverClient({
         {archivedCount > 0 && (
           <Link
             href="/archive"
-            className="group mt-10 flex min-h-12 items-center justify-between gap-3 rounded-2xl border border-amber-100 bg-white px-5 text-sm text-stone-700 transition-colors hover:border-amber-300 hover:text-stone-900"
+            className="group mt-10 flex min-h-12 items-center justify-between gap-3 rounded-2xl border border-stone-200 bg-white px-5 text-sm text-stone-700 transition-colors hover:border-amber-300 hover:text-stone-900"
           >
             <span>
               끝난 방 결과도 {archivedCount}개 남아 있어요

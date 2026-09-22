@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { Fawn } from "@/components/Fawn";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -8,25 +8,12 @@ export const metadata: Metadata = {
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-[#fafaf8] flex flex-col items-center justify-center gap-8 px-4">
-      <div className="text-center">
-        <div className="text-[96px] font-bold leading-none tracking-tight text-stone-300 mb-6">
-          404
-        </div>
-        <p className="text-stone-800 text-xl font-bold mb-2">
-          찾을 수 없는 페이지예요
-        </p>
-        <p className="text-stone-500 text-sm">
-          링크가 만료됐거나 잘못된 주소일 수 있어요
-        </p>
-      </div>
-
-      <Link
-        href="/"
-        className="flex items-center gap-2 text-sm text-stone-600 hover:text-stone-900 transition-colors duration-200"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        홈으로 돌아가기
+    <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-page px-5 text-center">
+      <Fawn mood="curious" className="h-40 w-40" title="고개를 갸웃하는 아기 사슴" />
+      <h1 className="font-cute mt-4 text-[28px] text-stone-900 sm:text-4xl">길을 잃었어요</h1>
+      <p className="mt-2 text-base text-stone-600">링크가 만료됐거나 잘못된 주소일 수 있어요</p>
+      <Link href="/" className="btn-primary mt-8 min-w-52">
+        홈으로 가기
       </Link>
     </div>
   );

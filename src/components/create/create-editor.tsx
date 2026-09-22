@@ -3,10 +3,11 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence, Reorder, useReducedMotion } from "framer-motion";
-import { ArrowLeft, ArrowRight, Pencil, Sparkles } from "lucide-react";
+import { ArrowLeft, Pencil, Scale, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { QUESTION_META, QUESTION_TYPES } from "@/lib/question-meta";
+import { Fawn } from "@/components/Fawn";
+import { QUESTION_META } from "@/lib/question-meta";
 import {
   CREATE_DRAFT_KEY,
   clearDraft,
@@ -218,8 +219,8 @@ export function CreateEditor({
 
   if (!showFullEditor) {
     return (
-      <div className="min-h-screen bg-[#fafaf8] text-stone-900">
-        <nav className="fixed inset-x-0 top-0 z-50 flex items-center justify-between border-b border-amber-100 bg-white/90 px-4 py-4 backdrop-blur-md md:px-8">
+      <div className="min-h-screen bg-page text-stone-900">
+        <nav className="fixed inset-x-0 top-0 z-50 flex items-center justify-between border-b border-stone-200 bg-white/90 px-4 py-4 backdrop-blur-md md:px-8">
           <button
             type="button"
             onClick={discardDraft}
@@ -236,7 +237,7 @@ export function CreateEditor({
 
         <main className="mx-auto max-w-xl px-4 pb-16 pt-24">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold leading-tight tracking-tight text-stone-900">
+            <h1 className="text-3xl font-cute leading-tight text-stone-900">
               질문 {questions.length}개 준비됐어요
             </h1>
             <p className="mt-3 break-words text-base leading-relaxed text-stone-600">{title}</p>
@@ -244,17 +245,17 @@ export function CreateEditor({
 
           <section aria-labelledby="prepared-questions-heading">
             <h2 id="prepared-questions-heading" className="sr-only">준비된 질문</h2>
-            <ol className="divide-y divide-amber-100 border-y border-amber-100">
+            <ol className="surface divide-y divide-stone-100 px-5">
               {questions.map((question, index) => {
                 const meta = QUESTION_META[question.type];
                 const Icon = meta.icon;
                 return (
                   <li key={question.id} className="flex items-start gap-3 py-4">
-                    <span className="mt-0.5 w-5 flex-shrink-0 font-mono text-xs tabular-nums text-stone-500">
+                    <span className="mt-0.5 w-5 flex-shrink-0 text-sm font-bold tabular-nums text-stone-500">
                       {index + 1}
                     </span>
                     <Icon className={cn("mt-0.5 h-4 w-4 flex-shrink-0", meta.accent)} aria-hidden="true" />
-                    <span className="min-w-0 flex-1 line-clamp-2 break-words text-sm font-medium leading-relaxed text-stone-800">
+                    <span className="min-w-0 flex-1 line-clamp-2 break-words text-base font-semibold leading-relaxed text-stone-800">
                       {question.title}
                     </span>
                   </li>
@@ -267,17 +268,16 @@ export function CreateEditor({
             <button
               type="button"
               onClick={openPublishModal}
-              className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-amber-600 text-sm font-semibold text-white shadow-lg shadow-amber-900/25 transition-colors hover:bg-amber-500"
+              className="btn-primary w-full"
             >
               링크 만들기
-              <ArrowRight className="h-4 w-4" />
             </button>
             <button
               type="button"
               onClick={() => setShowFullEditor(true)}
-              className="flex min-h-11 w-full items-center justify-center gap-2 text-sm font-medium text-stone-600 transition-colors hover:text-stone-900"
+              className="btn-secondary w-full bg-white hover:bg-stone-50"
             >
-              <Pencil className="h-3.5 w-3.5" />
+              <Pencil className="h-4 w-4" />
               수정하기
             </button>
           </div>
@@ -297,16 +297,16 @@ export function CreateEditor({
   }
 
   return (
-    <div className="min-h-screen bg-[#fafaf8] text-stone-900">
-      <nav className="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-4 md:px-8 py-4 border-b border-amber-100 bg-white/90 backdrop-blur-md">
+    <div className="min-h-screen bg-page text-stone-900">
+      <nav className="fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between border-b border-stone-100 bg-white/85 px-2 backdrop-blur-md sm:px-6">
         <Link
           href="/"
           aria-label="홈으로 돌아가기"
-          className="flex min-h-11 min-w-11 items-center gap-2 text-sm text-stone-600 hover:text-stone-900 transition-colors"
+          className="pressable flex min-h-11 min-w-11 items-center gap-2 rounded-xl px-2 text-[15px] font-semibold text-stone-700 hover:text-stone-900"
         >
-          <ArrowLeft className="w-4 h-4" />
-          <span className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-stone-900 tracking-tight">
-            <AntlerLogo className="w-3 h-[15px] text-amber-500" />
+          <ArrowLeft className="h-4 w-4" />
+          <span className="hidden items-center gap-1.5 tracking-tight text-stone-900 sm:inline-flex">
+            <AntlerLogo className="h-[15px] w-3 text-amber-500" />
             Deerlink
           </span>
         </Link>
@@ -315,80 +315,56 @@ export function CreateEditor({
           onClick={openPublishModal}
           disabled={!isValid}
           title={missing ?? undefined}
-          className={cn(
-            "hidden md:flex items-center gap-1.5 px-4 min-h-11 rounded-xl text-sm font-medium transition-colors duration-200",
-            isValid
-              ? "bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-900/30"
-              : "bg-stone-200 text-stone-500 cursor-not-allowed"
-          )}
+          className="btn-primary hidden min-h-10 rounded-xl px-4 text-[15px] md:inline-flex"
         >
           링크 만들기
-          <ArrowRight className="w-3.5 h-3.5" />
         </button>
       </nav>
 
-      <div className="max-w-xl mx-auto px-4 pt-24 pb-40 md:pb-20">
+      <div className="mx-auto max-w-xl px-4 pb-44 pt-20 md:pb-24 md:pt-24">
         {restored && (
           <motion.div
-            initial={{ opacity: 0, y: -6 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-6 flex items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3"
+            initial={reduceMotion ? false : { opacity: 0, transform: "translateY(-6px)" }}
+            animate={{ opacity: 1, transform: "translateY(0px)" }}
+            transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+            className="mb-4 flex items-center justify-between gap-3 rounded-2xl bg-amber-50 py-1 pl-4 pr-2"
           >
-            <p className="text-xs text-amber-900">작성 중이던 내용을 불러왔어요.</p>
+            <p className="text-[15px] font-medium text-amber-900">작성 중이던 내용을 불러왔어요</p>
             <button
               onClick={() => setShowDiscardConfirm(true)}
-              className="min-h-11 flex-shrink-0 px-2 text-xs text-amber-800 underline underline-offset-2 transition-colors hover:text-amber-900"
+              className="pressable min-h-11 flex-shrink-0 rounded-xl px-3 text-[15px] font-semibold text-amber-900 hover:bg-amber-100"
             >
               새로 쓰기
             </button>
           </motion.div>
         )}
 
-        <div className="mb-8">
-          <h1 className="mb-1 text-sm font-semibold text-stone-700">질문 만들기</h1>
-          <label htmlFor="room-title" className="sr-only">방 제목</label>
+        {/* 예시는 따로 한 줄을 두지 않고 placeholder가 돌아가며 보여준다. 글자 수는 한도에
+            가까울 때만 라벨 줄 오른쪽에 뜬다. 아래 줄을 따로 두면 카드 밑이 비어 보였다. */}
+        <div className="surface mb-3 px-5 py-4">
+          <div className="flex items-center justify-between gap-3">
+            <h1 className="text-sm font-semibold text-stone-600">방 제목</h1>
+            {title.length >= TITLE_MAX - 10 && (
+              <span className="text-sm tabular-nums text-stone-500">
+                {title.length}/{TITLE_MAX}
+              </span>
+            )}
+          </div>
           <input
             id="room-title"
             ref={titleInputRef}
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="제목을 입력하세요"
+            placeholder={TITLE_EXAMPLES[exampleIndex]}
             maxLength={TITLE_MAX}
             aria-label="방 제목"
-            className="min-h-11 w-full border-b border-amber-100 bg-transparent pb-3 text-2xl font-bold text-stone-900 placeholder:text-stone-500 transition-colors focus-visible:border-amber-500 focus-visible:outline-none"
+            className="input-lg mt-1 min-h-12 w-full bg-transparent text-[26px] font-bold tracking-tight text-stone-900 outline-none placeholder:text-stone-500"
           />
-          <div className="flex items-start justify-between gap-3 mt-2.5">
-            <AnimatePresence mode="wait">
-              {title.length === 0 && (
-                <motion.p
-                  key={exampleIndex}
-                  initial={reduceMotion ? false : { opacity: 0, y: -3 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 3 }}
-                  transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                  className="text-xs text-stone-500"
-                >
-                  <span>예시: </span>
-                  {TITLE_EXAMPLES[exampleIndex]}
-                </motion.p>
-              )}
-            </AnimatePresence>
-            {title.length > 0 && (
-              <span className="ml-auto text-xs text-stone-500 font-mono tabular-nums">
-                {title.length}/{TITLE_MAX}
-              </span>
-            )}
-          </div>
         </div>
 
         <div className="space-y-3">
-          <Reorder.Group
-            axis="y"
-            values={questions}
-            onReorder={setQuestions}
-            className="space-y-3"
-          >
+          <Reorder.Group axis="y" values={questions} onReorder={setQuestions} className="space-y-3">
             <AnimatePresence>
               {questions.map((q, i) => (
                 <QuestionCard
@@ -405,100 +381,72 @@ export function CreateEditor({
           </Reorder.Group>
 
           {title.trim().length === 0 && questions.length === 0 && (
-            <p className="pt-4 text-center text-xs text-stone-500">
-              제목을 정하면 질문을 추가할 수 있어요
-            </p>
+            <div className="flex flex-col items-center pt-6 text-center">
+              <Fawn mood="curious" className="h-24 w-24" />
+              <p className="mt-2 text-[15px] text-stone-600">제목을 정하면 질문을 추가할 수 있어요</p>
+            </div>
           )}
 
-          <AnimatePresence>
-            {!atMax && title.trim().length > 0 && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="grid grid-cols-3 gap-2"
+          {!atMax && title.trim().length > 0 && (
+            <div className="pt-3">
+              <p className="mb-2 px-1 text-[15px] font-semibold text-stone-700">
+                {questions.length === 0 ? "첫 질문을 골라주세요" : "질문 추가"}
+              </p>
+              {/* 밸런스 게임이 이 제품의 주력이라 한 줄을 통째로 쓴다. 세 유형을 같은 크기로
+                  두면 무엇을 먼저 만들지 고민하게 된다. */}
+              <button
+                onClick={() => addQuestion("balance")}
+                className="pressable fawn-spots flex min-h-20 w-full items-center gap-3 rounded-[24px] bg-amber-100 px-5 text-left text-amber-950 hover:bg-amber-200"
               >
-                {QUESTION_TYPES.map((type) => {
-                  const { icon: Icon, label } = QUESTION_META[type];
+                <Scale className="h-6 w-6 flex-shrink-0 text-amber-800" aria-hidden="true" />
+                <span className="text-lg font-bold">밸런스 게임</span>
+                <span className="ml-auto text-sm font-semibold text-amber-800">A vs B</span>
+              </button>
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                {(["multiple", "subjective"] as const).map((type) => {
+                  const { icon: Icon, label, accent } = QUESTION_META[type];
                   return (
-                    <motion.button
+                    <button
                       key={type}
                       onClick={() => addQuestion(type)}
-                      whileTap={{ scale: 0.97 }}
-                      className="flex items-center justify-center gap-1.5 min-h-11 rounded-xl border border-dashed border-stone-300 hover:border-amber-400 text-stone-600 hover:text-amber-700 text-xs transition-colors duration-150"
+                      className="pressable flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-white text-[15px] font-semibold text-stone-800 shadow-[inset_0_0_0_2px_#f1e4cf] hover:bg-[#fffaf2]"
                     >
-                      <Icon className="w-3.5 h-3.5" />
+                      <Icon className={cn("h-4 w-4", accent)} aria-hidden="true" />
                       {label}
-                    </motion.button>
+                    </button>
                   );
                 })}
-              </motion.div>
-            )}
-          </AnimatePresence>
+              </div>
+              <button
+                onClick={() => setShowSheet(true)}
+                className="pressable mt-2 flex min-h-12 w-full items-center justify-center gap-1.5 rounded-2xl text-[15px] font-semibold text-amber-900 hover:bg-amber-50"
+              >
+                <Sparkles className="h-4 w-4" aria-hidden="true" />
+                인기 질문에서 가져오기
+              </button>
+            </div>
+          )}
 
           {atMax && (
-            <p className="text-center text-xs text-stone-500">
+            <p className="text-center text-[15px] text-stone-500">
               질문은 최대 {MAX_QUESTIONS}개까지 넣을 수 있어요
             </p>
           )}
 
           {!atMax && questions.length >= APPROACHING_LIMIT && (
-            <p className="text-center text-xs text-stone-500">
+            <p className="text-center text-sm tabular-nums text-stone-500">
               질문 {questions.length}/{MAX_QUESTIONS}개
             </p>
-          )}
-
-          <AnimatePresence>
-            {!atMax && title.trim().length > 0 && (
-              <motion.button
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setShowSheet(true)}
-                className="w-full flex items-center justify-center gap-1.5 min-h-11 text-xs text-stone-600 hover:text-amber-700 transition-colors"
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                인기 질문에서 가져오기
-              </motion.button>
-            )}
-          </AnimatePresence>
-
-          {title.trim().length > 0 && questions.length === 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="relative flex flex-col items-center justify-center py-12 gap-4"
-            >
-              <Sparkles className="w-8 h-8 text-amber-300" />
-              <p className="text-center text-xs text-stone-600">
-                질문 하나면 충분해요
-              </p>
-            </motion.div>
           )}
 
           <div ref={bottomRef} />
         </div>
       </div>
 
-      <div className="fixed bottom-0 inset-x-0 md:hidden z-40">
-        <div className="bg-gradient-to-t from-[#fafaf8] via-[#fafaf8]/95 to-transparent pt-8 px-4 pb-safe">
-          <button
-            onClick={openPublishModal}
-            disabled={!isValid}
-            className={cn(
-              "w-full min-h-12 rounded-xl text-sm font-semibold transition-colors duration-200 flex items-center justify-center gap-2",
-              isValid
-                ? "bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-900/40"
-                : "bg-stone-200 text-stone-500"
-            )}
-          >
-            링크 만들기
-            <ArrowRight className="w-4 h-4" />
-          </button>
-          {missing && (
-            <p className="mt-2 text-center text-xs text-stone-500">{missing}</p>
-          )}
-        </div>
+      <div className="bottom-dock md:hidden">
+        <button onClick={openPublishModal} disabled={!isValid} className="btn-primary w-full">
+          {isValid ? "링크 만들기" : missing ?? "링크 만들기"}
+        </button>
       </div>
 
       <PopularQuestionsSheet

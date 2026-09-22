@@ -115,6 +115,7 @@ export function serializeDiscoverRoom(room: {
   const first = room.questions?.[0];
   const previewQuestion = first
     ? {
+        id: first.id,
         type: first.type as QuestionType,
         title: first.title,
         optionA: first.optionA,

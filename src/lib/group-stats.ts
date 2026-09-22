@@ -1,8 +1,8 @@
 import { parseOptions, type Participant, type Question, type ResultsRoom } from "./types";
 
 /**
- * "지우와 87% 일치" 같은 그룹 리포트 계산. 결과 페이지와 공유 카드가
- * 같은 숫자를 말해야 하므로 순수 함수로 뽑아 양쪽이 이 파일 하나만 쓴다.
+ * "지우와 87% 일치" 같은 그룹 리포트 계산. 인사이트·그룹 리포트·나의 결과가
+ * 같은 숫자를 말해야 하므로 순수 함수로 뽑아 이 파일 하나만 쓴다.
  */
 
 export interface PairScore {
@@ -210,4 +210,67 @@ export function primaryResultInsight(room: ResultsRoom): PrimaryResultInsight | 
 
   const aggregate = mostMeaningfulAggregate(room);
   return aggregate ? { kind: "aggregate", aggregate } : null;
+}
+
+export interface ViewerSummary {
+  /** 나를 포함해 2명 이상 답한 비교 가능 질문 수 */
+  comparable: number;
+  /** 내 답이 가장 많이 고른 답(동률 포함)과 같았던 질문 수 */
+  withMajority: number;
+  /** 나와 가장 잘 맞는 사람 — 비공개방에서만. 공개방 닉네임은 신원이 아니다. */
+  closest: { other: Participant; pct: number; comparable: number } | null;
+}
+
+/**
+ * 결과 페이지의 "나의 결과". 참여자 전체 통계와 같은 집계(questionAggregate,
+ * computePairScores)에서 나를 기준으로 잘라낼 뿐이라 두 숫자가 어긋나지 않는다.
+ */
+export function computeViewerSummary(
+  room: ResultsRoom,
+  viewerId: string
+): ViewerSummary | null {
+  const viewer = room.participants.find((p) => p.id === viewerId);
+  if (!viewer) return null;
+
+  let comparable = 0;
+  let withMajority = 0;
+  for (const question of comparableQuestions(room)) {
+    const value = viewer.answers.find((a) => a.questionId === question.id)?.value;
+    if (value == null) continue;
+    const aggregate = questionAggregate(room, question);
+    const label = answerLabel(question, value);
+    if (!aggregate || aggregate.total < 2 || label == null) continue;
+    comparable++;
+    if (aggregate.topLabels.includes(label)) withMajority++;
+  }
+
+  let closest: ViewerSummary["closest"] = null;
+  if (!room.isPublic) {
+    for (const pair of computePairScores(room)) {
+      if (pair.a.id !== viewerId && pair.b.id !== viewerId) continue;
+      if (closest && closest.pct >= pair.pct) continue;
+      closest = {
+        other: pair.a.id === viewerId ? pair.b : pair.a,
+        pct: pair.pct,
+        comparable: pair.comparable,
+      };
+    }
+  }
+
+  return comparable > 0 || closest ? { comparable, withMajority, closest } : null;
+}
+
+export type ViewerVerdict = { kind: "majority" | "balanced" | "independent"; label: string; detail: string };
+
+/**
+ * "나의 결과"를 숫자(4/4) 대신 한마디로 말한다. 대세와 같았던 비율로만 가른다.
+ * 비교 가능한 질문이 2개 미만이면 판정하지 않는다 (가짜 정밀도보다 침묵).
+ */
+export function viewerVerdict(summary: ViewerSummary): ViewerVerdict | null {
+  if (summary.comparable < 2) return null;
+  const ratio = summary.withMajority / summary.comparable;
+  const detail = `${summary.comparable}개 중 ${summary.withMajority}개가 대세와 같았어요`;
+  if (ratio >= 0.75) return { kind: "majority", label: "대세파", detail };
+  if (ratio <= 0.25) return { kind: "independent", label: "소신파", detail };
+  return { kind: "balanced", label: "균형파", detail };
 }

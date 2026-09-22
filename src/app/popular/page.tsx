@@ -59,7 +59,7 @@ const itemListJsonLd = {
 
 export default function PopularPage() {
   return (
-    <div className="min-h-screen bg-[#fafaf8] text-stone-900">
+    <div className="min-h-screen bg-page text-stone-900">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
@@ -69,7 +69,7 @@ export default function PopularPage() {
 
       <main className="max-w-3xl mx-auto px-6 pt-32 pb-24">
         <header className="mb-14">
-          <h1 className="break-keep text-4xl md:text-5xl font-bold text-stone-900 tracking-tight leading-[1.1] mb-6">
+          <h1 className="break-keep text-4xl md:text-5xl font-cute text-stone-900 leading-[1.1] mb-6">
             단톡방에서 바로 쓰는
             <br />
             <span className="text-stone-500">밸런스 게임 질문 {total}선</span>
@@ -81,17 +81,17 @@ export default function PopularPage() {
           </p>
           <Link
             href="/create"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-sm font-medium transition-all duration-200 shadow-lg shadow-amber-900/30 hover:-translate-y-0.5"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-amber-700 hover:bg-amber-800 text-white text-sm font-medium transition-all duration-200 shadow-lg shadow-amber-900/30 hover:-translate-y-0.5"
           >
             방 만들기 시작
             <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
           </Link>
         </header>
 
-        <section aria-labelledby="topics-heading" className="border-y border-amber-100 py-10">
+        <section aria-labelledby="topics-heading" className="border-y border-stone-200 py-10">
           <h2
             id="topics-heading"
-            className="text-2xl md:text-3xl font-bold tracking-tight text-stone-900"
+            className="text-2xl md:text-3xl font-cute text-stone-900"
           >
             어떤 자리에서 쓸 건가요?
           </h2>
@@ -104,7 +104,7 @@ export default function PopularPage() {
               <Link
                 key={topic.slug}
                 href={`/popular/${topic.slug}`}
-                className="group rounded-2xl border border-amber-100 bg-white p-5 transition-colors hover:border-amber-300 hover:bg-amber-50/40"
+                className="group rounded-2xl border border-stone-200 bg-white p-5 transition-colors hover:border-amber-300 hover:bg-amber-50/40"
               >
                 <p className="text-base font-bold text-stone-900">{topic.label}</p>
                 <p className="mt-1 text-xs leading-relaxed text-stone-600">{topic.tagline}</p>
@@ -149,7 +149,7 @@ export default function PopularPage() {
 
         <section className="mt-20 rounded-3xl bg-amber-50 border border-amber-100 px-8 py-14 text-center">
           <AntlerLogo className="w-10 h-12 text-amber-500 mx-auto mb-6" />
-          <h2 className="text-2xl md:text-3xl font-bold text-stone-900 tracking-tight mb-4">
+          <h2 className="text-2xl md:text-3xl font-cute text-stone-900 mb-4">
             마음에 드는 질문 있었나요?
           </h2>
           <p className="text-sm text-stone-600 leading-relaxed mb-8 max-w-md mx-auto">
@@ -158,7 +158,7 @@ export default function PopularPage() {
           </p>
           <Link
             href="/create"
-            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-sm font-medium transition-all duration-200 shadow-lg shadow-amber-900/40 hover:-translate-y-0.5"
+            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-amber-700 hover:bg-amber-800 text-white text-sm font-medium transition-all duration-200 shadow-lg shadow-amber-900/40 hover:-translate-y-0.5"
           >
             지금 방 만들기
             <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
@@ -191,7 +191,7 @@ function Section({
   return (
     <section className="mt-16">
       <div className="mb-8">
-        <h2 className="flex items-center gap-2.5 text-2xl md:text-3xl font-bold text-stone-900 tracking-tight mb-3">
+        <h2 className="flex items-center gap-2.5 text-2xl md:text-3xl font-cute text-stone-900 mb-3">
           <Icon className={`h-5 w-5 flex-shrink-0 ${meta.accent}`} aria-hidden="true" />
           {title}
         </h2>

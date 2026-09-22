@@ -3,13 +3,14 @@
 import { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Menu } from "@base-ui/react/menu";
-import { AlertCircle, ArrowRight, Check, ChevronDown, Flame, History, Hourglass, Loader2, MessagesSquare, Users, type LucideIcon } from "lucide-react";
+import { AlertCircle, Check, ChevronDown, ChevronRight, Flame, History, Hourglass, Loader2, MessagesSquare, Users, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { formatRemainingShort } from "@/lib/format";
 import type { DiscoverPreviewQuestion, DiscoverRoom } from "@/lib/types";
 import type { DiscoverSort } from "@/lib/discover-rooms";
 import { BalanceRatioBar } from "@/components/ResultBar";
+import { Fawn } from "@/components/Fawn";
 
 /**
  * /discover 페이지와 랜딩 공개방 섹션이 공유하는 목록 UI다.
@@ -23,6 +24,7 @@ export function PublicRoomsFeed({
   mode = "full",
   initialError = null,
   pageSize,
+  excludeId = null,
 }: {
   initialRooms: DiscoverRoom[];
   initialTotal: number;
@@ -32,6 +34,8 @@ export function PublicRoomsFeed({
   initialError?: string | null;
   /** landing은 한 화면 분량만 보여준다. 정렬을 바꿔도 같은 개수만 다시 받는다. */
   pageSize?: number;
+  /** 랜딩 히어로가 이미 보여준 방. 목록에서 빼고, 그 자리를 채우려고 하나 더 받는다. */
+  excludeId?: string | null;
 }) {
   const [rooms, setRooms] = useState(initialRooms);
   const [total, setTotal] = useState(initialTotal);
@@ -44,7 +48,8 @@ export function PublicRoomsFeed({
     { kind: "sort"; sort: DiscoverSort } | { kind: "more" } | null
   >(initialError ? { kind: "sort", sort: initialSort } : null);
   const reduceMotion = useReducedMotion();
-  const pageSizeQuery = pageSize ? `&pageSize=${pageSize}` : "";
+  const fetchSize = pageSize && excludeId ? pageSize + 1 : pageSize;
+  const pageSizeQuery = fetchSize ? `&pageSize=${fetchSize}` : "";
 
   const requestRooms = async (url: string) => {
     const res = await fetch(url, { cache: "no-store" });
@@ -117,7 +122,8 @@ export function PublicRoomsFeed({
     }
   };
 
-  const visibleRooms = pageSize ? rooms.slice(0, pageSize) : rooms;
+  const listed = excludeId ? rooms.filter((room) => room.id !== excludeId) : rooms;
+  const visibleRooms = pageSize ? listed.slice(0, pageSize) : listed;
   const landing = mode === "landing";
   const sortOptions = landing ? LANDING_SORTS : FULL_SORTS;
 
@@ -128,12 +134,12 @@ export function PublicRoomsFeed({
         value={sort}
         onChange={changeSort}
         disabled={loading}
-        className={landing ? "mb-5" : "mb-6"}
+        className="mb-5"
       />
 
       {error && (
         <div
-          className="mb-5 flex items-center justify-between gap-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3"
+          className="mb-5 flex items-center justify-between gap-4 rounded-2xl bg-red-50 px-4 py-3"
           role="alert"
         >
           <div className="flex min-w-0 items-start gap-2 text-red-700">
@@ -150,50 +156,33 @@ export function PublicRoomsFeed({
         </div>
       )}
 
-      {rooms.length === 0 && !loading && !error && (
-        mode === "landing" ? (
-          <div className="grid overflow-hidden rounded-3xl border border-amber-200 bg-white shadow-lg shadow-amber-100/60 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
-            <div className="p-7 sm:p-9">
-              <Users className="mb-6 h-9 w-9 text-amber-700" aria-hidden="true" />
-              <h3 className="text-2xl font-bold tracking-tight text-stone-900">
-                첫 공개방을 열어주세요
-              </h3>
-              <p className="mt-3 max-w-xl text-base leading-relaxed text-stone-600">
-                방을 만들 때 공개로 설정하면 이곳에서 누구나 결과를 보고 익명으로
-                답할 수 있어요.
-              </p>
-            </div>
-            <div className="border-t border-amber-100 p-7 md:border-l md:border-t-0 md:p-9">
-              <Link
-                href="/create"
-                className="group inline-flex min-h-12 items-center gap-2 rounded-xl bg-amber-700 px-6 text-sm font-semibold text-white shadow-lg shadow-amber-900/20 transition-colors hover:bg-amber-600"
-              >
-                공개방 만들기
-                <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden="true" />
-              </Link>
-            </div>
+      {visibleRooms.length === 0 && !loading && !error && (
+        <div className="surface flex flex-col items-start gap-6 p-7 sm:flex-row sm:items-center sm:justify-between sm:p-9">
+          <Fawn mood="curious" className="h-20 w-20 flex-shrink-0" />
+          <div className="flex-1">
+            <h3 className="text-xl font-cute text-stone-900 sm:text-2xl">
+              {landing ? "첫 공개방을 열어주세요" : "아직 공개된 방이 없어요"}
+            </h3>
+            <p className="mt-2 max-w-xl text-base leading-relaxed text-stone-600">
+              방을 만들 때 공개로 설정하면 여기서 누구나 익명으로 답할 수 있어요.
+            </p>
           </div>
-        ) : (
-          <div className="py-16 text-center">
-            <Users className="mx-auto mb-5 h-10 w-10 text-stone-300" />
-            <p className="text-stone-600 text-sm">아직 공개된 방이 없어요</p>
-            <p className="text-stone-600 text-xs mt-1">방을 만들 때 공개로 설정하면 여기 나타나요</p>
-          </div>
-        )
+          <Link href="/create" className="btn-primary flex-shrink-0">
+            공개방 만들기
+          </Link>
+        </div>
       )}
 
       {visibleRooms.length > 0 && (
         <>
           {mode === "full" && (
-            <p className="mb-3 text-xs text-stone-500 font-mono tabular-nums">{total}개 방</p>
+            <p className="mb-3 text-sm tabular-nums text-stone-600">{total}개 방</p>
           )}
           <div
             className={cn(
-              "min-w-0",
-              landing
-                ? "divide-y divide-amber-100 transition-opacity duration-200"
-                : "space-y-3",
-              landing && loading && "opacity-60"
+              "grid min-w-0 gap-3 transition-opacity duration-200 sm:gap-4",
+              landing ? "sm:grid-cols-2 lg:grid-cols-3" : "sm:grid-cols-2",
+              loading && "opacity-60"
             )}
           >
             {visibleRooms.map((room, i) =>
@@ -202,12 +191,12 @@ export function PublicRoomsFeed({
               ) : (
                 <motion.div
                   key={room.id}
-                  initial={reduceMotion ? false : { opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: (i % 12) * 0.04 }}
+                  initial={reduceMotion ? false : { opacity: 0, transform: "translateY(8px)" }}
+                  animate={{ opacity: 1, transform: "translateY(0px)" }}
+                  transition={{ duration: 0.28, delay: (i % 12) * 0.04, ease: [0.23, 1, 0.32, 1] }}
                   className="min-w-0"
                 >
-                  <RoomCard room={room} size="compact" />
+                  <RoomCard room={room} size="compact" className="h-full" />
                 </motion.div>
               )
             )}
@@ -219,7 +208,7 @@ export function PublicRoomsFeed({
         <button
           onClick={loadMore}
           disabled={loading}
-          className="mt-6 flex items-center justify-center gap-2 w-full min-h-11 rounded-xl border border-dashed border-stone-300 hover:border-amber-400 text-sm text-stone-600 hover:text-amber-700 transition-colors disabled:opacity-60"
+          className="btn-secondary mt-6 w-full bg-white hover:bg-stone-50"
         >
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "더 보기"}
         </button>
@@ -270,54 +259,39 @@ function RoomCard({
   return (
     <Link
       href={`/room/${room.id}?join=1`}
-      aria-label={`${room.title} 공개방 참여하기`}
+      aria-label={`${headline}, ${room.title} 공개방 참여하기`}
       className={cn(
-        "group block min-w-0 rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-600",
-        size === "list" && "rounded-xl",
+        "group block min-w-0 rounded-[20px] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-600",
         className
       )}
     >
       <article
         className={cn(
-          "flex min-w-0 flex-col transition-[background-color,transform] duration-200",
-          size === "list"
-            ? "-mx-2 gap-4 rounded-xl px-2 py-6 group-hover:bg-amber-50/60 sm:-mx-4 sm:px-4"
-            : "h-full gap-3 overflow-hidden rounded-2xl border border-amber-100 bg-white p-5 transition-[border-color,box-shadow,transform] duration-200 group-hover:-translate-y-0.5 group-hover:border-amber-300 group-hover:shadow-lg group-hover:shadow-amber-100/50"
+          "surface flex h-full min-w-0 flex-col gap-4 p-5 sm:p-6",
+          "transition-[transform,box-shadow] duration-200 ease-out-strong group-active:scale-[0.98]",
+          "group-hover:-translate-y-0.5 group-hover:shadow-[0_1px_2px_rgb(28_20_18/0.04),0_12px_32px_-12px_rgb(28_20_18/0.18)]"
         )}
       >
-        <p
-          className={cn(
-            "break-keep font-bold leading-snug text-stone-900",
-            size === "list" ? "line-clamp-2 text-lg sm:text-xl" : "line-clamp-2 text-base"
-          )}
-        >
+        <p className="line-clamp-2 break-keep text-[17px] font-bold leading-snug tracking-tight text-stone-900 sm:text-lg">
           {headline}
         </p>
 
         {q && <TypePreview question={q} size={size} />}
 
-        <div className="mt-auto flex items-end justify-between gap-3">
-          <div
-            className={cn(
-              "flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-stone-500",
-              size === "compact" ? "text-xs" : "text-sm"
-            )}
-          >
-            {q && <span className="truncate text-stone-600">{room.title}</span>}
+        <div className="mt-auto flex items-center justify-between gap-3 pt-1 text-sm text-stone-500">
+          <div className="flex min-w-0 items-center gap-x-3">
+            {q && <span className="truncate font-medium text-stone-600">{room.title}</span>}
             <span className="flex flex-shrink-0 items-center gap-1">
               <Users className="h-3.5 w-3.5" aria-hidden="true" />
               <span className="tabular-nums">{room.participantCount}</span>
             </span>
-            <span className="flex flex-shrink-0 items-center gap-1 font-mono tabular-nums">
+            <span className="flex flex-shrink-0 items-center gap-1 tabular-nums">
               <Hourglass className="h-3.5 w-3.5" aria-hidden="true" />
               {formatRemainingShort(room.expiresAt)}
             </span>
           </div>
-          <ArrowRight
-            className={cn(
-              "flex-shrink-0 text-amber-700 transition-transform duration-200 group-hover:translate-x-1",
-              size === "compact" ? "h-4 w-4" : "h-5 w-5"
-            )}
+          <ChevronRight
+            className="h-5 w-5 flex-shrink-0 text-stone-400 transition-transform duration-200 ease-out-strong group-hover:translate-x-0.5 group-hover:text-stone-700"
             aria-hidden="true"
           />
         </div>
@@ -348,19 +322,9 @@ function TypePreview({ question, size }: { question: DiscoverPreviewQuestion; si
     }
 
     return (
-      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 sm:gap-3">
-        <OptionChip tone="amber" size={size}>
-          {question.optionA}
-        </OptionChip>
-        <span
-          className={cn("font-semibold text-stone-400", size === "list" ? "text-sm" : "text-xs")}
-          aria-hidden="true"
-        >
-          VS
-        </span>
-        <OptionChip tone="teal" size={size}>
-          {question.optionB}
-        </OptionChip>
+      <div className="grid grid-cols-2 gap-2">
+        <OptionChip tone="amber">{question.optionA}</OptionChip>
+        <OptionChip tone="teal">{question.optionB}</OptionChip>
       </div>
     );
   }
@@ -369,25 +333,17 @@ function TypePreview({ question, size }: { question: DiscoverPreviewQuestion; si
     const shown = question.options.slice(0, 3);
     const extra = question.options.length - shown.length;
     return (
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-1.5">
         {shown.map((option) => (
           <span
             key={option}
-            className={cn(
-              "truncate rounded-lg border border-teal-200 bg-teal-50 font-medium text-teal-900",
-              size === "compact" ? "px-2.5 py-1 text-xs" : "px-3 py-1.5 text-sm"
-            )}
+            className="max-w-full truncate rounded-lg bg-teal-50 px-3 py-1.5 text-sm font-medium text-teal-900"
           >
             {option}
           </span>
         ))}
         {extra > 0 && (
-          <span
-            className={cn(
-              "rounded-lg border border-stone-200 bg-stone-50 font-medium text-stone-500",
-              size === "compact" ? "px-2.5 py-1 text-xs" : "px-3 py-1.5 text-sm"
-            )}
-          >
+          <span className="rounded-lg bg-stone-100 px-3 py-1.5 text-sm font-medium text-stone-600">
             +{extra}
           </span>
         )}
@@ -398,26 +354,15 @@ function TypePreview({ question, size }: { question: DiscoverPreviewQuestion; si
   return null;
 }
 
-function OptionChip({
-  tone,
-  size,
-  children,
-}: {
-  tone: "amber" | "teal";
-  size: CardSize;
-  children: string;
-}) {
+function OptionChip({ tone, children }: { tone: "amber" | "teal"; children: string }) {
   return (
     <span
       className={cn(
-        "flex items-center justify-center break-keep rounded-xl border text-center font-semibold leading-snug",
-        tone === "amber" ? "border-amber-200 bg-amber-50 text-amber-900" : "border-teal-200 bg-teal-50 text-teal-900",
-        size === "list"
-          ? "min-h-12 px-3 py-2 text-base"
-          : "min-h-10 px-2.5 py-1.5 text-sm"
+        "fawn-spots flex min-h-14 items-center justify-center break-keep rounded-2xl px-3 py-2 text-center text-[15px] font-semibold leading-snug",
+        tone === "amber" ? "bg-amber-100 text-amber-950" : "bg-teal-100 text-teal-950"
       )}
     >
-      {children}
+      <span className="line-clamp-2">{children}</span>
     </span>
   );
 }
@@ -451,7 +396,7 @@ function SortMenu({
         disabled={disabled}
         aria-label={`공개방 정렬: ${active.label}`}
         className={cn(
-          "flex min-h-11 items-center gap-1.5 rounded-xl bg-stone-100 px-4 text-sm font-semibold text-stone-800 transition-colors hover:bg-stone-200 disabled:cursor-wait disabled:opacity-60",
+          "pressable flex min-h-10 items-center gap-1.5 rounded-full bg-white px-4 text-[15px] font-semibold text-stone-800 shadow-[inset_0_0_0_2px_#f1e4cf] hover:bg-[#fffaf2] disabled:cursor-wait disabled:opacity-60",
           "data-[popup-open]:bg-amber-50 data-[popup-open]:text-amber-900",
           className
         )}
@@ -462,14 +407,14 @@ function SortMenu({
       </Menu.Trigger>
       <Menu.Portal>
         <Menu.Positioner side="bottom" align="start" sideOffset={6}>
-          <Menu.Popup className="min-w-40 rounded-2xl border border-amber-100 bg-white p-1.5 shadow-lg shadow-amber-100/60 outline-none data-[starting-style]:scale-95 data-[starting-style]:opacity-0 data-[ending-style]:scale-95 data-[ending-style]:opacity-0 transition-[opacity,transform] duration-150">
+          <Menu.Popup className="min-w-44 origin-[var(--transform-origin)] rounded-2xl bg-white p-1.5 shadow-[0_2px_4px_rgb(28_20_18/0.06),0_16px_40px_-12px_rgb(28_20_18/0.25)] outline-none transition-[opacity,transform] duration-150 ease-out-strong data-[starting-style]:scale-[0.96] data-[starting-style]:opacity-0 data-[ending-style]:scale-[0.96] data-[ending-style]:opacity-0">
             <Menu.RadioGroup value={value} onValueChange={onChange}>
               {options.map(({ value: optionValue, label, icon: Icon }) => (
                 <Menu.RadioItem
                   key={optionValue}
                   value={optionValue}
                   closeOnClick
-                  className="flex min-h-11 cursor-pointer items-center justify-between gap-4 rounded-xl px-3 text-sm font-medium text-stone-700 outline-none data-[highlighted]:bg-amber-50 data-[highlighted]:text-amber-900"
+                  className="flex min-h-11 cursor-pointer items-center justify-between gap-4 rounded-xl px-3 text-[15px] font-medium text-stone-700 outline-none data-[highlighted]:bg-stone-100 data-[highlighted]:text-stone-900"
                 >
                   <span className="flex items-center gap-2">
                     {Icon && <Icon className="h-3.5 w-3.5" aria-hidden="true" />}

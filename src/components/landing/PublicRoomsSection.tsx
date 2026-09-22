@@ -1,53 +1,46 @@
-import { ArrowRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { PublicRoomsFeed } from "@/components/discover/public-rooms-feed";
 import type { DiscoverRoom } from "@/lib/types";
 
-/**
- * 세 항목을 같은 크기 리스트로 보여준다 (`PublicRoomsFeed`의 `RoomCard` size="list").
- * 카드 박스 없이 구분선(`divide-y`)만으로 항목을 나눈다.
- */
-export const LANDING_ROOM_COUNT = 3;
+/** 데스크톱 3열 두 줄 분량. 히어로가 가져간 1위 방은 목록에서 뺀다 (`excludeId`). */
+export const LANDING_ROOM_COUNT = 6;
 
 /**
- * 히어로 바로 아래, 첫 화면에 걸치는 섹션이라 등장 애니메이션을 걸지 않는다.
- * initial opacity 0이면 서버 HTML에 투명하게 박혀서 JS가 돌기 전까지 안 보인다.
+ * 회색 바탕 위 흰 카드 그리드. 히어로(흰 바탕)와 바탕색으로 섹션이 갈린다.
+ * 첫 화면에 걸치는 섹션이라 등장 애니메이션을 걸지 않는다.
  */
 export function PublicRoomsSection({
   rooms,
   total,
   hasMore,
   error,
+  excludeId,
 }: {
   rooms: DiscoverRoom[];
   total: number;
   hasMore: boolean;
   error: string | null;
+  excludeId: string | null;
 }) {
   return (
-    <section
-      aria-labelledby="public-rooms-title"
-      className="border-t border-amber-100 bg-white px-6 pb-20 pt-16 md:pb-24 md:pt-20"
-    >
+    <section aria-labelledby="public-rooms-title" className="bg-page px-5 py-16 sm:px-6 md:py-24">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-5 flex items-end justify-between gap-4">
+        <div className="mb-4 flex items-center justify-between gap-4">
           <h2
             id="public-rooms-title"
-            className="text-2xl font-bold leading-tight tracking-tight text-stone-900 sm:text-3xl"
+            className="text-[26px] font-cute leading-tight text-stone-900 sm:text-4xl"
           >
-            인기 밸런스 게임
+            지금 뜨는 밸런스 게임
           </h2>
 
           {total > 0 && (
             <Link
               href="/discover"
-              className="group inline-flex min-h-11 flex-shrink-0 items-center gap-1 text-sm font-semibold text-amber-800 transition-colors hover:text-amber-600 sm:text-base"
+              className="pressable -mr-2 inline-flex min-h-11 flex-shrink-0 items-center rounded-xl px-2 text-[15px] font-semibold text-stone-600 hover:text-stone-900"
             >
               전체 보기
-              <ArrowRight
-                className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5"
-                aria-hidden="true"
-              />
+              <ChevronRight className="h-4 w-4" aria-hidden="true" />
             </Link>
           )}
         </div>
@@ -60,6 +53,7 @@ export function PublicRoomsSection({
           initialError={error}
           mode="landing"
           pageSize={LANDING_ROOM_COUNT}
+          excludeId={excludeId}
         />
       </div>
     </section>
