@@ -1,83 +1,95 @@
-import { ArrowRight } from "lucide-react";
+import { Plus } from "lucide-react";
 import Link from "next/link";
 import { popularQuestionPath, type PopularQuestion } from "@/data/popular-questions";
 import { QUESTION_META } from "@/lib/question-meta";
+import { cn } from "@/lib/utils";
+
+const MULTIPLE_PREVIEW = 3;
 
 /**
- * /popular 과 /popular/[topic] 이 같은 카드를 쓴다.
- * 카드 테두리는 유형과 무관하게 amber 단색이다 — 예전엔 객관식만 teal 테두리였는데,
- * teal은 밸런스 B 옵션 대비색이라 카드 계열색으로 쓰면 의미가 두 개가 된다.
+ * 밸런스는 A amber / B teal, 객관식은 teal 톤 하나로 3개까지 + "+N" — RoomCard의 TypePreview와
+ * 같은 문법이다. 주관식은 보여줄 선택지가 없으니 비운다.
  */
-function QuestionBody({ question }: { question: PopularQuestion }) {
+function Choices({ question }: { question: PopularQuestion }) {
   if (question.type === "balance") {
     return (
-      <div className="grid grid-cols-2 gap-2">
-        <div className="py-2 px-3 rounded-lg border border-amber-100 bg-amber-50 text-xs font-medium text-amber-900 text-center">
-          {question.optionA}
-        </div>
-        <div className="py-2 px-3 rounded-lg border border-teal-100 bg-teal-50 text-xs font-medium text-teal-900 text-center">
-          {question.optionB}
-        </div>
+      <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs font-medium">
+        <span className="rounded-full bg-amber-50 px-2.5 py-1 text-amber-900">{question.optionA}</span>
+        <span className="text-stone-500">vs</span>
+        <span className="rounded-full bg-teal-50 px-2.5 py-1 text-teal-900">{question.optionB}</span>
       </div>
     );
   }
 
-  if (question.type === "multiple") {
+  if (question.type === "multiple" && question.options) {
+    const shown = question.options.slice(0, MULTIPLE_PREVIEW);
+    const rest = question.options.length - shown.length;
     return (
-      <ul className="space-y-1.5">
-        {question.options?.map((option) => (
-          <li key={option} className="flex items-center gap-2 text-xs text-stone-600">
-            <span className="w-1 h-1 rounded-full bg-amber-400 flex-shrink-0" aria-hidden="true" />
+      <div className="mt-2 flex flex-wrap gap-1.5 text-xs font-medium">
+        {shown.map((option) => (
+          <span key={option} className="rounded-full bg-teal-50 px-2.5 py-1 text-teal-900">
             {option}
-          </li>
+          </span>
         ))}
-      </ul>
+        {rest > 0 && <span className="px-1 py-1 text-stone-500">+{rest}</span>}
+      </div>
     );
   }
 
   return null;
 }
 
-export function PopularQuestionCard({
+/**
+ * 한 줄에 한 질문. 행 전체가 질문 상세(/popular/q/[id])로 가는 링크이고, 오른쪽 버튼만
+ * 바로 방 만들기로 간다. 예전 카드는 질문 하나에 200px 넘게 써서 70개가 한 화면에 안 잡혔다.
+ */
+export function PopularQuestionRow({
   question,
-  index,
+  rank,
+  highlight,
   showType,
 }: {
   question: PopularQuestion;
-  index: number;
+  rank: number;
+  highlight: boolean;
   showType: boolean;
 }) {
   const meta = QUESTION_META[question.type];
 
   return (
-    <li className="rounded-2xl border border-stone-200 bg-white p-5">
-      <div className="mb-2 flex items-center gap-2">
-        <span className="font-mono text-xs tabular-nums text-amber-700">
-          {String(index + 1).padStart(2, "0")}
-        </span>
+    <li className="relative flex items-center gap-3 px-4 py-4 transition-colors hover:bg-amber-50/40 sm:gap-4 sm:px-6">
+      <span
+        className={cn(
+          "w-8 flex-shrink-0 text-center font-cute text-2xl tabular-nums",
+          highlight ? "text-amber-700" : "text-stone-500"
+        )}
+      >
+        {rank}
+      </span>
+      <div className="min-w-0 flex-1">
         {showType && (
-          <span
-            className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${meta.badge}`}
-          >
+          <span className={cn("mb-1 inline-flex rounded-full border px-2 py-0.5 text-[11px] font-medium", meta.badge)}>
             {meta.label}
           </span>
         )}
+        <h3 className="break-keep text-[15px] font-semibold leading-snug text-stone-900 sm:text-base">
+          <Link
+            href={popularQuestionPath(question.id)}
+            className="after:absolute after:inset-0 after:content-[''] focus-visible:outline-none"
+          >
+            {question.title}
+          </Link>
+        </h3>
+        <Choices question={question} />
       </div>
-      <h3 className="mb-3 break-keep text-base font-bold leading-snug text-stone-900">
-        <Link
-          href={popularQuestionPath(question.id)}
-          className="underline-offset-4 transition-colors hover:text-amber-900 hover:underline"
-        >
-          {question.title}
-        </Link>
-      </h3>
-      <QuestionBody question={question} />
       <Link
         href={`/create?question=${encodeURIComponent(question.id)}`}
-        className="mt-4 flex min-h-11 items-center justify-end gap-1.5 border-t border-stone-200 pt-3 text-sm font-semibold text-amber-800 transition-colors hover:text-amber-950"
+        aria-label={`"${question.title}" 질문으로 방 만들기`}
+        className="pressable relative z-10 flex min-h-11 flex-shrink-0 items-center justify-center gap-1 rounded-full bg-amber-100 pl-2.5 pr-3.5 text-sm font-semibold text-amber-900 hover:bg-amber-200"
       >
-        이 질문으로 시작
-        <ArrowRight className="h-4 w-4" aria-hidden="true" />
+        <Plus className="h-4 w-4" aria-hidden="true" />
+        <span className="sm:hidden">시작</span>
+        <span className="hidden sm:inline">이 질문으로 시작</span>
       </Link>
     </li>
   );
@@ -86,20 +98,29 @@ export function PopularQuestionCard({
 export function PopularQuestionList({
   questions,
   showType = false,
+  startRank = 1,
+  highlightTop = 0,
 }: {
   questions: PopularQuestion[];
   showType?: boolean;
+  startRank?: number;
+  /** 앞에서 몇 개의 순위 숫자를 amber로 강조할지. 순위가 없는 목록(주제 페이지)은 0. */
+  highlightTop?: number;
 }) {
   return (
-    <ol className="space-y-4">
-      {questions.map((question, index) => (
-        <PopularQuestionCard
-          key={question.id}
-          question={question}
-          index={index}
-          showType={showType}
-        />
-      ))}
+    <ol start={startRank} className="surface divide-y divide-stone-100 overflow-hidden">
+      {questions.map((question, index) => {
+        const rank = startRank + index;
+        return (
+          <PopularQuestionRow
+            key={question.id}
+            question={question}
+            rank={rank}
+            highlight={rank <= highlightTop}
+            showType={showType}
+          />
+        );
+      })}
     </ol>
   );
 }
