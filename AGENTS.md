@@ -481,6 +481,11 @@ const room = await prisma.room.findUnique({
   나머지는 채워지는 대로 붙이면 된다.
 - `brief.why`는 meta description으로도 쓴다(검색결과에서 잘리지 않게 why까지만). 집계가 쌓이면
   집계 문장이 우선한다.
+- 사이트맵의 질문 페이지는 **우선순위를 3단으로 나눈다**: 실제 답이 `QUESTION_STATS_MIN_ANSWERS`
+  이상 쌓인 질문 0.7(weekly) > 유형별 상위 20(= `/popular` 1페이지) 0.5 > 나머지 0.3(monthly).
+  106개를 같은 값으로 올리면 크롤러가 어디부터 볼지 알 수 없다. **얇다고 빼지는 않는다** —
+  질문마다 `brief`가 있다. 집계 조회는 `getAnsweredQuestionIds()` 한 번으로 끝낸다
+  (질문마다 `getQuestionStats`를 부르면 libSQL 왕복이 100번을 넘는다). 실패하면 전부 기본값이다.
 
 사용자에게 보이는 명칭은 **테마**다 ("팩"은 2026-08에 "테마"로 바꿨다 — `PackPicker`/`question-packs.ts`/`QuestionPack`/`initialSource="pack"` 같은 코드 식별자는 그대로 두고, 화면에 노출되는 문구만 바꿨다는 뜻. 새 코드에서도 변수명은 `pack` 계열을 그대로 쓰고, 사용자 문구에서만 "테마"라고 쓸 것 — 식별자까지 바꾸는 전면 리네임은 하지 않았다).
 
