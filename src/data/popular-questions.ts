@@ -250,7 +250,7 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     optionB: "카톡 폭격 애인",
     brief: {
       why: "연락이 너무 없는 쪽과 너무 많은 쪽, 둘 다 피곤한데 하나를 골라야 한다. 연락 빈도에 대한 기준이 서로 다르다는 게 드러난다.",
-      tip: "연애 중인 친구들끼리 하면 각자의 불만이 자연스럽게 나온다.",
+      tip: "연락 습관이 다른 커플이 왜 부딪히는지 설명해준다.",
     },
   },
   {
@@ -382,7 +382,7 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     optionB: "매일 표현",
     brief: {
       why: "큰 이벤트 한 번과 매일의 표현 중 무엇이 사랑으로 느껴지는지 묻는다. 받고 싶은 방식이 서로 다르다.",
-      tip: "기념일이 다가올 때 물어보면 실제로 참고가 된다.",
+      tip: "기념일을 준비하는 쪽이 헛수고를 줄일 수 있다.",
     },
   },
   {
@@ -404,7 +404,7 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     optionB: "착한 동료",
     brief: {
       why: "같이 일할 때 실력과 성격 중 무엇을 더 참을 수 있는지 묻는다. 직급과 경험에 따라 답이 바뀐다.",
-      tip: "팀 회식이나 동기 모임에서 특히 반응이 갈린다.",
+      tip: "같이 일해본 사람들끼리 하면 실제 경험담이 따라 나온다.",
     },
   },
   {
@@ -414,7 +414,7 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     optionA: "연봉 2배, 불안정",
     optionB: "정년 보장",
     brief: {
-      why: "안정과 보상 중 무엇을 택하는지 묻는 질문이다. 나이와 상황에 따라 답이 정반대가 된다.",
+      why: "안정과 보상 중 무엇을 택하는지 묻는다. 모아둔 돈과 부양 가족이 있느냐에 따라 같은 사람도 답이 바뀐다.",
       tip: "이직 이야기가 오가는 자리에서 자연스럽게 이어진다.",
     },
   },
@@ -437,7 +437,7 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     optionB: "1만 명 공개 망신",
     brief: {
       why: "가까운 사람들의 미움과 모르는 다수의 조롱 중 무엇이 더 견디기 힘든지 묻는다.",
-      tip: "SNS를 많이 쓰는 모임에서 특히 답이 갈린다.",
+      tip: "온라인에서 시간을 많이 보내는 사람일수록 답이 뚜렷해진다.",
     },
   },
   {
@@ -646,7 +646,7 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     optionB: "축가",
     brief: {
       why: "말로 떠는 긴장과 노래로 떠는 긴장 중 어느 쪽을 견딜 수 있는지 묻는다. 둘 다 싫다는 반응이 제일 많다.",
-      tip: "결혼식이 잦아지는 나이대 모임에서 반응이 좋다.",
+      tip: "청첩장이 돌기 시작하면 누가 무대에 설지 미리 가늠할 수 있다.",
     },
   },
   // 객관식
@@ -657,7 +657,7 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     options: ["즉시 답장", "읽고 나중에 답장", "읽씹할 때 있음", "알림 꺼놓음"],
     brief: {
       why: "답장 속도는 성격이자 예의 기준이라 서로 다른 게 자주 오해를 만든다.",
-      tip: "단톡방 사람들끼리 하면 서운했던 이유가 설명된다.",
+      tip: "답장 때문에 서운했던 적이 있는 사이에서 특히 풀린다.",
     },
   },
   {
@@ -687,7 +687,7 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     options: ["집 구매", "세계 일주", "투자·사업", "부모님께 드림"],
     brief: {
       why: "큰돈이 생겼을 때 제일 먼저 떠오르는 것이 그 사람의 현재 걱정이다.",
-      tip: "돈 이야기를 무겁지 않게 시작할 수 있는 질문이다.",
+      tip: "숫자가 커서 부담 없이 소원을 말하게 된다.",
     },
   },
   {
@@ -757,7 +757,7 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     options: ["집에서 영화", "맛집 탐방", "근교 드라이브", "전시나 공연"],
     brief: {
       why: "쉬는 데이트와 움직이는 데이트 중 무엇이 좋은 주말인지가 사람마다 다르다. 연애 스타일이 그대로 보인다.",
-      tip: "주말 계획을 정하기 전에 물어보면 실제로 참고가 된다.",
+      tip: "데이트 코스를 짜기 전에 서로 기대를 맞출 수 있다.",
     },
   },
   {
@@ -767,7 +767,7 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     options: ["치킨", "피자", "족발", "떡볶이"],
     brief: {
       why: "배가 고플 때 제일 먼저 떠오르는 것이 취향의 본심이다. 하나만 고르라고 해야 답이 나온다.",
-      tip: "야식 주문 직전에 던지면 메뉴가 바로 정해진다.",
+      tip: "배달 앱을 켜 놓고 물어보면 그대로 장바구니가 된다.",
     },
   },
   {
@@ -807,7 +807,7 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     options: ["한 번에 일어남", "5분 간격으로 여러 개", "다시 알림 무한 반복", "알람 없이 일어남"],
     brief: {
       why: "아침을 여는 방식은 잘 안 바뀌고, 같이 자는 사람에게 바로 영향을 준다.",
-      tip: "여행이나 합숙 전에 물어보면 아침 풍경이 예상된다.",
+      tip: "같이 자는 사람이 몇 시에 깨게 될지 미리 알 수 있다.",
     },
   },
   {
@@ -817,7 +817,7 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     options: ["미리미리 끝냄", "벼락치기", "책상 정리부터 함", "일단 포기"],
     brief: {
       why: "마감 앞에서 어떻게 움직이는지가 일하는 방식 그 자체다. 벼락치기파와 미리파는 같이 일하면 부딪힌다.",
-      tip: "팀 과제나 협업을 시작하기 전에 맞춰두면 좋다.",
+      tip: "팀 과제를 시작할 때 서로의 속도를 알아두면 덜 부딪힌다.",
     },
   },
   {
@@ -917,7 +917,7 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     options: ["해외여행", "국내 여행", "집에서 푹 쉬기", "밀린 일 처리"],
     brief: {
       why: "휴가를 회복에 쓰는지 경험에 쓰는지가 갈린다. 요즘 얼마나 지쳤는지도 드러난다.",
-      tip: "연차 계획을 세우는 시기에 물어보면 좋다.",
+      tip: "연차를 어떻게 쓸지 정하기 전에 후보를 좁힐 수 있다.",
     },
   },
   {
@@ -946,7 +946,7 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     title: "내 첫인상은 어땠어? 솔직하게 한 줄로",
     brief: {
       why: "첫인상은 본인만 모른다. 지금과 얼마나 달라졌는지 듣는 게 이 질문의 핵심이다.",
-      tip: "알고 지낸 지 오래된 사이일수록 답이 재밌어진다.",
+      tip: "처음 만난 날을 기억하는 사람이 있으면 이야기가 커진다.",
     },
   },
   {
@@ -1027,7 +1027,7 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     title: "어릴 때 꿈은 뭐였어?",
     brief: {
       why: "어릴 때 꿈과 지금의 일이 얼마나 멀어졌는지 비교하게 된다. 답보다 그 뒤의 이야기가 길다.",
-      tip: "오래 알고 지낸 사이에서 서로의 과거를 꺼내기 좋다.",
+      tip: "진로가 갈린 친구들끼리 하면 서로의 선택이 보인다.",
     },
   },
   {
@@ -1054,7 +1054,7 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     title: "최근 본 것 중에 제일 웃겼던 거 하나만",
     brief: {
       why: "요즘 뭘 보고 사는지가 자연스럽게 공유된다. 링크나 짤이 오가면서 대화가 이어진다.",
-      tip: "단톡방이 조용할 때 던지면 반응이 가장 빠르다.",
+      tip: "링크와 짤이 오가면서 대화가 저절로 길어진다.",
     },
   },
   {
@@ -1072,7 +1072,7 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     title: "올해 제일 잘한 일 하나만 자랑해줘",
     brief: {
       why: "잘한 일을 스스로 인정하게 만드는 질문이다. 답하면서 한 해를 정리하게 된다.",
-      tip: "연말 모임의 마무리 질문으로 좋다.",
+      tip: "한 해를 정리하는 자리에서 서로의 성과를 꺼내보기 좋다.",
     },
   },
   {
@@ -1081,7 +1081,7 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     title: "올해가 가기 전에 꼭 해보고 싶은 것 하나",
     brief: {
       why: "남은 기간을 계산하게 만들어서 답이 구체적으로 나온다.",
-      tip: "연말이 다가올수록 답이 진지해진다.",
+      tip: "12월이 가까울수록 답이 구체적으로 바뀐다.",
     },
   },
   {
@@ -1099,7 +1099,7 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     title: "이 그룹에서 알고 보니 제일 의외였던 사람은? (이유도)",
     brief: {
       why: "첫인상과 지금이 가장 많이 달라진 사람을 찾게 된다. 지목보다 이유가 본론이다.",
-      tip: "알고 지낸 지 오래된 모임에서 반응이 제일 좋다.",
+      tip: "구성원이 잘 안 바뀌는 모임일수록 답이 날카로워진다.",
     },
   },
   {
@@ -1108,7 +1108,7 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     title: "요즘 제일 많이 듣는 노래는?",
     brief: {
       why: "요즘 듣는 노래에는 기분이 묻어난다. 답이 모이면 그대로 모임 플레이리스트가 된다.",
-      tip: "여행이나 드라이브 전에 물어보면 바로 쓸 수 있다.",
+      tip: "답이 모이면 그대로 같이 들을 플레이리스트가 된다.",
     },
   },
   {
@@ -1126,7 +1126,7 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     title: "나한테 별명을 하나 붙여준다면?",
     brief: {
       why: "남이 붙여주는 별명에는 내가 모르는 내 모습이 들어 있다.",
-      tip: "모임의 마지막 질문으로 두면 이야기가 오래 간다.",
+      tip: "답이 모이면 그대로 그 모임의 호칭이 되기도 한다.",
     },
   },
 ];
