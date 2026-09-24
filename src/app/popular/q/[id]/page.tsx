@@ -45,6 +45,11 @@ function metaDescription(question: PopularQuestion, stats: QuestionStats | null)
     const top = stats.counts.indexOf(Math.max(...stats.counts));
     return `${stats.total}명 중 가장 많이 고른 답은 "${question.options?.[top]}" (${percentOf(stats.counts[top], stats.total)}%). 친구들은 뭘 고를지 링크 하나로 비교해보세요.`;
   }
+  // 집계가 아직 없으면 brief가 이 페이지의 유일한 고유 문장이다. 설명도 여기서 가져온다.
+  if (question.brief) {
+    // 검색결과에서 잘리지 않게 why 한 문단까지만 쓴다 (tip은 본문에만).
+    return `${question.brief.why} 링크 하나로 친구들의 답과 비교해보세요.`;
+  }
   if (question.type === "balance") {
     return `${question.optionA}, 아니면 ${question.optionB}? 단톡방에 링크를 보내면 친구들이 각자 고르고, 내 답을 마친 뒤에 서로의 선택이 열려요. 회원가입 없이 무료.`;
   }
@@ -268,6 +273,16 @@ export default async function PopularQuestionPage({
         <div className="mt-8">
           <Choices question={question} />
         </div>
+
+        {question.brief && (
+          <section aria-labelledby="brief-heading" className="mt-10 rounded-2xl bg-white p-6 shadow-[0_2px_0_rgb(191_122_34/0.07),0_10px_28px_-14px_rgb(150_95_30/0.22)]">
+            <h2 id="brief-heading" className="text-lg font-cute text-stone-900">
+              왜 의견이 갈릴까요?
+            </h2>
+            <p className="mt-2 break-keep text-base leading-relaxed text-stone-700">{question.brief.why}</p>
+            <p className="mt-4 break-keep text-base leading-relaxed text-stone-600">{question.brief.tip}</p>
+          </section>
+        )}
 
         {stats && (
           <section
