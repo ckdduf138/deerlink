@@ -64,3 +64,39 @@ export async function getQuestionStats(question: PopularQuestion): Promise<Quest
 export function percentOf(count: number, total: number): number {
   return total ? Math.round((count / total) * 100) : 0;
 }
+
+/**
+ * 사이트맵용: 어떤 인기 질문이 집계를 낼 만큼 답을 받았는지 한 번에 본다.
+ *
+ * getQuestionStats를 질문 수만큼 부르면 libSQL 왕복이 100번을 넘는다 (이 프로젝트에서
+ * 성능을 좌우하는 건 쿼리 개수다). 여기서는 공개방 답변을 sourceId로 한 번에 묶어 센다.
+ * 선택지가 바뀐 문항까지 걸러내지는 않으므로 화면에 쓰지 말 것 — 사이트맵 우선순위처럼
+ * 대략적인 신호에만 쓴다.
+ */
+export async function getAnsweredQuestionIds(): Promise<Set<string>> {
+  const rows = await prisma.answer.groupBy({
+    by: ["questionId"],
+    where: { question: { room: { isPublic: true }, sourceId: { not: null } } },
+    _count: { _all: true },
+  });
+  if (rows.length === 0) return new Set();
+
+  const questions = await prisma.question.findMany({
+    where: { id: { in: rows.map((row) => row.questionId) } },
+    select: { id: true, sourceId: true },
+  });
+  const sourceOf = new Map(questions.map((q) => [q.id, q.sourceId]));
+
+  const totals = new Map<string, number>();
+  for (const row of rows) {
+    const sourceId = sourceOf.get(row.questionId);
+    if (!sourceId) continue;
+    totals.set(sourceId, (totals.get(sourceId) ?? 0) + row._count._all);
+  }
+
+  return new Set(
+    [...totals.entries()]
+      .filter(([, total]) => total >= QUESTION_STATS_MIN_ANSWERS)
+      .map(([sourceId]) => sourceId)
+  );
+}
