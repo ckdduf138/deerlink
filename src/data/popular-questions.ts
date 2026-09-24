@@ -1,5 +1,19 @@
 export type QuestionType = "balance" | "multiple" | "subjective";
 
+/**
+ * 질문 상세 페이지(/popular/q/[id])의 고유 본문. 없으면 그 자리를 아예 그리지 않는다.
+ *
+ * 왜 필요한가: 질문 페이지 100여 개가 제목 한 줄만 다른 같은 틀이라 구글이 전부
+ * "크롤링됨 - 현재 색인이 생성되지 않음"으로 판단했다 (2026-09 Search Console 확인).
+ * 실제 답변 집계는 10개 이상 모여야 나오니 그때까지 그 페이지에만 있는 문장이 하나도 없었다.
+ * why는 왜 의견이 갈리는지, tip은 어떤 자리에서 쓰면 좋은지다. 두 문장 다 그 질문에만
+ * 해당하는 내용이어야 한다 — 다른 질문에 그대로 옮겨 붙일 수 있으면 안 쓴 것과 같다.
+ */
+export interface QuestionBrief {
+  why: string;
+  tip: string;
+}
+
 export interface PopularQuestion {
   id: string;
   type: QuestionType;
@@ -7,6 +21,7 @@ export interface PopularQuestion {
   optionA?: string;
   optionB?: string;
   options?: string[];
+  brief?: QuestionBrief;
 }
 
 /**
@@ -24,6 +39,10 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     title: "애인이 내 친구 깻잎 떼어주는 거 괜찮다 vs 안 된다",
     optionA: "괜찮다",
     optionB: "안 된다",
+    brief: {
+      why: "한국 커뮤니티에서 가장 오래 싸운 연애 질문이다. 깻잎 한 장이 문제가 아니라 '내 사람이 남에게 베푸는 친절'을 어디까지 허용하느냐를 묻기 때문에, 평소 연애관이 그대로 드러난다.",
+      tip: "커플끼리 하면 진짜 싸움이 날 수 있다. 친구들끼리 서로의 연애관을 구경하는 자리에서 꺼내는 게 안전하다.",
+    },
   },
   {
     id: "b-tangsuyuk",
@@ -31,6 +50,10 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     title: "탕수육은 부먹 vs 찍먹",
     optionA: "부먹",
     optionB: "찍먹",
+    brief: {
+      why: "부먹은 소스가 배어든 맛, 찍먹은 튀김의 바삭함을 지키는 쪽이다. 취향 차이인데도 서로를 놀리기 좋아서 중식 배달 때마다 되살아난다.",
+      tip: "처음 만난 사이에서도 부담 없이 갈릴 수 있는 질문이라 첫 문항으로 쓰기 좋다.",
+    },
   },
   {
     id: "b-mintcho",
@@ -38,6 +61,10 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     title: "민트초코는 맛있다 vs 치약 맛이다",
     optionA: "맛있다",
     optionB: "치약 맛",
+    brief: {
+      why: "같은 향을 누구는 시원한 디저트로, 누구는 치약으로 느낀다. 중간 의견이 거의 없어서 결과가 반반으로 갈리면 그 자체로 화제가 된다.",
+      tip: "디저트 고르러 가기 전에 물어보면 주문이 빨라진다.",
+    },
   },
   {
     id: "b-jjajang",
@@ -45,6 +72,10 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     title: "짜장면 vs 짬뽕",
     optionA: "짜장면",
     optionB: "짬뽕",
+    brief: {
+      why: "짬짜면이 나온 뒤에도 끝나지 않은 질문이다. 매운맛과 국물을 포기할 수 있느냐가 사람마다 다르다.",
+      tip: "중국집 가는 길에 단톡방에 올리면 메뉴 정하기가 대신 끝난다.",
+    },
   },
   {
     id: "b-saeu",
@@ -52,6 +83,10 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     title: "애인이 내 친구 새우 까주는 거 괜찮다 vs 안 된다",
     optionA: "괜찮다",
     optionB: "안 된다",
+    brief: {
+      why: "깻잎 논쟁의 다음 단계다. 껍질을 까주는 건 손이 더 많이 가는 일이라, 깻잎은 괜찮다던 사람도 여기서 갈리곤 한다.",
+      tip: "깻잎 질문과 같이 넣어서 어디서 선을 긋는지 비교해보면 재밌다.",
+    },
   },
   {
     id: "b-1eok-jeolyeon",
@@ -59,6 +94,10 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     title: "1억 받고 절친과 영원히 절연 vs 1억 포기하고 평생 절친",
     optionA: "1억 받고 절연",
     optionB: "1억 포기하고 절친",
+    brief: {
+      why: "금액이 크지도 작지도 않아서 진짜 고민이 된다. 1억이면 인생이 바뀌지는 않지만 무시하기도 어려운 돈이라, 우정의 값을 각자 계산하게 만든다.",
+      tip: "오래된 친구 사이에서 하면 대답보다 이유를 듣는 재미가 크다.",
+    },
   },
   {
     id: "b-200man-1000man",
@@ -66,6 +105,10 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     title: "월급 200만원 좋아하는 일 vs 월급 1,000만원 하기 싫은 일",
     optionA: "200만원 좋아하는 일",
     optionB: "1,000만원 싫은 일",
+    brief: {
+      why: "직장인이 매일 하는 고민을 숫자로 못박은 질문이다. 좋아하는 일의 값을 월 800만원으로 칠 수 있느냐를 묻는다.",
+      tip: "회식이나 동기 모임에서 꺼내면 서로의 직업관이 바로 드러난다.",
+    },
   },
   {
     id: "b-jjaksarang",
@@ -73,6 +116,10 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     title: "내가 미치게 좋아하는 사람과 연애 vs 나를 미치게 좋아하는 사람과 연애",
     optionA: "내가 좋아하는 사람",
     optionB: "나를 좋아하는 사람",
+    brief: {
+      why: "사랑받는 편안함과 사랑하는 설렘 중 뭘 택하냐는 질문이다. 연애 경험에 따라 답이 정반대로 바뀐다.",
+      tip: "연애 이야기로 자리를 데우고 싶을 때 첫 질문으로 좋다.",
+    },
   },
   {
     id: "b-chicken",
@@ -80,6 +127,10 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     title: "치킨은 후라이드 vs 양념",
     optionA: "후라이드",
     optionB: "양념",
+    brief: {
+      why: "후라이드는 튀김 그대로, 양념은 소스가 주인공이다. 반반이라는 도피처가 있어서 오히려 하나만 고르라고 하면 진심이 나온다.",
+      tip: "치킨 시키기 직전에 던지면 주문이 정해진다.",
+    },
   },
   {
     id: "b-padding",
@@ -87,6 +138,10 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     title: "애인이 내 친구 롱패딩 지퍼 올려주는 거 괜찮다 vs 안 된다",
     optionA: "괜찮다",
     optionB: "안 된다",
+    brief: {
+      why: "깻잎, 새우에 이은 세 번째 논쟁이다. 손이 몸에 닿는다는 점 때문에 앞의 둘보다 훨씬 강하게 갈린다.",
+      tip: "깻잎 질문과 묶어서 쓰면 허용선이 어디서 무너지는지 보인다.",
+    },
   },
   {
     id: "b-aircon",
@@ -94,6 +149,10 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     title: "평생 에어컨 없는 여름 vs 평생 난방 없는 겨울",
     optionA: "에어컨 없는 여름",
     optionB: "난방 없는 겨울",
+    brief: {
+      why: "한국의 여름과 겨울 중 어느 쪽이 더 견딜 만한지 묻는 질문이다. 사는 지역과 체질에 따라 답이 확 갈린다.",
+      tip: "계절이 바뀔 때 물어보면 지금 날씨 탓에 답이 쏠려서 더 재밌다.",
+    },
   },
   {
     id: "b-tumyeong-maeum",
@@ -101,6 +160,10 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     title: "모든 사람이 내 속마음을 읽을 수 있음 vs 나만 모든 사람 속마음을 읽을 수 있음",
     optionA: "내 마음이 투명",
     optionB: "남의 마음이 보임",
+    brief: {
+      why: "남이 나를 다 아는 세상과 내가 남을 다 아는 세상 중 하나를 고르는 질문이다. 후자를 고르는 사람이 많지만 그 이유는 제각각이다.",
+      tip: "가치관 질문으로 넘어가는 다리로 쓰기 좋다.",
+    },
   },
   {
     id: "b-10nyeon-1eok",
@@ -108,6 +171,10 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     title: "지금 기억 그대로 10년 전으로 돌아가기 vs 지금 1억 받기",
     optionA: "10년 전으로",
     optionB: "지금 1억",
+    brief: {
+      why: "과거로 돌아가 다시 살 기회와 지금의 현금을 맞바꾸는 질문이다. 10년 전으로 돌아가고 싶은지부터 사람마다 다르다.",
+      tip: "나이대가 섞인 모임에서 하면 세대별로 답이 갈리는 게 보인다.",
+    },
   },
   {
     id: "b-superpower",
@@ -115,6 +182,10 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     title: "투명인간 되기 vs 순간이동 하기",
     optionA: "투명인간",
     optionB: "순간이동",
+    brief: {
+      why: "투명인간은 몰래 보는 능력, 순간이동은 시간을 버는 능력이다. 고른 쪽이 평소 뭘 아쉬워하는지 말해준다.",
+      tip: "가볍게 웃고 넘어갈 수 있어서 어색한 자리 초반에 좋다.",
+    },
   },
   {
     id: "b-10eok-50eok",
@@ -122,6 +193,10 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     title: "100% 확률로 10억 받기 vs 50% 확률로 50억 받기",
     optionA: "확실한 10억",
     optionB: "반반 확률 50억",
+    brief: {
+      why: "확실한 10억과 기댓값이 더 큰 도박 중 고르는 질문이다. 수학적으로는 후자가 유리한데도 절반은 안전을 택한다.",
+      tip: "투자나 돈 이야기가 오가는 자리에서 성향을 확인하기 좋다.",
+    },
   },
   {
     id: "b-gwageo-mirae",
@@ -129,6 +204,10 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     title: "딱 한 번 과거로 가보기 vs 딱 한 번 미래로 가보기",
     optionA: "과거로",
     optionB: "미래로",
+    brief: {
+      why: "과거는 후회를, 미래는 불안을 건드린다. 알고 싶은 쪽이 지금 무엇에 매여 있는지 보여준다.",
+      tip: "연말이나 새해에 물어보면 답이 유난히 진지해진다.",
+    },
   },
   {
     id: "b-yeonrak-jaemi",
@@ -136,6 +215,10 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     title: "연락은 잘 되는데 재미없는 애인 vs 재밌는데 연락 안 되는 애인",
     optionA: "연락 잘 되는 애인",
     optionB: "재밌는 애인",
+    brief: {
+      why: "연애에서 안정감과 재미 중 무엇을 포기할 수 있느냐는 질문이다. 연애 스타일이 정면으로 드러난다.",
+      tip: "커플 모임보다 친구끼리 연애 성향을 비교할 때 낫다.",
+    },
   },
   {
     id: "b-lotto",
@@ -143,6 +226,10 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     title: "로또 1등 되고 평생 아무한테도 말 못 함 vs 로또 3등 되고 마음껏 자랑",
     optionA: "1등, 비밀",
     optionB: "3등, 자랑",
+    brief: {
+      why: "돈보다 자랑을 포기하는 게 더 어려운 사람이 의외로 많다. 액수 차이가 커서 더 고민된다.",
+      tip: "돈 이야기를 웃으면서 할 수 있게 만드는 질문이다.",
+    },
   },
   {
     id: "b-gwisin-bakwi",
@@ -150,6 +237,10 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     title: "자다 깼는데 방에 귀신 vs 자다 깼는데 얼굴 위에 바퀴벌레",
     optionA: "귀신",
     optionB: "바퀴벌레",
+    brief: {
+      why: "무서움과 징그러움 중 어느 쪽을 덜 견디는지 묻는다. 논리가 필요 없어서 답이 즉각 나온다.",
+      tip: "MT나 밤늦은 자리에서 분위기 띄우기 좋다.",
+    },
   },
   {
     id: "b-seontok-katok",
@@ -157,6 +248,10 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     title: "선톡 절대 안 하는 애인 vs 하루종일 카톡 폭격하는 애인",
     optionA: "선톡 안 하는 애인",
     optionB: "카톡 폭격 애인",
+    brief: {
+      why: "연락이 너무 없는 쪽과 너무 많은 쪽, 둘 다 피곤한데 하나를 골라야 한다. 연락 빈도에 대한 기준이 서로 다르다는 게 드러난다.",
+      tip: "연애 중인 친구들끼리 하면 각자의 불만이 자연스럽게 나온다.",
+    },
   },
   {
     id: "b-gonggam-haegyeol",
@@ -416,60 +511,100 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     type: "multiple",
     title: "카톡 왔을 때 나는?",
     options: ["즉시 답장", "읽고 나중에 답장", "읽씹할 때 있음", "알림 꺼놓음"],
+    brief: {
+      why: "답장 속도는 성격이자 예의 기준이라 서로 다른 게 자주 오해를 만든다.",
+      tip: "단톡방 사람들끼리 하면 서운했던 이유가 설명된다.",
+    },
   },
   {
     id: "m-yaksok-sigan",
     type: "multiple",
     title: "약속 시간 나는?",
     options: ["30분 전 도착", "딱 맞게 도착", "5~10분 지각", "항상 30분+ 지각"],
+    brief: {
+      why: "약속 시간에 대한 감각은 좀처럼 안 바뀐다. 늘 늦는 사람과 늘 일찍 오는 사람이 한 모임에 있으면 매번 같은 일이 반복된다.",
+      tip: "여행이나 모임 계획을 짜기 전에 물어보면 집합 시간을 현실적으로 잡을 수 있다.",
+    },
   },
   {
     id: "m-yeonae-jungyo",
     type: "multiple",
     title: "연애할 때 제일 중요한 건?",
     options: ["대화가 잘 통함", "외모", "경제력", "가치관"],
+    brief: {
+      why: "연애에서 무엇을 1순위로 두는지에 따라 잘 맞는 사람이 완전히 달라진다.",
+      tip: "소개팅이나 커플 모임 전에 하면 대화가 깊어진다.",
+    },
   },
   {
     id: "m-10eok",
     type: "multiple",
     title: "10억 생기면 가장 먼저?",
     options: ["집 구매", "세계 일주", "투자·사업", "부모님께 드림"],
+    brief: {
+      why: "큰돈이 생겼을 때 제일 먼저 떠오르는 것이 그 사람의 현재 걱정이다.",
+      tip: "돈 이야기를 무겁지 않게 시작할 수 있는 질문이다.",
+    },
   },
   {
     id: "m-animal",
     type: "multiple",
     title: "나를 동물에 비유하면?",
     options: ["강아지", "고양이", "곰", "여우"],
+    brief: {
+      why: "자기가 생각하는 나와 남이 보는 나가 가장 크게 어긋나는 질문이다.",
+      tip: "결과를 보고 서로 다르게 고른 이유를 물어보면 이야기가 길어진다.",
+    },
   },
   {
     id: "m-position",
     type: "multiple",
     title: "우리 그룹에서 내 포지션은?",
     options: ["분위기 메이커", "조용한 관찰자", "분위기 파악러", "중재자"],
+    brief: {
+      why: "모임에는 분위기를 만드는 사람, 챙기는 사람, 지켜보는 사람이 있다. 본인 생각과 남의 평가가 다를 때 가장 재밌다.",
+      tip: "동아리나 팀 모임에서 서로의 역할을 확인할 때 좋다.",
+    },
   },
   {
     id: "m-galdeung",
     type: "multiple",
     title: "갈등 생기면 나는?",
     options: ["바로 직접 말함", "삭히다가 폭발함", "그냥 넘어감", "슬쩍 멀어짐"],
+    brief: {
+      why: "갈등 앞에서 부딪히는지 피하는지는 관계가 오래갈수록 크게 작용한다.",
+      tip: "같이 일하거나 오래 볼 사람들과 해보면 도움이 된다.",
+    },
   },
   {
     id: "m-stress",
     type: "multiple",
     title: "스트레스 받을 때 나는?",
     options: ["혼자 조용히", "친구 만나서 풀기", "먹방", "잠으로 해결"],
+    brief: {
+      why: "푸는 방식이 다르면 힘들 때 서로를 돕는 방법도 달라진다.",
+      tip: "힘든 시기를 같이 지나는 사람들끼리 물어보기 좋다.",
+    },
   },
   {
     id: "m-dantokbang",
     type: "multiple",
     title: "단톡방에서 나는?",
     options: ["대화 주도", "리액션 담당", "눈팅만 함", "한참 뒤에 몰아서 읽음"],
+    brief: {
+      why: "읽고 마는 사람, 대화를 끌고 가는 사람이 한 방에 섞여 있다. 각자 자기 위치를 어떻게 보는지가 갈린다.",
+      tip: "단톡방이 조용해졌을 때 던지면 대화가 다시 붙는다.",
+    },
   },
   {
     id: "m-don-billyeo",
     type: "multiple",
     title: "친구가 돈 빌려달라고 하면?",
     options: ["바로 빌려줌", "액수 보고 결정", "정중하게 거절", "그냥 줘버림"],
+    brief: {
+      why: "돈 앞에서 관계를 어떻게 다루는지가 그대로 나온다. 금액보다 기준이 사람마다 다르다.",
+      tip: "가까운 사이일수록 미리 얘기해두면 좋은 주제다.",
+    },
   },
   {
     id: "m-date",
@@ -584,51 +719,91 @@ export const POPULAR_QUESTIONS: PopularQuestion[] = [
     id: "s-first-married",
     type: "subjective",
     title: "이 그룹에서 제일 먼저 결혼할 것 같은 사람은? (이유도)",
+    brief: {
+      why: "근거 없이 지목하는 재미와 그 이유를 듣는 재미가 동시에 있다. 이유가 본론이다.",
+      tip: "결혼식이 늘어나는 나이대 모임에서 반응이 제일 좋다.",
+    },
   },
   {
     id: "s-cheotinsang",
     type: "subjective",
     title: "내 첫인상은 어땠어? 솔직하게 한 줄로",
+    brief: {
+      why: "첫인상은 본인만 모른다. 지금과 얼마나 달라졌는지 듣는 게 이 질문의 핵심이다.",
+      tip: "알고 지낸 지 오래된 사이일수록 답이 재밌어진다.",
+    },
   },
   {
     id: "s-want-to-say",
     type: "subjective",
     title: "이 그룹 사람들한테 하고 싶었던 말이 있다면?",
+    brief: {
+      why: "평소에 꺼내기 어려웠던 말을 글로 남길 자리를 만들어준다.",
+      tip: "모임 마지막 질문으로 두면 분위기가 정리된다.",
+    },
   },
   {
     id: "s-ten-years",
     type: "subjective",
     title: "10년 후 나는 어디서 뭘 하고 있을 것 같아?",
+    brief: {
+      why: "막연한 미래를 구체적으로 말해보게 만든다. 답이 진로 이야기로 이어진다.",
+      tip: "연말이나 졸업 시즌에 하기 좋다.",
+    },
   },
   {
     id: "s-anywhere",
     type: "subjective",
     title: "지금 당장 어디든 갈 수 있다면 어디 가고 싶어?",
+    brief: {
+      why: "가고 싶은 곳에는 지금 무엇에서 벗어나고 싶은지가 묻어난다.",
+      tip: "여행 계획을 세우기 전 후보를 모으는 데도 쓸 수 있다.",
+    },
   },
   {
     id: "s-three-words",
     type: "subjective",
     title: "나를 세 단어로 소개한다면?",
+    brief: {
+      why: "자기를 압축해야 해서 짧지만 오래 고민하게 된다.",
+      tip: "새로 모인 사람들의 자기소개 대신 쓰기 좋다.",
+    },
   },
   {
     id: "s-into-lately",
     type: "subjective",
     title: "요즘 꽂혀있는 것 하나만 말해봐",
+    brief: {
+      why: "요즘 관심사는 근황을 묻는 것보다 훨씬 구체적인 답이 나온다.",
+      tip: "오랜만에 모인 자리에서 대화를 시작하기 좋다.",
+    },
   },
   {
     id: "s-choneungryeok",
     type: "subjective",
     title: "초능력 하나를 가질 수 있다면 뭘 고를래? (이유도)",
+    brief: {
+      why: "고른 능력보다 이유에 그 사람의 불편함이 들어 있다.",
+      tip: "가볍게 웃다가 의외로 진지해지는 질문이다.",
+    },
   },
   {
     id: "s-don-geokjeong",
     type: "subjective",
     title: "돈 걱정이 전혀 없다면 무슨 일을 하고 싶어?",
+    brief: {
+      why: "돈이라는 조건을 지우면 진짜 하고 싶은 일이 남는다.",
+      tip: "진로 고민이 많은 시기에 서로 답을 나누기 좋다.",
+    },
   },
   {
     id: "s-chueok",
     type: "subjective",
     title: "우리가 같이 한 일 중에 제일 기억에 남는 순간은?",
+    brief: {
+      why: "같은 시간을 각자 다르게 기억한다는 걸 확인하게 된다.",
+      tip: "오래된 모임의 마무리 질문으로 좋다.",
+    },
   },
   {
     id: "s-childhood-dream",
