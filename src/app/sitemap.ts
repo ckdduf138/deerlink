@@ -38,6 +38,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly",
       priority: 0.9,
     },
+    // 질문 유형과 다음 페이지도 각자 다른 문항을 보여주는 정본 URL이다.
+    ...(["balance", "multiple", "subjective"] as const).flatMap((type) => {
+      const count = POPULAR_QUESTIONS.filter((question) => question.type === type).length;
+      const pages = Math.ceil(count / 20);
+      return Array.from({ length: pages }, (_, index) => {
+        const page = index + 1;
+        if (type === "balance" && page === 1) return null;
+        const params = new URLSearchParams();
+        if (type !== "balance") params.set("type", type);
+        if (page > 1) params.set("page", String(page));
+        return {
+          url: `${baseUrl}/popular?${params.toString()}`,
+          changeFrequency: "monthly" as const,
+          priority: 0.5,
+        };
+      }).filter((entry): entry is NonNullable<typeof entry> => entry !== null);
+    }),
     {
       url: `${baseUrl}/discover`,
       changeFrequency: "daily",

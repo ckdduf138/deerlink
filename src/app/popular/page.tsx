@@ -5,6 +5,7 @@ import { Fawn } from "@/components/Fawn";
 import { PopularNav } from "@/components/popular/popular-nav";
 import { PopularQuestionList } from "@/components/popular/question-list";
 import { POPULAR_QUESTIONS, type PopularQuestion } from "@/data/popular-questions";
+import { QUESTION_TOPICS } from "@/data/question-topics";
 import { QUESTION_META, QUESTION_TYPES } from "@/lib/question-meta";
 import { SITE_OPEN_GRAPH } from "@/lib/site-metadata";
 import type { QuestionType } from "@/lib/types";
@@ -26,6 +27,11 @@ const TAB_LABEL: Record<QuestionType, string> = {
   multiple: "객관식",
   subjective: "주관식",
 };
+
+function searchLabel(type: QuestionType): string {
+  if (type === "balance") return "밸런스 게임";
+  return type === "multiple" ? "투표" : "대화";
+}
 
 type SearchParams = Promise<{ type?: string | string[]; page?: string | string[] }>;
 
@@ -61,36 +67,28 @@ export async function generateMetadata({
   searchParams: SearchParams;
 }): Promise<Metadata> {
   const { type, page } = resolve(await searchParams);
-  const base = type === "balance" ? "밸런스 게임 질문" : `${TAB_LABEL[type]} 질문`;
-  const title =
-    page === 1
-      ? `인기 ${base} TOP 20 - 단톡방과 MT에서 바로 쓰는 질문 모음`
-      : `인기 ${base} ${rangeLabel(type, page).replace(`${TAB_LABEL[type]} `, "")}`;
-  const description = `단톡방, MT, 회식, 술자리에서 가장 많이 쓰는 ${base}를 순위로 모았어요. 깻잎 논쟁, 부먹 찍먹부터 친구 사이 진심 질문까지. 골라서 링크 하나로 공유하면 친구들의 선택이 열려요.`;
+  const base = searchLabel(type);
+  const title = page === 1
+    ? `${base} 질문 모음 ${Math.min(PAGE_SIZE, byType[type].length)}선`
+    : `${base} 질문 모음 ${rangeLabel(type, page).replace(`${TAB_LABEL[type]} `, "")}`;
+  const description = type === "balance"
+    ? "친구, 커플, MT에서 함께 고르기 좋은 밸런스 게임 질문을 모았어요. 마음에 드는 질문으로 방을 만들고 링크를 공유해 서로의 답을 비교해보세요."
+    : type === "multiple"
+      ? "친구들과 함께 답하기 좋은 투표 질문 모음. 질문을 골라 링크로 공유하고, 모두 답한 뒤 어떤 선택이 많았는지 확인해보세요."
+      : "친구들과 더 깊이 이야기할 수 있는 대화 질문 모음. 질문을 골라 링크로 공유하고, 각자 답한 뒤 서로의 생각을 비교해보세요.";
   const url = hrefFor(type, page);
 
   return {
     title,
     description,
     alternates: { canonical: url },
-    openGraph: { ...SITE_OPEN_GRAPH, title: `${title} | Deerlink`, description, url },
-    keywords: [
-      "밸런스게임 질문",
-      "밸런스게임 질문 모음",
-      "인기 밸런스게임",
-      "밸런스게임 추천",
-      "밸런스게임 순위",
-      "단톡방 밸런스게임",
-      "MT 밸런스게임",
-      "술자리 게임 질문",
-      "커플 밸런스게임 질문",
-      "아이스브레이킹 질문",
-    ],
+    openGraph: { ...SITE_OPEN_GRAPH, title: `${title} | 디어링크`, description, url },
   };
 }
 
 export default async function PopularPage({ searchParams }: { searchParams: SearchParams }) {
   const { type, page, pageCount } = resolve(await searchParams);
+  const base = searchLabel(type);
   const offset = (page - 1) * PAGE_SIZE;
   const questions = byType[type].slice(offset, offset + PAGE_SIZE);
 
@@ -118,11 +116,12 @@ export default async function PopularPage({ searchParams }: { searchParams: Sear
       <main className="mx-auto max-w-3xl px-4 pt-28 pb-24 sm:px-6">
         <header className="mb-8">
           <h1 className="break-keep font-cute text-4xl leading-[1.1] text-stone-900 md:text-5xl">
-            요즘 제일 많이 하는 질문
+            {base} 질문 모음
           </h1>
           <p className="mt-3 max-w-xl text-base leading-relaxed text-stone-600">
-            단톡방, MT, 술자리에서 가장 자주 도는 질문을 순위로 모았어요. 마음에 드는 걸
-            골라 방을 만들면 링크 하나로 친구들의 선택을 모을 수 있어요.
+            {type === "balance"
+              ? "친구, 커플, MT에서 해볼 만한 질문을 골랐어요. 질문으로 방을 만들고 링크를 보내면 각자 답한 뒤 선택을 비교할 수 있어요."
+              : "함께 답하기 좋은 질문을 골랐어요. 질문으로 방을 만들고 링크를 보내면 각자 답한 뒤 결과를 비교할 수 있어요."}
           </p>
         </header>
 
@@ -171,13 +170,27 @@ export default async function PopularPage({ searchParams }: { searchParams: Sear
 
         {pageCount > 1 && <Pagination type={type} page={page} pageCount={pageCount} />}
 
+        <nav aria-label="상황별 질문" className="mt-14">
+          <h2 className="font-cute text-2xl text-stone-900">상황별로 골라보기</h2>
+          <p className="mt-2 text-sm leading-relaxed text-stone-600">
+            함께할 사람과 자리에 맞는 질문을 찾아보세요.
+          </p>
+          <div className="mt-5 flex flex-wrap gap-3">
+            {QUESTION_TOPICS.map((topic) => (
+              <Link key={topic.slug} href={`/popular/${topic.slug}`} className="btn-secondary">
+                {topic.label}
+              </Link>
+            ))}
+          </div>
+        </nav>
+
         <section className="surface mt-16 flex flex-col items-center px-6 py-12 text-center">
           <Fawn mood="happy" className="h-20 w-20" />
           <h2 className="mt-4 font-cute text-2xl text-stone-900 md:text-3xl">
             내 질문으로 직접 만들어도 돼요
           </h2>
           <p className="mt-3 max-w-md text-sm leading-relaxed text-stone-600">
-            여기 질문을 섞어도 되고, 우리끼리만 아는 질문을 써도 돼요. 회원가입 없이 30초면
+            여기 질문을 섞어도 되고, 우리끼리만 아는 질문을 써도 돼요. 회원가입 없이 바로
             링크가 나와요.
           </p>
           <Link href="/create" className="btn-primary mt-7">

@@ -41,7 +41,7 @@ export async function generateMetadata({
       title: info.title,
       description,
       url: archivePath(id),
-      siteName: "Deerlink",
+      siteName: "디어링크",
       type: "article",
       locale: "ko_KR",
       images: [{ url: imageUrl, width: 1200, height: 630, alt: `${info.title} 결과` }],

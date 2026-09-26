@@ -21,7 +21,7 @@ export function CtaSection() {
         <h2 className="break-keep text-[28px] font-cute leading-snug text-stone-900 sm:text-4xl">
           질문 하나로 시작하세요
         </h2>
-        <p className="mt-3 text-lg leading-relaxed text-stone-600">회원가입 없이, 30초면 돼요.</p>
+        <p className="mt-3 text-lg leading-relaxed text-stone-600">회원가입 없이, 링크 하나면 돼요.</p>
         <CreateRoomButton className="mt-8 w-full sm:w-auto sm:min-w-52" />
       </motion.div>
 

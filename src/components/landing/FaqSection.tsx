@@ -1,12 +1,14 @@
 import { ChevronDown } from "lucide-react";
+import Link from "next/link";
 import { FREEZE_MIN_PARTICIPANTS } from "@/lib/room-archive";
 import { PUBLIC_ROOM_EXTENSION_LABEL, PUBLIC_ROOM_MAX_LABEL, roomLifetimeLabel } from "@/lib/room-lifetime";
 
-const FAQS = [
+const FAQS: { question: string; answer: string; link?: { href: string; label: string } }[] = [
   {
     question: "밸런스 게임은 어떻게 하나요?",
     answer:
-      "둘 중 하나만 골라야 하는 질문을 던지고, 각자 고른 답을 비교하는 게임이에요. 질문을 만들어 링크를 단톡방에 올리면 모두 따로 답하고, 내가 답을 마친 뒤에 누가 무엇을 골랐는지 한 번에 열려요. 질문이 떠오르지 않으면 인기 밸런스게임 질문 모음에서 골라 쓰면 돼요.",
+      "둘 중 하나만 골라야 하는 질문을 던지고, 각자 고른 답을 비교하는 게임이에요. 질문을 만들어 링크를 단톡방에 올리면 모두 따로 답하고, 내가 답을 마친 뒤에 누가 무엇을 골랐는지 한 번에 열려요. 질문이 떠오르지 않으면 질문 모음에서 골라 쓰면 돼요.",
+    link: { href: "/popular", label: "밸런스 게임 질문 모음 보기" },
   },
   {
     question: "친구들의 답은 언제 볼 수 있나요?",
@@ -65,7 +67,14 @@ export function FaqSection() {
                   aria-hidden="true"
                 />
               </summary>
-              <p className="max-w-xl pb-5 text-base leading-relaxed text-stone-600">{item.answer}</p>
+              <div className="max-w-xl pb-5 text-base leading-relaxed text-stone-600">
+                <p>{item.answer}</p>
+                {item.link && (
+                  <Link href={item.link.href} className="mt-2 inline-flex min-h-11 items-center font-semibold text-amber-900 underline underline-offset-4">
+                    {item.link.label}
+                  </Link>
+                )}
+              </div>
             </details>
           ))}
         </div>

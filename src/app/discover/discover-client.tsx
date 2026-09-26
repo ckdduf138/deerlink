@@ -38,7 +38,7 @@ export function DiscoverClient({
       <div className="max-w-2xl mx-auto px-4 pt-24 pb-20">
         <div className="mb-8">
           <h1 className="text-3xl font-cute text-stone-900 mb-2">
-            공개방 둘러보기
+            밸런스 게임 공개방
           </h1>
           <p className="text-sm text-stone-600 leading-relaxed">
             질문을 골라 익명으로 답해보세요.

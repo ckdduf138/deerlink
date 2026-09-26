@@ -129,13 +129,15 @@ export function PublicRoomsFeed({
 
   return (
     <div aria-busy={loading}>
-      <SortMenu
-        options={sortOptions}
-        value={sort}
-        onChange={changeSort}
-        disabled={loading}
-        className="mb-5"
-      />
+      <div data-nosnippet>
+        <SortMenu
+          options={sortOptions}
+          value={sort}
+          onChange={changeSort}
+          disabled={loading}
+          className="mb-5"
+        />
+      </div>
 
       {error && (
         <div
@@ -176,7 +178,7 @@ export function PublicRoomsFeed({
       {visibleRooms.length > 0 && (
         <>
           {mode === "full" && (
-            <p className="mb-3 text-sm tabular-nums text-stone-600">{total}개 방</p>
+            <p className="mb-3 text-sm tabular-nums text-stone-600"><span data-nosnippet>{total}개 방</span></p>
           )}
           <div
             className={cn(

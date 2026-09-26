@@ -1,13 +1,21 @@
 import type { Metadata } from "next";
 import { getPublicRooms } from "@/lib/discover-rooms";
 import { countArchivedRooms } from "@/lib/room-archive";
+import { SITE_OPEN_GRAPH } from "@/lib/site-metadata";
 import { DiscoverClient } from "./discover-client";
 
+const description = "지금 참여할 수 있는 밸런스 게임 공개방을 둘러보세요. 원하는 질문을 골라 답하면 다른 사람들의 선택과 결과를 볼 수 있어요.";
+
 export const metadata: Metadata = {
-  title: "공개방 둘러보기 - 지금 열린 밸런스 게임과 투표",
-  description:
-    "다른 사람들이 공개로 만든 밸런스 게임과 투표 방을 둘러보고 바로 참여해보세요. 회원가입 없이 익명으로 답하고 결과를 볼 수 있어요.",
+  title: "밸런스 게임 하기 - 공개방 둘러보기",
+  description,
   alternates: { canonical: "/discover" },
+  openGraph: {
+    ...SITE_OPEN_GRAPH,
+    title: "밸런스 게임 하기 - 공개방 둘러보기 | 디어링크",
+    description,
+    url: "/discover",
+  },
 };
 
 export const dynamic = "force-dynamic";

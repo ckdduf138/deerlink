@@ -2,13 +2,13 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Deerlink - 밸런스게임 만들기",
-    short_name: "Deerlink",
+    name: "디어링크 - 밸런스게임 만들기",
+    short_name: "디어링크",
     description:
       "링크 하나로 밸런스게임, 투표, 설문을 만들고 친구들과 생각을 비교해요.",
     start_url: "/",
     display: "standalone",
-    background_color: "#fafaf8",
+    background_color: "#fcf5ea",
     theme_color: "#e8a038",
     icons: [
       {

@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "Deerlink - 밸런스게임 만들기, 링크 하나로 의견 비교";
+export const alt = "디어링크 - 친구와 함께하는 밸런스게임";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

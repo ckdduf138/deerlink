@@ -41,7 +41,7 @@ export function LandingNav() {
           className="flex min-h-11 items-center gap-2 text-base font-semibold tracking-tight text-stone-900"
         >
           <AntlerLogo className="h-[18px] w-3.5 text-amber-500" />
-          Deerlink
+          디어링크
         </Link>
 
         <div className="flex items-center gap-2">

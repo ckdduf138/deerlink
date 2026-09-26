@@ -9,7 +9,7 @@ import type { Metadata } from "next";
  * 자기 og를 선언하는 페이지는 이걸 펼쳐 넣을 것.
  */
 export const SITE_OPEN_GRAPH = {
-  siteName: "Deerlink",
+  siteName: "디어링크",
   type: "website",
   locale: "ko_KR",
   images: [
@@ -17,7 +17,7 @@ export const SITE_OPEN_GRAPH = {
       url: "/opengraph-image",
       width: 1200,
       height: 630,
-      alt: "Deerlink - 밸런스게임 만들기, 링크 하나로 의견 비교",
+      alt: "디어링크 - 친구와 함께하는 밸런스게임",
     },
   ],
 } satisfies NonNullable<Metadata["openGraph"]>;

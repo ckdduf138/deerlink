@@ -19,6 +19,15 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
+const websiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "디어링크",
+  alternateName: "Deerlink",
+  url: "https://deerlink.kr/",
+  inLanguage: "ko-KR",
+};
+
 /**
  * 공개방 목록은 서버에서 읽는다. 예전엔 클라이언트가 마운트 후 fetch 했는데,
  * 그러면 크롤러와 첫 페인트에는 "공개방을 불러오는 중이에요"만 남는다 — 랜딩의
@@ -61,6 +70,10 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen bg-page">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+      />
       <LandingNav />
       <HeroSection featured={featured} />
       <PublicRoomsSection

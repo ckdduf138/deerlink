@@ -31,6 +31,7 @@ async function loadStats(question: PopularQuestion) {
 }
 
 function metaTitle(question: PopularQuestion): string {
+  if (question.title.length > 25) return question.title;
   if (question.type === "balance") return `${question.title} 밸런스 게임`;
   if (question.type === "multiple") return `${question.title} 투표 질문`;
   return `${question.title} 대화 질문`;
@@ -79,7 +80,7 @@ export async function generateMetadata({
     alternates: { canonical: path },
     openGraph: {
       ...SITE_OPEN_GRAPH,
-      title: `${title} | Deerlink`,
+      title: `${title} | 디어링크`,
       description,
       url: path,
     },

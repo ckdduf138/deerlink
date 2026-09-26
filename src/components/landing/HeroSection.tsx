@@ -31,7 +31,7 @@ export function HeroSection({ featured }: { featured: DiscoverRoom | null }) {
           </h1>
 
           <p className="mt-5 max-w-md break-keep text-lg leading-relaxed text-stone-600 sm:text-xl">
-            링크 하나로 친구들 답을 비교해요.
+            디어링크에서 링크 하나로 친구들 답을 비교해요.
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">

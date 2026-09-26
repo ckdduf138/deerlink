@@ -34,7 +34,7 @@ export async function generateMetadata({
     alternates: { canonical: `/popular/${topic.slug}` },
     openGraph: {
       ...SITE_OPEN_GRAPH,
-      title: `${topic.metaTitle} | Deerlink`,
+      title: `${topic.metaTitle} | 디어링크`,
       description: topic.metaDescription,
       url: `/popular/${topic.slug}`,
     },
@@ -136,7 +136,7 @@ export default async function TopicPage({
           </h2>
           <p className="text-sm text-stone-600 leading-relaxed mb-8 max-w-md mx-auto">
             질문을 고르면 방이 만들어지고, 링크를 보내면 친구들이 답합니다. 회원가입 없이
-            30초면 끝나요.
+            링크 하나면 돼요.
           </p>
           <Link
             href={startHref}
