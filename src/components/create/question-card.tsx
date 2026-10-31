@@ -14,6 +14,59 @@ export const OPTION_MAX = 30;
 export const MAX_OPTIONS = 5;
 export const MIN_OPTIONS = 2;
 
+/**
+ * maxLength는 한도에 닿으면 아무 말 없이 입력을 삼킨다. 사용자에게는 키보드가 멈춘 것처럼
+ * 보이고, 자기가 쓴 글이 잘렸다는 걸 모른 채 제출한다 - 실제로 랜딩 히어로에 "...띄우는
+ * 유"(유튜브), "...보여주는 카"(카톡)가 단어 중간에서 끊긴 채 떠 있었다.
+ *
+ * 그래서 한도 10자 전부터 숫자를 띄우고, 닿으면 색을 바꿔 "여기서 멈췄다"를 말해준다.
+ * 기준(한도 - 10)은 방 제목(create-editor.tsx)이 이미 쓰던 것과 같게 맞췄다.
+ *
+ * 자리는 입력칸 안쪽 오른쪽이라 숫자가 떠도 카드 높이가 변하지 않는다. 오른쪽 여백은
+ * 숫자가 보일 때만 준다 - 375px에서 밸런스 옵션 한 칸이 150px이라 늘 비워두면 폭의
+ * 3분의 1을 숫자에 내주게 된다. 20자 미만(대부분의 입력)은 칸을 그대로 다 쓴다.
+ */
+const COUNTER_LEAD = 10;
+
+const nearMax = (value: string, max: number) => value.length >= max - COUNTER_LEAD;
+
+/** 숫자가 보이는 동안만 오른쪽을 비운다. 글자가 숫자 밑으로 들어가지 않게. */
+const counterPad = (value: string, max: number) => (nearMax(value, max) ? "pr-12" : "pr-4");
+
+/** 면 색마다 전경을 바꾼다. amber-50·teal-50 위에 중립 회색을 올리면 대비가 모자란다. */
+const COUNTER_TONE = {
+  amber: "text-amber-900",
+  teal: "text-teal-900",
+  neutral: "text-stone-500",
+} as const;
+
+function CharCount({
+  id,
+  value,
+  max,
+  tone,
+}: {
+  id: string;
+  value: string;
+  max: number;
+  tone: keyof typeof COUNTER_TONE;
+}) {
+  if (!nearMax(value, max)) return null;
+  const full = value.length >= max;
+  return (
+    <span
+      id={id}
+      className={cn(
+        "pointer-events-none absolute inset-y-0 right-2.5 flex items-center text-[11px] tabular-nums",
+        full ? "font-semibold text-red-600" : COUNTER_TONE[tone]
+      )}
+    >
+      {value.length}/{max}
+      {full && <span className="sr-only"> 글자, 더 쓸 수 없어요</span>}
+    </span>
+  );
+}
+
 export function QuestionCard({
   question,
   index,
@@ -134,7 +187,7 @@ export function QuestionCard({
         </button>
       </div>
 
-      <div className="px-3 pb-2 pt-1">
+      <div className="relative px-3 pb-2 pt-1">
         <input
           ref={titleRef}
           type="text"
@@ -143,28 +196,47 @@ export function QuestionCard({
           placeholder="질문을 입력하세요"
           maxLength={QUESTION_TITLE_MAX}
           aria-label={`질문 ${index + 1} 내용`}
-          className="input-lg min-h-12 w-full rounded-xl bg-transparent px-2 text-lg font-bold leading-relaxed text-stone-900 placeholder:font-semibold placeholder:text-stone-500 transition-colors focus-visible:bg-page focus-visible:outline-none"
+          aria-describedby={`${question.id}-title-count`}
+          className={cn(
+            "input-lg min-h-12 w-full rounded-xl bg-transparent pl-2 text-lg font-bold leading-relaxed text-stone-900 placeholder:font-semibold placeholder:text-stone-500 transition-colors focus-visible:bg-page focus-visible:outline-none",
+            counterPad(question.title, QUESTION_TITLE_MAX)
+          )}
+        />
+        <CharCount
+          id={`${question.id}-title-count`}
+          value={question.title}
+          max={QUESTION_TITLE_MAX}
+          tone="neutral"
         />
       </div>
 
       {question.type === "balance" && (
         <div className="grid grid-cols-2 gap-2 px-5 pb-5">
           {(["optionA", "optionB"] as const).map((key, i) => (
-            <input
-              key={key}
-              type="text"
-              value={question[key] ?? ""}
-              onChange={(e) => onChange(question.id, { [key]: e.target.value })}
-              placeholder={`옵션 ${i + 1}`}
-              maxLength={OPTION_MAX}
-              aria-label={`질문 ${index + 1} 옵션 ${i + 1}`}
-              className={cn(
-                "min-h-14 rounded-2xl px-4 font-semibold text-stone-900 outline-none ring-2 ring-transparent transition-shadow placeholder:font-medium placeholder:text-stone-500",
-                key === "optionA"
-                  ? "bg-amber-50 focus-visible:ring-amber-400"
-                  : "bg-teal-50 focus-visible:ring-teal-400"
-              )}
-            />
+            <div key={key} className="relative">
+              <input
+                type="text"
+                value={question[key] ?? ""}
+                onChange={(e) => onChange(question.id, { [key]: e.target.value })}
+                placeholder={`옵션 ${i + 1}`}
+                maxLength={OPTION_MAX}
+                aria-label={`질문 ${index + 1} 옵션 ${i + 1}`}
+                aria-describedby={`${question.id}-${key}-count`}
+                className={cn(
+                  "min-h-14 w-full rounded-2xl pl-4 font-semibold text-stone-900 outline-none ring-2 ring-transparent transition-shadow placeholder:font-medium placeholder:text-stone-500",
+                  counterPad(question[key] ?? "", OPTION_MAX),
+                  key === "optionA"
+                    ? "bg-amber-50 focus-visible:ring-amber-400"
+                    : "bg-teal-50 focus-visible:ring-teal-400"
+                )}
+              />
+              <CharCount
+                id={`${question.id}-${key}-count`}
+                value={question[key] ?? ""}
+                max={OPTION_MAX}
+                tone={key === "optionA" ? "amber" : "teal"}
+              />
+            </div>
           ))}
         </div>
       )}
@@ -173,15 +245,27 @@ export function QuestionCard({
         <div className="space-y-2 px-5 pb-5">
           {options.map((opt, i) => (
             <div key={i} className="flex items-center gap-2">
-              <input
-                type="text"
-                value={opt}
-                onChange={(e) => updateOption(i, e.target.value)}
-                placeholder={`선택지 ${i + 1}`}
-                maxLength={OPTION_MAX}
-                aria-label={`질문 ${index + 1} 선택지 ${i + 1}`}
-                className="min-h-12 flex-1 rounded-xl bg-teal-50 px-4 font-medium text-stone-900 outline-none ring-2 ring-transparent transition-shadow placeholder:text-stone-500 focus-visible:ring-teal-400"
-              />
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  value={opt}
+                  onChange={(e) => updateOption(i, e.target.value)}
+                  placeholder={`선택지 ${i + 1}`}
+                  maxLength={OPTION_MAX}
+                  aria-label={`질문 ${index + 1} 선택지 ${i + 1}`}
+                  aria-describedby={`${question.id}-opt${i}-count`}
+                  className={cn(
+                    "min-h-12 w-full rounded-xl bg-teal-50 pl-4 font-medium text-stone-900 outline-none ring-2 ring-transparent transition-shadow placeholder:text-stone-500 focus-visible:ring-teal-400",
+                    counterPad(opt, OPTION_MAX)
+                  )}
+                />
+                <CharCount
+                  id={`${question.id}-opt${i}-count`}
+                  value={opt}
+                  max={OPTION_MAX}
+                  tone="teal"
+                />
+              </div>
               {options.length > MIN_OPTIONS && (
                 <button
                   onClick={() => removeOption(i)}
