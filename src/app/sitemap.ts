@@ -8,6 +8,23 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://deerlink.kr";
 
 export const revalidate = 3600;
 
+/**
+ * Next.js는 loc 값을 이스케이프 없이 그대로 끼워 넣는다
+ * (next/dist/build/webpack/loaders/metadata/resolve-route-data.js의 `<loc>${item.url}</loc>`).
+ * 그래서 쿼리 구분자 &가 날것으로 나가면 XML 구문 오류가 되고, 파서는 거기서 멈춘다 —
+ * 2026-09-23부터 /popular?type=multiple&page=2 한 줄 때문에 구글이 사이트맵 전체를
+ * "발견된 페이지 0개"로 버리고 있었다. 뒤에 어떤 URL이 와도 전달되지 않는다.
+ * 나중에 누가 또 쿼리 URL을 넣어도 같은 사고가 나지 않게 전 항목에 적용한다.
+ */
+function escapeLoc(url: string): string {
+  return url
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 유형 안에서의 순서가 곧 순위다 (/popular가 20개씩 끊어 보여준다).
   const rankInType = new Map<string, number>();
@@ -79,21 +96,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 동결 보존된 방은 사람들이 실제로 답한 유일한 색인 대상이다.
   // DB가 죽어도 사이트맵 전체가 깨지면 안 되니 실패는 빈 배열로 흡수한다.
   const archived = await getArchivedRooms({ limit: 500 }).catch(() => []);
-  if (archived.length === 0) return staticEntries;
 
-  return [
-    ...staticEntries,
-    {
-      url: `${baseUrl}/archive`,
-      lastModified: new Date(archived[0].frozenAt),
-      changeFrequency: "weekly",
-      priority: 0.7,
-    },
-    ...archived.map((room) => ({
-      url: `${baseUrl}${archivePath(room.id)}`,
-      lastModified: new Date(room.frozenAt),
-      changeFrequency: "yearly" as const,
-      priority: 0.6,
-    })),
-  ];
+  const entries: MetadataRoute.Sitemap =
+    archived.length === 0
+      ? staticEntries
+      : [
+          ...staticEntries,
+          {
+            url: `${baseUrl}/archive`,
+            lastModified: new Date(archived[0].frozenAt),
+            changeFrequency: "weekly",
+            priority: 0.7,
+          },
+          ...archived.map((room) => ({
+            url: `${baseUrl}${archivePath(room.id)}`,
+            lastModified: new Date(room.frozenAt),
+            changeFrequency: "yearly" as const,
+            priority: 0.6,
+          })),
+        ];
+
+  return entries.map((entry) => ({ ...entry, url: escapeLoc(entry.url) }));
 }
