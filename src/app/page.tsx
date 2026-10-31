@@ -38,19 +38,30 @@ const websiteJsonLd = {
  * 히어로 카드는 처음 온 사람의 첫인상이라, 인기 1위라도 질문이 "a"·선택지 "가/나" 같은
  * 방은 건너뛴다 (실제로 로컬 1위 방이 그랬다). 기준은 글자 수뿐이다. 내용 검열이 아니다.
  * 조건을 만족하는 방이 없으면 히어로는 카드 없이 그려진다.
+ *
+ * 상한도 같이 본다. 작성 화면의 maxLength={OPTION_MAX}가 경고 없이 입력을 자르기 때문에,
+ * 상한에 닿은 선택지는 대개 단어 중간에서 끊긴 글이다 - 실제로 히어로에
+ * "...광고 3개 띄우는 유"(유튜브)와 "...보여주는 카"(카톡)가 떠 있었다. 길이로는 잘린
+ * 글과 멀쩡한 글을 구분할 수 없으니, 첫인상 자리에서는 의심스러우면 건너뛴다.
+ * 덤으로 A/B 타일이 네 줄까지 늘어나 카드가 터지는 것도 막는다.
  */
 const SHOWCASE_MIN_TITLE = 6;
 const SHOWCASE_MIN_OPTION = 2;
+const SHOWCASE_MAX_TITLE = 40;
+const SHOWCASE_MAX_OPTION = 20;
 
 function isShowcaseable(room: DiscoverRoom): boolean {
   const q = room.previewQuestion;
   if (!q || q.type !== "balance" || !q.optionA || !q.optionB) return false;
+  const title = q.title.trim();
   const a = q.optionA.trim();
   const b = q.optionB.trim();
+  const fits = (text: string, min: number, max: number) =>
+    text.length >= min && text.length <= max;
   return (
-    q.title.trim().length >= SHOWCASE_MIN_TITLE &&
-    a.length >= SHOWCASE_MIN_OPTION &&
-    b.length >= SHOWCASE_MIN_OPTION &&
+    fits(title, SHOWCASE_MIN_TITLE, SHOWCASE_MAX_TITLE) &&
+    fits(a, SHOWCASE_MIN_OPTION, SHOWCASE_MAX_OPTION) &&
+    fits(b, SHOWCASE_MIN_OPTION, SHOWCASE_MAX_OPTION) &&
     a !== b
   );
 }
