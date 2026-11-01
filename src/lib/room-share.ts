@@ -16,6 +16,8 @@ export interface RoomShareInfo {
   isPublic: boolean;
   expired: boolean;
   frozen: boolean;
+  /** 어드민이 내린 방. 동결돼 있어도 색인 대상에서 뺀다. */
+  hidden: boolean;
   questionCount: number;
   participantCount: number;
   firstQuestion: RoomSharePreview | null;
@@ -40,6 +42,7 @@ export const getRoomShareInfo = cache(async function getRoomShareInfo(
       'isPublic', r.isPublic,
       'expiresAt', strftime('%Y-%m-%dT%H:%M:%fZ', r.expiresAt),
       'frozenAt', strftime('%Y-%m-%dT%H:%M:%fZ', r.frozenAt),
+      'hiddenAt', strftime('%Y-%m-%dT%H:%M:%fZ', r.hiddenAt),
       'questionCount', (SELECT COUNT(*) FROM Question q WHERE q.roomId = r.id),
       'participantCount', (SELECT COUNT(*) FROM Participant p WHERE p.roomId = r.id),
       -- json()으로 감싸지 않으면 서브쿼리가 JSON subtype을 잃어 문자열로 이중 인코딩된다
@@ -63,6 +66,7 @@ export const getRoomShareInfo = cache(async function getRoomShareInfo(
     isPublic: number;
     expiresAt: string;
     frozenAt: string | null;
+    hiddenAt: string | null;
     questionCount: number;
     participantCount: number;
     firstQuestion: {
@@ -81,6 +85,7 @@ export const getRoomShareInfo = cache(async function getRoomShareInfo(
     // 동결된 방은 만료 시각이 지났어도 "만료"가 아니다. 결과가 영구히 남는 상태다.
     expired: new Date(raw.expiresAt) < new Date() && raw.frozenAt === null,
     frozen: raw.frozenAt !== null,
+    hidden: raw.hiddenAt !== null,
     questionCount: raw.questionCount,
     participantCount: raw.participantCount,
     firstQuestion: raw.firstQuestion

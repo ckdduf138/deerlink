@@ -47,6 +47,8 @@ export interface ResultsRoom extends RoomBase {
 
 export interface AdminRoom extends ResultsRoom {
   createdAt: string;
+  /** 어드민이 공개 노출에서 내린 시각. null이면 노출 중이다. */
+  hiddenAt: string | null;
 }
 
 /**

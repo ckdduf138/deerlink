@@ -23,7 +23,9 @@ async function queryPublicRooms({
   sort?: DiscoverSort;
   pageSize?: number;
 } = {}): Promise<{ rooms: DiscoverRoom[]; total: number; hasMore: boolean }> {
-  const where = { isPublic: true, expiresAt: { gt: new Date() } };
+  // hiddenAt은 어드민이 내린 방이다. 이 함수 하나가 랜딩·/discover·API를 다 먹이니
+  // 여기서 한 번 거르면 공개 노출 경로 전체에서 같이 빠진다.
+  const where = { isPublic: true, hiddenAt: null, expiresAt: { gt: new Date() } };
 
   // "답변 많은순"은 참여자 수 × 질문 수의 곱이라 DB의 orderBy 한 번으로 못 낸다.
   // 공개방 규모가 아직 작으니(운영 트래픽이 실제로 커지기 전까지는) 전부 불러와 JS에서

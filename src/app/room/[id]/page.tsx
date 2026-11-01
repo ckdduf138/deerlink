@@ -20,7 +20,9 @@ export default async function RoomPage({
   if (!room) notFound();
 
   // 동결 보존된 방은 읽기 전용 아카이브가 정본이다. 중복 URL을 만들지 않는다.
-  if (room.frozenAt) redirect(archivePath(id));
+  // 내린 방은 /archive가 404다. 링크를 가진 사람까지 막을 이유는 없으니
+  // 여기(noindex)에서 그대로 보여준다.
+  if (room.frozenAt && !room.hiddenAt) redirect(archivePath(id));
 
   // 이미 참여한 사람은 결과 페이지로
   const cookieStore = await cookies();

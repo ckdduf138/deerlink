@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, ChevronUp, Trash2, LogOut, Users, MessageSquare, Clock, Copy, Check } from "lucide-react";
+import { ChevronDown, ChevronUp, Trash2, LogOut, Users, MessageSquare, Clock, Copy, Check, Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { parseOptions, type AdminRoom, type Question } from "@/lib/types";
 
@@ -70,13 +70,23 @@ function RoomDetail({ room }: { room: AdminRoom }) {
   );
 }
 
-function RoomRow({ room, onDelete }: { room: AdminRoom; onDelete: (id: string) => void }) {
+function RoomRow({
+  room,
+  onDelete,
+  onToggleHidden,
+}: {
+  room: AdminRoom;
+  onDelete: (id: string) => void;
+  onToggleHidden: (id: string, hiddenAt: string | null) => void;
+}) {
   const [expanded, setExpanded] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirm, setConfirm] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [hiding, setHiding] = useState(false);
 
   const expired = isExpired(room.expiresAt);
+  const hidden = room.hiddenAt !== null;
 
   const handleDelete = async () => {
     if (!confirm) {
@@ -87,6 +97,23 @@ function RoomRow({ room, onDelete }: { room: AdminRoom; onDelete: (id: string) =
     setDeleting(true);
     await fetch(`/api/admin/rooms/${room.id}`, { method: "DELETE" });
     onDelete(room.id);
+  };
+
+  // 내리기는 되돌릴 수 있으니 삭제와 달리 확인 단계를 두지 않는다.
+  const handleToggleHidden = async () => {
+    setHiding(true);
+    try {
+      const res = await fetch(`/api/admin/rooms/${room.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hidden: !hidden }),
+      });
+      if (!res.ok) return;
+      const data: { hiddenAt: string | null } = await res.json();
+      onToggleHidden(room.id, data.hiddenAt);
+    } finally {
+      setHiding(false);
+    }
   };
 
   const handleCopy = async (e: React.MouseEvent) => {
@@ -109,7 +136,10 @@ function RoomRow({ room, onDelete }: { room: AdminRoom; onDelete: (id: string) =
               {room.title}
             </p>
             {expired && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-stone-100 text-stone-400 flex-shrink-0">만료</span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-stone-100 text-stone-500 flex-shrink-0">만료</span>
+            )}
+            {hidden && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-50 text-red-600 flex-shrink-0">숨김</span>
             )}
           </div>
           {expanded ? (
@@ -146,6 +176,20 @@ function RoomRow({ room, onDelete }: { room: AdminRoom; onDelete: (id: string) =
               title="방 링크 복사"
             >
               {copied ? <Check className="w-3.5 h-3.5 text-amber-600" /> : <Copy className="w-3.5 h-3.5" />}
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); handleToggleHidden(); }}
+              disabled={hiding}
+              className={cn(
+                "p-1.5 rounded-lg transition-colors disabled:opacity-50",
+                hidden
+                  ? "text-red-600 hover:bg-red-50"
+                  : "text-stone-500 hover:text-amber-700 hover:bg-amber-50"
+              )}
+              title={hidden ? "공개 목록에 다시 올리기" : "공개 목록에서 내리기"}
+              aria-label={hidden ? "공개 목록에 다시 올리기" : "공개 목록에서 내리기"}
+            >
+              {hidden ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); handleDelete(); }}
@@ -186,6 +230,9 @@ export function AdminClient({ initialRooms }: { initialRooms: AdminRoom[] }) {
 
   const handleDelete = (id: string) => setRooms((prev) => prev.filter((r) => r.id !== id));
 
+  const handleToggleHidden = (id: string, hiddenAt: string | null) =>
+    setRooms((prev) => prev.map((r) => (r.id === id ? { ...r, hiddenAt } : r)));
+
   const handleLogout = async () => {
     await fetch("/api/admin/auth", { method: "DELETE" });
     router.push("/admin/login");
@@ -193,6 +240,7 @@ export function AdminClient({ initialRooms }: { initialRooms: AdminRoom[] }) {
 
   const totalParticipants = rooms.reduce((sum, r) => sum + r.participants.length, 0);
   const activeRooms = rooms.filter((r) => !isExpired(r.expiresAt)).length;
+  const hiddenRooms = rooms.filter((r) => r.hiddenAt !== null).length;
 
   return (
     <div className="min-h-screen bg-page">
@@ -202,6 +250,7 @@ export function AdminClient({ initialRooms }: { initialRooms: AdminRoom[] }) {
             <h1 className="text-lg font-cute text-stone-900">관리자</h1>
             <p className="text-xs text-stone-400 mt-0.5">
               방 {rooms.length}개 · 활성 {activeRooms}개 · 참여자 {totalParticipants}명
+              {hiddenRooms > 0 && <span className="text-red-600"> · 숨김 {hiddenRooms}개</span>}
             </p>
           </div>
           <button
@@ -235,7 +284,12 @@ export function AdminClient({ initialRooms }: { initialRooms: AdminRoom[] }) {
             <p className="text-sm text-stone-400 text-center py-16">방이 없어요</p>
           ) : (
             sorted.map((room) => (
-              <RoomRow key={room.id} room={room} onDelete={handleDelete} />
+              <RoomRow
+                key={room.id}
+                room={room}
+                onDelete={handleDelete}
+                onToggleHidden={handleToggleHidden}
+              />
             ))
           )}
         </div>

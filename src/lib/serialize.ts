@@ -140,11 +140,13 @@ export function serializeDiscoverRoom(room: {
 export function serializeAdminRoom(
   room: DbRoom & {
     createdAt: Date;
+    hiddenAt: Date | null;
     participants: (DbParticipant & { answers: DbAnswer[] })[];
   }
 ): AdminRoom {
   return {
     ...serializeResultsRoom(room),
     createdAt: room.createdAt.toISOString(),
+    hiddenAt: room.hiddenAt?.toISOString() ?? null,
   };
 }

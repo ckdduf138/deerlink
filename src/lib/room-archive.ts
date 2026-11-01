@@ -43,7 +43,9 @@ function toPreview(
 /** 만료된 공개방 중 기준을 넘긴 것을 얼린다. 삭제보다 먼저 돌아야 한다. */
 export async function freezeExpiredPublicRooms(): Promise<number> {
   const candidates = await prisma.room.findMany({
-    where: { isPublic: true, frozenAt: null, expiresAt: { lt: new Date() } },
+    // 내린 방은 얼리지 않는다. 동결은 색인 가능한 영구 페이지를 만드는 일이라,
+    // 공개 노출에서 내린 방을 얼리면 내린 의미가 없어진다.
+    where: { isPublic: true, frozenAt: null, hiddenAt: null, expiresAt: { lt: new Date() } },
     select: { id: true, _count: { select: { participants: true } } },
   });
 
@@ -66,7 +68,7 @@ export async function freezeExpiredPublicRooms(): Promise<number> {
  * 직렬화해서 Promise.all로도 못 겹친다), 그 값을 위해 낼 비용이 아니다.
  */
 export const countArchivedRooms = unstable_cache(
-  async (): Promise<number> => prisma.room.count({ where: { frozenAt: { not: null } } }),
+  async (): Promise<number> => prisma.room.count({ where: { frozenAt: { not: null }, hiddenAt: null } }),
   ["archived-room-count-v1"],
   { revalidate: 3600 }
 );
@@ -75,7 +77,7 @@ export async function getArchivedRooms({
   limit = 50,
 }: { limit?: number } = {}): Promise<ArchivedRoom[]> {
   const rooms = await prisma.room.findMany({
-    where: { frozenAt: { not: null } },
+    where: { frozenAt: { not: null }, hiddenAt: null },
     orderBy: [{ frozenAt: "desc" }, { id: "desc" }],
     take: limit,
     select: {

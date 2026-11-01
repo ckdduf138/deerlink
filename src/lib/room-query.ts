@@ -52,6 +52,8 @@ export interface RoomBundle {
   createdAt: Date;
   expiresAt: Date;
   frozenAt: Date | null;
+  /** 어드민이 공개 노출에서 내린 방. 링크로는 그대로 열리고 /archive에서만 빠진다. */
+  hiddenAt: Date | null;
   questions: RoomBundleQuestion[];
   participants: RoomBundleParticipant[];
 }
@@ -65,6 +67,7 @@ interface RawBundle {
   createdAt: string;
   expiresAt: string;
   frozenAt: string | null;
+  hiddenAt: string | null;
   questions: RoomBundleQuestion[];
   participants: RoomBundleParticipant[];
 }
@@ -80,6 +83,7 @@ export const getRoomBundle = cache(async function getRoomBundle(
       'createdAt', strftime('%Y-%m-%dT%H:%M:%fZ', r.createdAt),
       'expiresAt', strftime('%Y-%m-%dT%H:%M:%fZ', r.expiresAt),
       'frozenAt', strftime('%Y-%m-%dT%H:%M:%fZ', r.frozenAt),
+      'hiddenAt', strftime('%Y-%m-%dT%H:%M:%fZ', r.hiddenAt),
       'questions', json((
         SELECT COALESCE(json_group_array(json_object(
           'id', q.id, 'type', q.type, 'title', q.title,
@@ -116,6 +120,7 @@ export const getRoomBundle = cache(async function getRoomBundle(
     createdAt: new Date(raw.createdAt),
     expiresAt: new Date(raw.expiresAt),
     frozenAt: raw.frozenAt === null ? null : new Date(raw.frozenAt),
+    hiddenAt: raw.hiddenAt === null ? null : new Date(raw.hiddenAt),
     questions: raw.questions,
     participants: raw.participants,
   };

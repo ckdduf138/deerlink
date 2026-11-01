@@ -17,7 +17,9 @@ export const revalidate = 86400;
 
 async function findFrozenRoom(id: string) {
   const room = await getRoomBundle(id);
-  return room?.frozenAt ? room : null;
+  // 어드민이 내린 방은 이 영구 페이지에서도 빠진다. 여기만 색인 대상이라, 목록과
+  // 사이트맵에서만 빼고 상세를 남겨두면 내린 방이 그대로 검색에 남는다.
+  return room?.frozenAt && !room.hiddenAt ? room : null;
 }
 
 export async function generateMetadata({
@@ -27,7 +29,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   const info = await getRoomShareInfo(id);
-  if (!info || !info.frozen) return { robots: { index: false, follow: false } };
+  if (!info || !info.frozen || info.hidden) return { robots: { index: false, follow: false } };
 
   const description = roomShareDescription(info);
   const imageUrl = `/og/room/${encodeURIComponent(id)}`;

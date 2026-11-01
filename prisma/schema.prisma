@@ -15,6 +15,10 @@ model Room {
   expiresAt DateTime
   // 동결 보존된 공개방. 만료돼도 지우지 않고 읽기 전용 아카이브로 남긴다.
   frozenAt  DateTime?
+  // 어드민이 공개 노출에서 내린 방. 방 자체는 살아 있어서 링크를 받은 사람은 그대로
+  // 쓸 수 있고, 랜딩·/discover·/archive·사이트맵에서만 빠진다. 신고 버튼 같은 걸
+  // 공개 피드에 두지 않기로 했으니 이 값을 바꾸는 경로는 어드민 하나뿐이다.
+  hiddenAt  DateTime?
 
   questions Question[]
   participants Participant[]
@@ -22,6 +26,7 @@ model Room {
   @@index([isPublic, expiresAt])
   @@index([isPublic, createdAt])
   @@index([frozenAt])
+  @@index([hiddenAt])
 }
 
 model Question {

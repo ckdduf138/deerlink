@@ -19,7 +19,9 @@ export default async function ResultsPage({
 
   if (!room) notFound();
 
-  if (room.frozenAt) redirect(archivePath(id));
+  // 내린 방은 /archive가 404다. 링크를 가진 사람까지 막을 이유는 없으니
+  // 여기(noindex)에서 그대로 보여준다.
+  if (room.frozenAt && !room.hiddenAt) redirect(archivePath(id));
 
   // 모든 질문에 답변한 참여자만 결과 열람 가능 — 단, 공개방은 링크를 아는
   // 아무나 결과를 볼 수 있는 게 의도된 동작이라 이 게이트를 건너뛴다.
