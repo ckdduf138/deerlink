@@ -78,6 +78,26 @@ function jsonLd(topic: QuestionTopic, baseUrl: string) {
   };
 }
 
+/**
+ * 아래에 다른 주제를 전부 깔면 주제가 늘어날수록 모든 주제 페이지의 본문 절반이 똑같은
+ * 카드 목록이 된다 - 고유 문장이 묻히는 쪽이라 색인에 좋을 게 없다. 문항이 많이 겹치는
+ * 순으로 6개만 둔다 (겹침 = 같은 자리에서 쓸 만한 질문이라는 뜻이다). 전체 목록은
+ * /popular 가 맡는다.
+ */
+const RELATED_TOPIC_COUNT = 6;
+
+function relatedTopics(topic: QuestionTopic): QuestionTopic[] {
+  const mine = new Set(topic.questionIds);
+  return QUESTION_TOPICS.filter((item) => item.slug !== topic.slug)
+    .map((item) => ({
+      item,
+      shared: item.questionIds.filter((id) => mine.has(id)).length,
+    }))
+    .sort((a, b) => b.shared - a.shared || a.item.slug.localeCompare(b.item.slug))
+    .slice(0, RELATED_TOPIC_COUNT)
+    .map((entry) => entry.item);
+}
+
 export default async function TopicPage({
   params,
 }: {
@@ -89,7 +109,7 @@ export default async function TopicPage({
 
   const questions = topicQuestions(topic);
   const pack = topicPack(topic);
-  const others = QUESTION_TOPICS.filter((item) => item.slug !== topic.slug);
+  const others = relatedTopics(topic);
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://deerlink.kr";
   const startHref = pack ? `/create?pack=${encodeURIComponent(pack.id)}` : "/create";
 
