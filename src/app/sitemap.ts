@@ -55,23 +55,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly",
       priority: 0.9,
     },
-    // 질문 유형과 다음 페이지도 각자 다른 문항을 보여주는 정본 URL이다.
-    ...(["balance", "multiple", "subjective"] as const).flatMap((type) => {
-      const count = POPULAR_QUESTIONS.filter((question) => question.type === type).length;
-      const pages = Math.ceil(count / 20);
-      return Array.from({ length: pages }, (_, index) => {
-        const page = index + 1;
-        if (type === "balance" && page === 1) return null;
-        const params = new URLSearchParams();
-        if (type !== "balance") params.set("type", type);
-        if (page > 1) params.set("page", String(page));
-        return {
-          url: `${baseUrl}/popular?${params.toString()}`,
-          changeFrequency: "monthly" as const,
-          priority: 0.5,
-        };
-      }).filter((entry): entry is NonNullable<typeof entry> => entry !== null);
-    }),
+    // 전체 목록의 다음 페이지. 카테고리 필터(?category=)는 넣지 않는다 - 전용 페이지인
+    // /popular/[slug] 와 같은 목록이라 canonical 이 그쪽으로 넘어간다.
+    ...Array.from(
+      { length: Math.ceil(POPULAR_QUESTIONS.length / 20) - 1 },
+      (_, index) => ({
+        url: `${baseUrl}/popular?page=${index + 2}`,
+        changeFrequency: "monthly" as const,
+        priority: 0.5,
+      })
+    ),
     {
       url: `${baseUrl}/discover`,
       changeFrequency: "daily",
