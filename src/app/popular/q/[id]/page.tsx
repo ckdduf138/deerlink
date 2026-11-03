@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { PopularNav } from "@/components/popular/popular-nav";
+import { SiteFooter } from "@/components/SiteFooter";
 import {
   findPopularQuestion,
   POPULAR_QUESTIONS,
@@ -359,9 +360,7 @@ export default async function PopularQuestionPage({
           </ul>
         </section>
 
-        <footer className="mt-16 border-t border-stone-200 pt-8 text-center">
-          <p className="text-xs text-stone-600">&copy; 2026 Deerlink</p>
-        </footer>
+        <SiteFooter className="mt-16" />
       </main>
     </div>
   );

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { AntlerLogo } from "@/components/landing/AntlerLogo";
 import { PopularNav } from "@/components/popular/popular-nav";
+import { SiteFooter } from "@/components/SiteFooter";
 import { PopularQuestionList } from "@/components/popular/question-list";
 import {
   findTopic,
@@ -195,9 +196,7 @@ export default async function TopicPage({
           </div>
         </section>
 
-        <footer className="mt-16 pt-8 border-t border-stone-200 text-center">
-          <p className="text-xs text-stone-600">&copy; 2026 Deerlink</p>
-        </footer>
+        <SiteFooter className="mt-16" />
       </main>
     </div>
   );

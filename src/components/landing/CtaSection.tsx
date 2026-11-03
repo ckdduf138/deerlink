@@ -3,7 +3,7 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { Fawn } from "@/components/Fawn";
 import { CreateRoomButton } from "./CreateRoomButton";
-import { OPEN_FEEDBACK_EVENT } from "@/components/FeedbackPrompt";
+import { SiteFooter } from "@/components/SiteFooter";
 
 export function CtaSection() {
   const reduceMotion = useReducedMotion();
@@ -25,16 +25,7 @@ export function CtaSection() {
         <CreateRoomButton className="mt-8 w-full sm:w-auto sm:min-w-52" />
       </motion.div>
 
-      <footer className="mx-auto mt-20 flex max-w-6xl flex-col items-center gap-2 border-t border-stone-100 pt-6 sm:flex-row sm:justify-between">
-        <p className="text-sm text-stone-500">&copy; 2026 Deerlink</p>
-        <button
-          type="button"
-          onClick={() => window.dispatchEvent(new Event(OPEN_FEEDBACK_EVENT))}
-          className="min-h-11 text-sm font-medium text-stone-600 transition-colors hover:text-stone-900"
-        >
-          피드백 보내기
-        </button>
-      </footer>
+      <SiteFooter className="mt-20" />
 
     </section>
   );
