@@ -77,6 +77,7 @@ export const metadata: Metadata = {
   verification: {
     google: "P6K0w_olXohe-HY7SjqzGxOT4_Pvtx97_7FIXKicZkM",
   },
+
 };
 
 const webAppJsonLd = {
@@ -107,6 +108,16 @@ export default function RootLayout({
       <head>
         <GoogleAnalytics />
         <meta name="naver-site-verification" content="e27d20053691ae1e1d1d23a7a14da0d60cccf90d" />
+        {/*
+          네이버 서치어드바이저가 쓰는 피드. metadata.alternates 로 넣으면 자기 canonical 을
+          선언한 페이지에서 통째로 사라진다 (Next 가 alternates 를 얕게 합친다). 그래서 직접 건다.
+        */}
+        <link
+          rel="alternate"
+          type="application/rss+xml"
+          title="디어링크 - 밸런스 게임 결과"
+          href={`${baseUrl}/rss.xml`}
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppJsonLd) }}
