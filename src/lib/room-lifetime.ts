@@ -34,11 +34,18 @@ export function roomExpiresAt(isPublic: boolean, from: Date = new Date()): Date 
  */
 export const PUBLIC_ROOM_EXTENSION_HOURS = 24;
 
-/** 상한. 없으면 인기 방이 영원히 살고, 중복 참여 우회로 수명을 무한정 늘릴 수 있다. */
-export const PUBLIC_ROOM_MAX_HOURS = 24 * 30;
+/**
+ * 상한. 없으면 인기 방이 영원히 살고, 중복 참여 우회로 수명을 무한정 늘릴 수 있다.
+ *
+ * 2026-11에 30일에서 14일로 줄였다. 검색 유입이 붙기 시작하면서 답이 꾸준히 들어오는
+ * 방이 한 달 내내 피드 상단을 차지했는데, 그러면 새로 만든 방이 보일 자리가 없어진다.
+ * 피드가 돌아야 방을 만들 이유도 생긴다. 연장 단위(하루)는 그대로 둔다 - 화면의
+ * "N일 남음"이 움직이는 게 유포 동기의 본체라 여기를 잘게 쪼개면 기능이 사라진다.
+ */
+export const PUBLIC_ROOM_MAX_HOURS = 24 * 14;
 
 export const PUBLIC_ROOM_EXTENSION_LABEL = "하루";
-export const PUBLIC_ROOM_MAX_LABEL = "30일";
+export const PUBLIC_ROOM_MAX_LABEL = "14일";
 
 /**
  * 연장된 만료 시각. 상한에 이미 닿았으면 null (업데이트할 필요 없음).
