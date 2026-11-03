@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Fawn } from "@/components/Fawn";
 import { PopularNav } from "@/components/popular/popular-nav";
+import { SiteFooter } from "@/components/SiteFooter";
 import { PopularQuestionList } from "@/components/popular/question-list";
 import { POPULAR_QUESTIONS } from "@/data/popular-questions";
 import { QUESTION_TOPICS, topicQuestions, type QuestionTopic } from "@/data/question-topics";
@@ -111,10 +112,14 @@ export default async function PopularPage({ searchParams }: { searchParams: Sear
           밸런스 게임 질문 모음
         </h1>
 
-        {/* 가로 스크롤 한 줄. 카테고리가 20개를 넘어가도 접히지 않고, 지금 고른 칩이 항상 보인다. */}
-        <nav aria-label="카테고리" className="-mx-4 mb-6 overflow-x-auto px-4 sm:-mx-6 sm:px-6">
-          <ul className="flex w-max gap-2">
-            {[null, ...QUESTION_TOPICS].map((item) => {
+        {/*
+          줄바꿈으로 깐다. 가로 스크롤일 때는 화면 밖 칩이 글자가 잘린 채 걸쳐 보여서
+          이름을 읽을 수 없었다 - 고를 수 있는 게 뭔지 모르는 상태가 된다.
+          칩은 primary 로 추린 넓은 이름만 띄운다. 나머지 주제는 아래 목록과 전용 페이지에 있다.
+        */}
+        <nav aria-label="카테고리" className="mb-6">
+          <ul className="flex flex-wrap gap-2">
+            {[null, ...QUESTION_TOPICS.filter((item) => item.primary)].map((item) => {
               const active = item?.slug === topic?.slug;
               return (
                 <li key={item?.slug ?? "all"}>
@@ -139,6 +144,16 @@ export default async function PopularPage({ searchParams }: { searchParams: Sear
             })}
           </ul>
         </nav>
+
+        {/* 칩에 없는 주제를 고른 경우에도 지금 뭘 보고 있는지는 알아야 한다. */}
+        {topic && !topic.primary && (
+          <p className="mb-4 flex items-center gap-2 px-1 text-sm text-stone-600">
+            <span className="rounded-full bg-brand px-3 py-1 text-sm font-semibold text-brand-ink">
+              {topic.label} {topic.questionIds.length}
+            </span>
+            카테고리를 보고 있어요
+          </p>
+        )}
 
         <div className="mb-3 flex items-baseline justify-between gap-3 px-1">
           <h2 className="font-cute text-2xl text-stone-900">
@@ -182,7 +197,7 @@ export default async function PopularPage({ searchParams }: { searchParams: Sear
         */}
         {!topic && (
           <nav aria-label="카테고리별 전체 페이지" className="mt-14">
-            <h2 className="font-cute text-2xl text-stone-900">카테고리별로 모아 보기</h2>
+            <h2 className="font-cute text-2xl text-stone-900">다른 주제로도 찾아보기</h2>
             <div className="mt-5 flex flex-wrap gap-2.5">
               {QUESTION_TOPICS.map((item) => (
                 <Link key={item.slug} href={`/popular/${item.slug}`} className="btn-secondary">
@@ -206,6 +221,8 @@ export default async function PopularPage({ searchParams }: { searchParams: Sear
             방 만들기
           </Link>
         </section>
+
+        <SiteFooter className="mt-16" />
       </main>
     </div>
   );

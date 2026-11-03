@@ -11,6 +11,13 @@ const nextConfig: NextConfig = {
         destination: "https://deerlink.kr/:path*",
         permanent: true,
       },
+      // 깻잎 논쟁은 카테고리에서 내리고 문항을 연애로 합쳤다 (2026-11).
+      // 사이트맵에 한 번 올라간 주소라 404 대신 합쳐진 쪽으로 보낸다.
+      {
+        source: "/popular/kkaennip",
+        destination: "/popular/couple",
+        permanent: true,
+      },
     ];
   },
 };

@@ -24,8 +24,17 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
+  /**
+   * 홈이 맡는 질의는 "밸런스 게임"과 "밸런스게임 사이트"다. 후자는 Search Console 기준
+   * 노출이 가장 큰 질의인데(3개월 210회) 7.1위라 CTR이 2.9%에 그쳤다.
+   *
+   * "만들기"는 여기 넣지 않는다. /create 가 그 질의를 1.5위, CTR 60%로 이미 가져가고
+   * 있어서 홈과 겹치면 서로 신호를 나눈다. 질의 하나에 페이지 하나가 원칙이다.
+   * og:title 은 바꾸지 않았다 - 카카오로 공유될 때 읽히는 문장이라 검색용 어휘를
+   * 밀어 넣을 자리가 아니다.
+   */
   title: {
-    default: "밸런스 게임, 친구와 답 비교하기 | 디어링크",
+    default: "밸런스 게임 사이트, 친구와 답 비교 | 디어링크",
     template: "%s | 디어링크",
   },
   description:
